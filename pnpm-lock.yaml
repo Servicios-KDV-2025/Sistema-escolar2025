@@ -39,6 +39,9 @@ importers:
       convex:
         specifier: ^1.24.8
         version: 1.24.8(react@19.1.0)
+      lucide-react:
+        specifier: ^0.516.0
+        version: 0.516.0(react@19.1.0)
       next:
         specifier: 15.3.3
         version: 15.3.3(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -51,6 +54,9 @@ importers:
       server:
         specifier: link:@convex-dev/auth/server
         version: link:@convex-dev/auth/server
+      zod:
+        specifier: ^3.25.67
+        version: 3.25.67
       zustand:
         specifier: ^5.0.5
         version: 5.0.5(@types/react@19.1.0)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
