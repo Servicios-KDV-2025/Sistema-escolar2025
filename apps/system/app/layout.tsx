@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConvexProviderWrapper from "../components/ConvexProviderWrapper";
 
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -32,7 +31,7 @@ export default function RootLayout({
         <ConvexProviderWrapper>  
           {children}
         </ConvexProviderWrapper>
-        
+      
       </body>
     </html>
   );
