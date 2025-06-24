@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint"
   },
-  "dependencies": 
+  "dependencies": {
     "@convex-dev/auth": "^0.0.87",
     "convex": "^1.24.8",
     "lucide-react": "^0.516.0",
@@ -18,7 +18,6 @@
     "server": "link:@convex-dev/auth/server",
     "zod": "^3.25.67",
     "zustand": "^5.0.5"
-
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
