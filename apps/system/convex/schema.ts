@@ -20,7 +20,7 @@ const applicationTables = {
     fechaInicio: v.number(), // timestamp
     fechaFin: v.number(), // timestamp
     activo: v.boolean(),
-  }).index("by_escuela", ["escuelaId"]),
+  }).index("by_escuela", ["escuelaId", "activo"]),
  
   // Departamentos
   departamento: defineTable({
@@ -187,11 +187,13 @@ const applicationTables = {
   // Calendario escolar
   calendario: defineTable({
     cicloEscolarId: v.id("ciclosEscolares"),
+    escuelaId: v.id("escuelas"),
     fecha: v.number(), // timestamp
     tipo: v.string(), // "clase", "feriado", "examen", etc.
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   })
+    .index("by_escuela", ["escuelaId", "activo"])
     .index("by_ciclo", ["cicloEscolarId"])
     .index("by_fecha", ["fecha"]),
  
