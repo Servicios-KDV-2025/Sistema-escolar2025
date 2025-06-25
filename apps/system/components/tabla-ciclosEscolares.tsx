@@ -14,7 +14,10 @@ import { useEscuela } from "@/app/store/useEscuela";
 export function TablaCiclosEscolares() {
   const router = useRouter();
   const escuela = useEscuela((s) => s.escuela);
-  const ciclosEscolares = useQuery(api.ciclosEscolares.obtenerCiclosEscolares, { escuelaId: escuela?._id as Id<"escuelas"> });
+  const ciclosEscolares = useQuery(
+    api.ciclosEscolares.obtenerCiclosEscolares,
+    escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
+  );
   const setItems = useBreadcrumbStore(state => state.setItems)
   const params = useParams();
   const slug = typeof params?.slug === "string" ? params.slug : "";
@@ -22,18 +25,18 @@ export function TablaCiclosEscolares() {
   useEffect(() => {
     if (escuela) {
       setItems([
-        { label: `${escuela?.nombre}`, href: '/' },
-        { label: 'Ciclos Escolares', href: '/ciclosEscolares', isCurrentPage: true },
+        { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
+        { label: 'Ciclos Escolares', isCurrentPage: true },
       ])
     }
-  }, [escuela, setItems])
+  }, [escuela, setItems, slug])
 
   const handleVerCicloEscolar = (id: string) => {
-    router.push(`/${slug}/ciclosEscolares` + `/${id}`);
+    router.push(`/escuela/${slug}/ciclosEscolares` + `/${id}`);
   };
 
   const handleCrear = () => {
-    router.push(`/${slug}/ciclosEscolares/create`);
+    router.push(`/escuela/${slug}/ciclosEscolares/create`);
   };
 
   if (ciclosEscolares === undefined) {
