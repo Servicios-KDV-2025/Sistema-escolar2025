@@ -13,6 +13,8 @@ export default async function EscuelaLayout({
   children: ReactNode;
   params: { slug: string };
 }) {
+  const awaitedParams = await params;
+
   return (
     <div className="[--header-height:calc(--spacing(14))]">
       <SidebarProvider className="flex flex-col">
@@ -21,7 +23,7 @@ export default async function EscuelaLayout({
           <AppSidebar />
           <SidebarInset>
             <div className="flex flex-1 flex-col gap-4 p-4">
-              <EscuelaWrapper slug={params?.slug ?? ""}>{children}</EscuelaWrapper>
+              <EscuelaWrapper slug={awaitedParams?.slug ?? ""}>{children}</EscuelaWrapper>
             </div>
           </SidebarInset>
         </div>
