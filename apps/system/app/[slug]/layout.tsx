@@ -13,9 +13,6 @@ export default async function EscuelaLayout({
   children: ReactNode;
   params: { slug: string };
 }) {
-  // Await params as required by Next.js dynamic route API
-  const awaitedParams = await params;
-  // Solo pasamos el slug como string al componente cliente
   return (
     <div className="[--header-height:calc(--spacing(14))]">
       <SidebarProvider className="flex flex-col">
@@ -24,7 +21,7 @@ export default async function EscuelaLayout({
           <AppSidebar />
           <SidebarInset>
             <div className="flex flex-1 flex-col gap-4 p-4">
-              <EscuelaWrapper slug={awaitedParams?.slug ?? ""}>{children}</EscuelaWrapper>
+              <EscuelaWrapper slug={params?.slug ?? ""}>{children}</EscuelaWrapper>
             </div>
           </SidebarInset>
         </div>
