@@ -4,7 +4,7 @@ import { useQuery } from "convex/react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
 import { useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
@@ -16,26 +16,28 @@ export function TablaCalendarios() {
   const escuela = useEscuela((s) => s.escuela);
   const calendarios = useQuery(api.calendario.obtenerEventosCalendario, {escuelaId: escuela?._id as Id<"escuelas">});
   const setItems = useBreadcrumbStore(state => state.setItems)
+  const params = useParams();
+  const slug = typeof params?.slug === "string" ? params.slug : "";
 
   useEffect(() => {
     if (escuela){
       setItems([
-      { label: `${escuela?.nombre}` , href: '/' },
-      { label: 'Calendarios', href: '/calendarios', isCurrentPage: true },
+      { label: `${escuela?.nombre}` , href: `/escuela/${slug}` },
+      { label: 'Calendarios', isCurrentPage: true },
     ])
     }
-  }, [escuela, setItems])
+  }, [escuela, setItems, slug])
 
   if (calendarios === undefined) {
     return <div>Cargando los Calendarios...</div>;
   }
 
   const handleVerCicloEscolar = (id: string) => {
-    router.push(`/calendarios/${id}`);
+    router.push(`/escuela/${slug}/calendarios/create` + `${id}`);
   };
 
   const handleCrear = () => {
-    router.push("/calendarios/create");
+    router.push(`/escuela/${slug}/calendarios/create`);
   };
 
   return (
