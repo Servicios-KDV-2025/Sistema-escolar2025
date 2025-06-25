@@ -15,6 +15,14 @@ import { useRouter } from "next/navigation";
 import { useEscuela } from "../app/store/useEscuela";
 import CrearEscuela from "./crear-escuelas";
 
+// Define la interfaz para Escuela
+interface Escuela {
+  _id: string;
+  nombre: string;
+  activa: boolean;
+  // Agrega aquí otras propiedades que tenga tu objeto escuela
+}
+
 export default function MostrarEscuelas() {
   // Obtener todas las escuelas (no una escuela específica por ID)
   const escuelas = useQuery(api.escuelas.obtenerEscuelas);
@@ -23,7 +31,7 @@ export default function MostrarEscuelas() {
   const setEscuela = useEscuela((state) => state.setEscuela);
 
   // Función para manejar la selección de escuela
-  const handleSeleccionarEscuela = (escuela: any) => {
+  const handleSeleccionarEscuela = (escuela: Escuela) => {
     // Primero guardar la escuela en el store
     setEscuela(escuela);
     
