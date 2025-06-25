@@ -4,7 +4,7 @@ import { use, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@repo/ui/components/shadcn/dialog";
@@ -23,18 +23,19 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
     const [modalEliminar, setModalEliminar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const setItems = useBreadcrumbStore(state => state.setItems)
-
     const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId , { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar });
+    const paramSlug = useParams();
+    const slug = typeof paramSlug?.slug === "string" ? paramSlug.slug : "";
 
     useEffect(() => {
         if (cicloEscolar && escuela) {
             setItems([
-                { label: `${escuela?.nombre}`, href: '/' },
+                { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
                 { label: 'Ciclos Escolares', href: '/ciclosEscolares' },
                 { label: `${cicloEscolar?.nombre}`, isCurrentPage: true }
             ]);
         }
-    }, [escuela, cicloEscolar, setItems]);
+    }, [escuela, cicloEscolar, setItems, slug]);
     if (cicloEscolar === undefined) {
         return (
             <div className="container mx-auto py-10">

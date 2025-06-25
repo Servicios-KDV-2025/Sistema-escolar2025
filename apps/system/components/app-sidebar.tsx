@@ -42,17 +42,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   navMain: [
     {
       title: "Ciclo Escolar",
-      url: `/${slug}/ciclosEscolares`,
+      url: `/escuela/${slug}/ciclosEscolares`,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Ciclo Escolar",
-          url: `/${slug}/ciclosEscolares`,
+          url: `/escuela/${slug}/ciclosEscolares`,
         },
         {
           title: "Calendario",
-          url: "[slug]/calendario",
+          url: "/escuela/[slug]/calendario",
         },
         {
           title: "Settings",
