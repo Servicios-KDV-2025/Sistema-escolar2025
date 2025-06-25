@@ -11,17 +11,33 @@ import {
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Plus, School } from "lucide-react";
 import React from "react";
-import CrearEscuela from "./crear-escuelas"; // Asegúrate de que la ruta sea correcta
+import { useRouter } from "next/navigation";
+import { useEscuela } from "../app/store/useEscuela";
+import CrearEscuela from "./crear-escuelas";
 
 export default function MostrarEscuelas() {
+  // Obtener todas las escuelas (no una escuela específica por ID)
   const escuelas = useQuery(api.escuelas.obtenerEscuelas);
   const [mostrarCrearEscuela, setMostrarCrearEscuela] = React.useState(false);
+  const router = useRouter();
+  const setEscuela = useEscuela((state) => state.setEscuela);
+
+  // Función para manejar la selección de escuela
+  const handleSeleccionarEscuela = (escuela: any) => {
+    // Primero guardar la escuela en el store
+    setEscuela(escuela);
+    
+    // Usar el nombre como slug para mantener URLs legibles
+    const slug = encodeURIComponent(escuela.nombre);
+    router.push(`/escuela/${slug}`);
+  };
 
   // Si está mostrando el formulario de crear escuela, renderizar solo ese componente
   if (mostrarCrearEscuela) {
     return <CrearEscuela onVolver={() => setMostrarCrearEscuela(false)} />;
   }
 
+  // Manejar estado de carga
   if (!escuelas) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8">
@@ -62,32 +78,25 @@ export default function MostrarEscuelas() {
           </div>
         ) : (
           escuelas.map((escuela) => (
-            <Card key={escuela._id} className="hover:shadow-lg transition-shadow">
+            <Card 
+              key={escuela._id} 
+              className="hover:shadow-lg transition-shadow cursor-pointer"
+              onClick={() => handleSeleccionarEscuela(escuela)}
+            >
               <CardHeader>
-                <CardTitle className="text-xl flex items-center gap-2">
+                <CardTitle className="text-xl flex items-center gap-3">
                   <School className="h-5 w-5 text-blue-600" />
                   {escuela.nombre}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Dirección:</span> {escuela.direccion}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Teléfono:</span> {escuela.telefono || "No disponible"}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Email:</span> {escuela.email || "No disponible"}
-                </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Director:</span> {escuela.director || "No asignado"}
-                </p>
                 <p className="text-sm flex items-center justify-between">
                   <span className="font-medium">Estado:</span>
-                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${escuela.activa
+                  <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                    escuela.activa
                       ? "bg-green-100 text-green-800"
                       : "bg-red-100 text-red-800"
-                    }`}>
+                  }`}>
                     {escuela.activa ? "Activa" : "Inactiva"}
                   </span>
                 </p>
@@ -109,13 +118,13 @@ export default function MostrarEscuelas() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-green-600">
-                    {escuelas.filter(e => e.activa).length}
+                    {escuelas.filter((e) => e.activa).length}
                   </p>
                   <p className="text-sm text-gray-600">Escuelas Activas</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-red-600">
-                    {escuelas.filter(e => !e.activa).length}
+                    {escuelas.filter((e) => !e.activa).length}
                   </p>
                   <p className="text-sm text-gray-600">Escuelas Inactivas</p>
                 </div>
