@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Crear
+// Create
 export const crearGrupo = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -15,7 +15,7 @@ export const crearGrupo = mutation({
   },
 });
 
-// Leer todos
+// Read all
 export const verTodosLosGrupos = query({
   args: { escuelaId: v.id("escuelas") },
   handler: async (ctx, args) => {
@@ -31,7 +31,7 @@ export const verTodosLosGrupos = query({
   },
 });
 
-// Leer uno
+// Read one
 export const grupoPorId = query({
   args: {
     id: v.id("grupos"),
@@ -44,7 +44,7 @@ export const grupoPorId = query({
   },
 });
 
-// Actualizar
+// Upadate
 export const actualizarGrupo = mutation({
   args: {
     id: v.id("grupos"),
@@ -63,7 +63,7 @@ export const actualizarGrupo = mutation({
   },
 });
 
-// Eliminar
+// Delete
 export const eliminarGrupo = mutation({
   args: {
     id: v.id("grupos"),

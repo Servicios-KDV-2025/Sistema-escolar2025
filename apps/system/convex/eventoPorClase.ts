@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Crear
+// Create
 export const crearEventoXClase = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -19,7 +19,7 @@ export const crearEventoXClase = mutation({
 });
 
 
-// Leer todos
+// Read all
 export const verTodosLosEventosXClases = query({
   args: {
     escuelaId: v.id("escuelas"),
@@ -37,7 +37,7 @@ export const verTodosLosEventosXClases = query({
   },
 });
 
-// Leer uno
+// Read one
 export const verUnEventoXClase = query({
   args: {
     id: v.id("eventoPorClases"),
@@ -50,7 +50,7 @@ export const verUnEventoXClase = query({
   },
 });
 
-// Actualizar
+// Update
 export const actualizarEventoXClase = mutation({
   args: {
     id: v.id("eventoPorClases"),
@@ -68,7 +68,7 @@ export const actualizarEventoXClase = mutation({
   },
 });
 
-// Eliminar
+// Delete
 export const eliminarEventoXClase = mutation({
   args: {
     id: v.id("eventoPorClases"),
