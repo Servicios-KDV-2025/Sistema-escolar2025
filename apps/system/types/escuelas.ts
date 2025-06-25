@@ -1,12 +1,12 @@
 // types/escuela.ts
-import { Id } from '../convex/_generated/dataModel'; // Importa Id si necesitas referenciar IDs de Convex
+import { Id } from '../convex/_generated/dataModel';
 
 export interface Escuela {
-  _id: Id<'escuelas'>; // ID generado por Convex, tipado para la tabla 'escuelas'
-  _creationTime: number; // Tiempo de creación generado por Convex
+  _id: Id<'escuelas'>;
+  _creationTime: number; 
   nombre: string;
   direccion: string;
-  telefono?: string; // Los campos opcionales en Convex deben ser opcionales aquí también
+  telefono?: string; 
   email?: string;
   director?: string;
   activa: boolean;

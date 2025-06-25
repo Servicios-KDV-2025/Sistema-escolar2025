@@ -1,6 +1,6 @@
 // store/useEscuelaStore.ts
 import { create } from 'zustand';
-import { Escuela } from '../types/escuelas'; // Importa la interfaz Escuela
+import { Escuela } from '../types/escuelas'; 
 
 interface EscuelaState {
   selectedEscuela: Escuela | null;
