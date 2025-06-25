@@ -13,6 +13,8 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as calendario from "../calendario.js";
+import type * as ciclosEscolares from "../ciclosEscolares.js";
 import type * as escuelas from "../escuelas.js";
 
 /**
@@ -24,6 +26,8 @@ import type * as escuelas from "../escuelas.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  calendario: typeof calendario;
+  ciclosEscolares: typeof ciclosEscolares;
   escuelas: typeof escuelas;
 }>;
 export declare const api: FilterApi<
