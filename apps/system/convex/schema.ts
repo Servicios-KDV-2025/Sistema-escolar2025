@@ -100,11 +100,13 @@ const applicationTables = {
  
   // Relación periodo por clase (horarios de clases)
   periodoPorClase: defineTable({
+    escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     periodoId: v.id("periodos"),
     diaSemana: v.number(), // 1=Lunes, 2=Martes, etc.
     activo: v.boolean(),
   })
+    .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
     .index("by_periodo", ["periodoId"]),
  
@@ -178,11 +180,12 @@ const applicationTables = {
  
   // Eventos escolares
   eventosEscolares: defineTable({
+    escuelaId: v.id("escuelas"),
     nombre: v.string(),
     descripcion: v.optional(v.string()),
     tipo: v.string(), // "examen", "evento", "suspension", etc.
     activo: v.boolean(),
-  }),
+  }).index("by_escuela", ["escuelaId"]),
  
   // Calendario escolar
   calendario: defineTable({
@@ -199,6 +202,7 @@ const applicationTables = {
  
   // Eventos por clases
   eventoPorClases: defineTable({
+    escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
@@ -207,6 +211,7 @@ const applicationTables = {
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   })
+    .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
     .index("by_calendario", ["calendarioId"])
     .index("by_ciclo", ["cicloEscolarId"])
