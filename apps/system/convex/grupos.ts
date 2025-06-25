@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Crear
+// Create
 export const crearGrupo = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -15,10 +15,15 @@ export const crearGrupo = mutation({
   },
 });
 
-// Leer todos
+// Read all
 export const verTodosLosGrupos = query({
-  handler: async (ctx) => {
-    const grupos = await ctx.db.query("grupos").collect();
+  args: { escuelaId: v.id("escuelas") },
+  handler: async (ctx, args) => {
+    const grupos = await ctx.db
+      .query("grupos")
+      .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
+      .collect();
+
     return grupos.map(({ _id, ...rest }) => ({
       id: _id,
       ...rest,
@@ -26,33 +31,47 @@ export const verTodosLosGrupos = query({
   },
 });
 
-// Leer uno
+// Read one
 export const grupoPorId = query({
-  args: { id: v.id("grupos") },
+  args: {
+    id: v.id("grupos"),
+    escuelaId: v.id("escuelas"),
+  },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const grupo = await ctx.db.get(args.id);
+    if (!grupo || grupo.escuelaId !== args.escuelaId) return null;
+    return grupo;
   },
 });
 
-// Actualizar
+// Upadate
 export const actualizarGrupo = mutation({
   args: {
     id: v.id("grupos"),
+    escuelaId: v.id("escuelas"),
     nombre: v.string(),
     grado: v.string(),
     seccion: v.string(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
+    const grupo = await ctx.db.get(args.id);
+    if (!grupo || grupo.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
+
     const { id, ...data } = args;
     await ctx.db.patch(id, data);
   },
 });
 
-// Eliminar
+// Delete
 export const eliminarGrupo = mutation({
-  args: { id: v.id("grupos") },
+  args: {
+    id: v.id("grupos"),
+    escuelaId: v.id("escuelas"),
+  },
   handler: async (ctx, args) => {
+    const grupo = await ctx.db.get(args.id);
+    if (!grupo || grupo.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
     await ctx.db.delete(args.id);
   },
 });
