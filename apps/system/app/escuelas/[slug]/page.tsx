@@ -2,9 +2,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEscuela } from "../store/useEscuela";
+import { useEscuela } from "../../store/useEscuela";
 import { useEffect } from "react";
-import { useBreadcrumbStore } from "../store/breadcrumbStore";
+import { useBreadcrumbStore } from "../../store/breadcrumbStore";
 
 export default function EscuelaHome() {
   const escuela = useEscuela((s) => s.escuela);
