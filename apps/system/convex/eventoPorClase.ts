@@ -1,9 +1,10 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Crear
+// Create
 export const crearEventoXClase = mutation({
   args: {
+    escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
@@ -17,10 +18,18 @@ export const crearEventoXClase = mutation({
   },
 });
 
-// Leer todos
+
+// Read all
 export const verTodosLosEventosXClases = query({
-  handler: async (ctx) => {
-    const eventos = await ctx.db.query("eventoPorClases").collect();
+  args: {
+    escuelaId: v.id("escuelas"),
+  },
+  handler: async (ctx, args) => {
+    const eventos = await ctx.db
+      .query("eventoPorClases")
+      .filter(q => q.eq(q.field("escuelaId"), args.escuelaId))
+      .collect();
+
     return eventos.map(({ _id, ...rest }) => ({
       id: _id,
       ...rest,
@@ -28,32 +37,46 @@ export const verTodosLosEventosXClases = query({
   },
 });
 
-// Leer uno
+// Read one
 export const verUnEventoXClase = query({
-  args: { id: v.id("eventoPorClases") },
+  args: {
+    id: v.id("eventoPorClases"),
+    escuelaId: v.id("escuelas"),
+  },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const evento = await ctx.db.get(args.id);
+    if (!evento || evento.escuelaId !== args.escuelaId) return null;
+    return evento;
   },
 });
 
-// Actualizar
+// Update
 export const actualizarEventoXClase = mutation({
   args: {
     id: v.id("eventoPorClases"),
+    escuelaId: v.id("escuelas"),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
+    const evento = await ctx.db.get(args.id);
+    if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
+
     const { id, ...data } = args;
     await ctx.db.patch(id, data);
   },
 });
 
-// Eliminar
+// Delete
 export const eliminarEventoXClase = mutation({
-  args: { id: v.id("eventoPorClases") },
+  args: {
+    id: v.id("eventoPorClases"),
+    escuelaId: v.id("escuelas"),
+  },
   handler: async (ctx, args) => {
+    const evento = await ctx.db.get(args.id);
+    if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
     await ctx.db.delete(args.id);
   },
 });
