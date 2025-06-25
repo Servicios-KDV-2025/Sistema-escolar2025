@@ -19,6 +19,19 @@ export const obtenerEscuelaPorId = query({
     }
 });
 
+export const obtenerEscuelaPorNombre = query({
+    args: { nombre: v.string() },
+    handler: async (ctx, { nombre }) => {
+        const escuela = await ctx.db.query("escuelas")
+        .filter((e) => e.eq(e.field("nombre"), nombre))
+        .collect();
+        if (escuela.length === 0) {
+            throw new Error("Escuela no encontrada");
+        }
+        return escuela[0];
+    }
+});
+
 export const crearEscuela = mutation({
     args: {
         nombre: v.string(),

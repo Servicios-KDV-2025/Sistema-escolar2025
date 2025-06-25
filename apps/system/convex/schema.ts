@@ -20,7 +20,7 @@ const applicationTables = {
     fechaInicio: v.number(), // timestamp
     fechaFin: v.number(), // timestamp
     activo: v.boolean(),
-  }).index("by_escuela", ["escuelaId"]),
+  }).index("by_escuela", ["escuelaId", "activo"]),
  
   // Departamentos
   departamento: defineTable({
@@ -100,11 +100,13 @@ const applicationTables = {
  
   // Relación periodo por clase (horarios de clases)
   periodoPorClase: defineTable({
+    escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     periodoId: v.id("periodos"),
     diaSemana: v.number(), // 1=Lunes, 2=Martes, etc.
     activo: v.boolean(),
   })
+    .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
     .index("by_periodo", ["periodoId"]),
  
@@ -178,25 +180,29 @@ const applicationTables = {
  
   // Eventos escolares
   eventosEscolares: defineTable({
+    escuelaId: v.id("escuelas"),
     nombre: v.string(),
     descripcion: v.optional(v.string()),
     tipo: v.string(), // "examen", "evento", "suspension", etc.
     activo: v.boolean(),
-  }),
+  }).index("by_escuela", ["escuelaId"]),
  
   // Calendario escolar
   calendario: defineTable({
     cicloEscolarId: v.id("ciclosEscolares"),
+    escuelaId: v.id("escuelas"),
     fecha: v.number(), // timestamp
     tipo: v.string(), // "clase", "feriado", "examen", etc.
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   })
+    .index("by_escuela", ["escuelaId", "activo"])
     .index("by_ciclo", ["cicloEscolarId"])
     .index("by_fecha", ["fecha"]),
  
   // Eventos por clases
   eventoPorClases: defineTable({
+    escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
@@ -205,6 +211,7 @@ const applicationTables = {
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   })
+    .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
     .index("by_calendario", ["calendarioId"])
     .index("by_ciclo", ["cicloEscolarId"])
