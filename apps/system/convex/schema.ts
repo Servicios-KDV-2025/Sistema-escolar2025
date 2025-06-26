@@ -6,11 +6,26 @@ const applicationTables = {
   // Tabla principal de escuelas
   escuelas: defineTable({
     nombre: v.string(),
-    direccion: v.string(),
+    nombreCorto: v.string(), // Nombre corto para mostrar
+    logoUrl: v.optional(v.string()), // URL del logo de la escuela
+    descripcion: v.optional(v.string()), // Descripción breve de la escuela
+    direccion: v.optional(v.string()),
     telefono: v.optional(v.string()),
     email: v.optional(v.string()),
     director: v.optional(v.string()),
     activa: v.boolean(),
+  }),
+  
+  //prospectos
+  prospectos: defineTable({
+    nombre: v.string(),
+    nombreCorto: v.string(), // Nombre corto para mostrar
+    logoUrl: v.optional(v.string()), // URL del logo de la escuela
+    descripcion: v.optional(v.string()), // Descripción breve de la escuela
+    direccion: v.optional(v.string()),
+    telefono: v.optional(v.string()),
+    email: v.string(),
+    director: v.optional(v.string()),
   }),
  
   // Ciclos escolares
@@ -68,7 +83,6 @@ const applicationTables = {
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
-    seccion: v.string(),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
  
