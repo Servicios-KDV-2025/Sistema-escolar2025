@@ -14,14 +14,8 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { useEscuela } from "../app/store/useEscuela";
 import CrearEscuela from "./crear-escuelas";
+import { Escuela } from "@/types/escuelas";
 
-// Define la interfaz para Escuela
-interface Escuela {
-  _id: string;
-  nombre: string;
-  activa: boolean;
-  // Agrega aquí otras propiedades que tenga tu objeto escuela
-}
 
 export default function MostrarEscuelas() {
   // Obtener todas las escuelas (no una escuela específica por ID)
