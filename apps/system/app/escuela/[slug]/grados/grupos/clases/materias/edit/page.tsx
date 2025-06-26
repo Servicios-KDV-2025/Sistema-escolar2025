@@ -23,7 +23,7 @@ export default function EditMateriaPage() {
 
   // 1. Obtener la materia actual para editar desde Convex
   const materiaToEdit = useQuery(
-    api.filtroes.materias.obtenerMateriaPorIdConEscuela
+    api.materias.obtenerMateriaPorIdConEscuela
   );
 
   // 2. Obtener la escuela (para mostrar el nombre en el encabezado)
