@@ -13,7 +13,7 @@ export const obtenerEscuelaPorId = query({
     handler: async (ctx, { id }) => {
         const escuela = await ctx.db.get(id);
         if (!escuela) {
-            throw new Error("Escuela no encontrada");
+            return null; // Devolver null en lugar de lanzar error
         }
         return escuela;
     }
@@ -22,11 +22,15 @@ export const obtenerEscuelaPorId = query({
 export const obtenerEscuelaPorNombre = query({
     args: { nombre: v.string() },
     handler: async (ctx, { nombre }) => {
+        // Decodificar el nombre que viene de la URL
+        const nombreDecodificado = decodeURIComponent(nombre);
+        
         const escuela = await ctx.db.query("escuelas")
-        .filter((e) => e.eq(e.field("nombre"), nombre))
-        .collect();
+            .filter((e) => e.eq(e.field("nombre"), nombreDecodificado))
+            .collect();
+            
         if (escuela.length === 0) {
-            throw new Error("Escuela no encontrada");
+            return null; // Devolver null en lugar de lanzar error
         }
         return escuela[0];
     }
