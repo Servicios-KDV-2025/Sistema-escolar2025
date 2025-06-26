@@ -44,7 +44,7 @@ export const crearEscuela = mutation({
         descripcion: v.optional(v.string()),
         direccion: v.string(),
         telefono: v.optional(v.string()),
-        email: v.optional(v.string()),
+        email: v.string(),
         director: v.optional(v.string()),
         activa: v.boolean(),
     },
