@@ -52,11 +52,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
         {
           title: "Calendario",
-          url: "/escuela/[slug]/calendario",
+          url: `/escuela/${slug}/calendario`,
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Grupos",
+          url: `/escuela/${slug}/grupos`,
         },
       ],
     },
