@@ -9,28 +9,6 @@ import { api } from '@/convex/_generated/api'; // <<-- AJUSTA ESTA RUTA SI ES NE
 import { Id } from '@/convex/_generated/dataModel'; // <<-- AJUSTA ESTA RUTA SI ES NECESARIO
 import { useEscuela } from '@/app/store/useEscuela';
 
-// Interfaces (copiadas para asegurar consistencia con tus schemas)
-interface Materia {
-  _id: Id<'materias'>;
-  escuelaId: Id<'escuelas'>;
-  nombre: string;
-  descripcion?: string;
-  creditos?: number;
-  activa: boolean;
-  _creationTime: number;
-}
-
-interface EscuelaConvex {
-  _id: Id<'escuelas'>;
-  nombre: string;
-  direccion: string;
-  telefono?: string;
-  email?: string;
-  director?: string;
-  activa: boolean;
-  _creationTime: number;
-}
-
 export default function EditMateriaPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -51,7 +29,7 @@ export default function EditMateriaPage() {
   // 2. Obtener la escuela (para mostrar el nombre en el encabezado)
   const { escuela: zustandEscuela } = useEscuela(); // Intentar obtener de Zustand primero
   const fetchedEscuela = useQuery(
-    api.escuelas.escuelas.obtenerEscuelaPorId,
+    api.escuelas.obtenerEscuelaPorId,
     // Si no está en Zustand Y tenemos un ID de escuela en la URL, la obtenemos de Convex
     (router.isReady && zustandEscuela === null && urlEscuelaId !== null) ? { id: urlEscuelaId } : "skip"
   );
@@ -59,7 +37,7 @@ export default function EditMateriaPage() {
   const escuelaEnUso = zustandEscuela || fetchedEscuela;
 
   // 3. Mutación para actualizar la materia en Convex
-  const actualizarMateria = useMutation(api.filtroes.materias.actualizarMateriaConEscuela);
+  const actualizarMateria = useMutation(api.materias.actualizarMateriaConEscuela);
 
   // Estado local para los datos del formulario
   const [formData, setFormData] = useState({
@@ -114,8 +92,8 @@ export default function EditMateriaPage() {
       alert('Materia actualizada con éxito!');
       // Redirige de vuelta a la lista de materias de la misma escuela
       router.push(`/materias?escuelaId=${escuelaEnUso._id}`);
-    } catch (error: any) {
-      alert('Error al actualizar materia: ' + error.message);
+    } catch (error) {
+      alert('Error al actualizar materia: ' + error);
     }
   };
 
