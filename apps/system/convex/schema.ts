@@ -83,7 +83,6 @@ const applicationTables = {
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
-    seccion: v.string(),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
  
