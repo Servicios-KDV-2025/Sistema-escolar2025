@@ -3,13 +3,13 @@ import { v } from "convex/values";
 
 export const obtenerProspectos = query({
     handler: async (ctx) => {
-        const prospectos = await ctx.db.query("prospetos").collect();
+        const prospectos = await ctx.db.query("prospectos").collect();
         return prospectos;
     }
 });
 
 export const obtenerProspectoPorId = query({
-    args: { id: v.id("prospetos") },
+    args: { id: v.id("prospectos") },
     handler: async (ctx, { id }) => {
         const prospecto = await ctx.db.get(id);
         if (!prospecto) {
@@ -31,7 +31,7 @@ export const crearProspecto = mutation({
         director: v.optional(v.string()),
     },
     handler: async (ctx, { nombre, nombreCorto, logoUrl, descripcion, direccion, telefono, email, director }) => {
-        const nuevoProspecto = await ctx.db.insert("prospetos", {
+        const nuevoProspecto = await ctx.db.insert("prospectos", {
             nombre,
             nombreCorto,
             logoUrl,            
@@ -44,3 +44,15 @@ export const crearProspecto = mutation({
         return nuevoProspecto;
     }
 }); 
+
+export const eliminarProspecto = mutation({
+    args: { id: v.id("prospectos") },
+    handler: async (ctx, { id }) => {
+        const prospecto = await ctx.db.get(id);
+        if (!prospecto) {
+            return null; // Devolver null si no se encuentra el prospecto
+        }
+        await ctx.db.delete(id);
+        return prospecto; // Devolver el prospecto eliminado
+    }
+});

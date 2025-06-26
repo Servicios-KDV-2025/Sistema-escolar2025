@@ -16,8 +16,8 @@ const applicationTables = {
     activa: v.boolean(),
   }),
   
-  //prospetos
-  prospetos: defineTable({
+  //prospectos
+  prospectos: defineTable({
     nombre: v.string(),
     nombreCorto: v.string(), // Nombre corto para mostrar
     logoUrl: v.optional(v.string()), // URL del logo de la escuela
