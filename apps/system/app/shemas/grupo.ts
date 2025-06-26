@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const gradoSchema = z.object({
+export const grupoSchema = z.object({
   grado: z.enum(["1°", "2°", "3°", "4°", "5°", "6°"], {
     errorMap: () => ({ message: "Selecciona un grado válido" })
   }),
@@ -8,4 +8,4 @@ export const gradoSchema = z.object({
   activo: z.boolean(),
 });
 
-export type GradoFormValues = z.infer<typeof gradoSchema>;
+export type GrupoFormValues = z.infer<typeof grupoSchema>;

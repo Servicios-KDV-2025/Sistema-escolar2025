@@ -56,7 +56,6 @@ export function TablaGrupos() {
           <TableRow>
             <TableHead className="w-[100px]">Grado</TableHead>
             <TableHead>Nombre</TableHead>
-            <TableHead>Sección</TableHead>
             <TableHead>Activo</TableHead>
           </TableRow>
         </TableHeader>
@@ -78,7 +77,6 @@ export function TablaGrupos() {
                   {grupo.grado}
                 </TableCell>
                 <TableCell>{grupo.nombre}</TableCell>
-                <TableCell>{grupo.seccion}</TableCell>
                 <TableCell>{grupo.activo}</TableCell>
               </TableRow>
             ))

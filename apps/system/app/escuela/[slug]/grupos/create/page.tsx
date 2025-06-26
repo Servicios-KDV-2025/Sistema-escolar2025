@@ -21,15 +21,15 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useForm } from "react-hook-form";
 import { useEscuela } from "@/app/store/useEscuela";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
-import { GradoFormValues, gradoSchema } from "@/app/shemas/grado";
+import { GrupoFormValues, grupoSchema } from "@/app/shemas/grupo";
 
 export default function CrearCalendarioPage() {
     const router = useRouter();
     const escuela = useEscuela((s) => s.escuela);
     const creargrupo = useMutation(api.grupos.crearGrupo);
 
-    const form = useForm<GradoFormValues>({
-        resolver: zodResolver(gradoSchema),
+    const form = useForm<GrupoFormValues>({
+        resolver: zodResolver(grupoSchema),
         defaultValues: {
             grado: undefined,
             nombre: "",
@@ -48,7 +48,7 @@ export default function CrearCalendarioPage() {
         ])
     }, [setItems])
 
-    const onSubmit = async (values: GradoFormValues) => {
+    const onSubmit = async (values: GrupoFormValues) => {
         try {
             setIsSubmitting(true);
             await creargrupo({
