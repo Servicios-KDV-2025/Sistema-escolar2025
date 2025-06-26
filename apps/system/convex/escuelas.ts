@@ -39,15 +39,19 @@ export const obtenerEscuelaPorNombre = query({
 export const crearEscuela = mutation({
     args: {
         nombre: v.string(),
+        nombreCorto: v.string(), // Esto es obligatorio
+        logoUrl: v.optional(v.string()),
+        descripcion: v.optional(v.string()),
         direccion: v.string(),
         telefono: v.optional(v.string()),
         email: v.optional(v.string()),
         director: v.optional(v.string()),
         activa: v.boolean(),
     },
-    handler: async (ctx, { nombre, direccion, telefono, email, director, activa }) => {
+    handler: async (ctx, { nombre, nombreCorto, direccion, telefono, email, director, activa }) => { // Agrega nombreCorto aquí
         const nuevaEscuela = await ctx.db.insert("escuelas", {
             nombre,
+            nombreCorto, // Agrega nombreCorto aquí
             direccion,
             telefono,
             email,

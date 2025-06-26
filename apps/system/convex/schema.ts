@@ -6,12 +6,16 @@ const applicationTables = {
   // Tabla principal de escuelas
   escuelas: defineTable({
     nombre: v.string(),
+    nombreCorto: v.string(), // Nombre corto para mostrar
+    logoUrl: v.optional(v.string()), // URL del logo de la escuela
+    descripcion: v.optional(v.string()), // Descripción breve de la escuela
     direccion: v.string(),
     telefono: v.optional(v.string()),
     email: v.optional(v.string()),
     director: v.optional(v.string()),
     activa: v.boolean(),
   }),
+  
  
   // Ciclos escolares
   ciclosEscolares: defineTable({
