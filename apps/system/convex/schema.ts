@@ -9,13 +9,24 @@ const applicationTables = {
     nombreCorto: v.string(), // Nombre corto para mostrar
     logoUrl: v.optional(v.string()), // URL del logo de la escuela
     descripcion: v.optional(v.string()), // Descripción breve de la escuela
-    direccion: v.string(),
+    direccion: v.optional(v.string()),
     telefono: v.optional(v.string()),
     email: v.optional(v.string()),
     director: v.optional(v.string()),
     activa: v.boolean(),
   }),
   
+  //prospetos
+  prospetos: defineTable({
+    nombre: v.string(),
+    nombreCorto: v.string(), // Nombre corto para mostrar
+    logoUrl: v.optional(v.string()), // URL del logo de la escuela
+    descripcion: v.optional(v.string()), // Descripción breve de la escuela
+    direccion: v.optional(v.string()),
+    telefono: v.optional(v.string()),
+    email: v.string(),
+    director: v.optional(v.string()),
+  }),
  
   // Ciclos escolares
   ciclosEscolares: defineTable({
