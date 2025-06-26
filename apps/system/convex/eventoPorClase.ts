@@ -1,22 +1,23 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Create
-export const crearEventoXClase = mutation({
-  args: {
-    escuelaId: v.id("escuelas"),
-    catalogoClaseId: v.id("catalogosDeClases"),
-    calendarioId: v.id("calendario"),
-    cicloEscolarId: v.id("ciclosEscolares"),
-    eventoEscolarId: v.id("eventosEscolares"),
-    fecha: v.number(),
-    descripcion: v.optional(v.string()),
-    activo: v.boolean(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.insert("eventoPorClases", { ...args });
-  },
-});
+
+// Crear
+// export const crearEventoXClase = mutation({
+//   args: {
+//     catalogoClaseId: v.id("catalogosDeClases"),
+//     calendarioId: v.id("calendario"),
+//     cicloEscolarId: v.id("ciclosEscolares"),
+//     eventoEscolarId: v.id("eventosEscolares"),
+//     fecha: v.number(),
+//     descripcion: v.optional(v.string()),
+//     activo: v.boolean(),
+//   },
+//   handler: async (ctx, args) => {
+//     await ctx.db.insert("eventoPorClases", { ...args, escuelaId: args.catalogoClaseId });
+//   },
+// });
+
 
 
 // Read all
