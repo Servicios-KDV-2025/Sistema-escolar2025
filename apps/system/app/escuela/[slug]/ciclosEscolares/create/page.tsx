@@ -29,6 +29,7 @@ export default function CrearCicloEscolarPage() {
             nombre: "",
             fechaInicio: "",
             fechaFin: "",
+            activo: true
         }
     });
 
@@ -39,7 +40,7 @@ export default function CrearCicloEscolarPage() {
         if (escuela) {
             setItems([
                 { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
-                { label: 'Ciclos Escolares', href: '/ciclosEscolares' },
+                { label: 'Ciclos Escolares', href: `/escuela/${slug}/ciclosEscolares` },
                 { label: 'Crear Ciclo Escolar', isCurrentPage: true },
             ])
         }
@@ -54,12 +55,12 @@ export default function CrearCicloEscolarPage() {
                 fechaInicio: new Date(values.fechaInicio).getTime(),
                 fechaFin: new Date(values.fechaFin).getTime()
             });
-            toast.success("Ciclo Escolar creada", { description: "La ciclo escolar se ha creado correctamente" });
-            router.push(`/${slug}/ciclosEscolares`);
+            toast.success("Ciclo Escolar creado", { description: "El ciclo escolar se ha creado correctamente" });
+            router.push(`/escuela/${slug}/ciclosEscolares`);
 
         } catch (error) {
             toast.error("Error", {
-                description: "Ocurrió un error al guardar la ciclo escolar"
+                description: "Ocurrió un error al guardar el ciclo escolar"
             });
             console.error(error);
         } finally {

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useMutation } from "convex/react";
+import { use, useEffect, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@repo/ui/components/shadcn/card";
@@ -16,15 +16,23 @@ import { CalendarioFormValues, calendarioSchema } from "@/app/shemas/calendario"
 import { useEscuela } from "@/app/store/useEscuela";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 
-export default function CrearCalendarioPage() {
+export default function CrearCalendarioPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
+    const idCicloEscolar = id as Id<"ciclosEscolares">;
+    const paramSlug = useParams();
+    const slug = typeof paramSlug?.slug === "string" ? paramSlug.slug : "";
     const router = useRouter();
     const escuela = useEscuela((s) => s.escuela);
+    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId,
+        escuela?._id && idCicloEscolar
+            ? { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar }
+            : "skip");
     const crearCalendario = useMutation(api.calendario.crearEventoCalendario);
 
     const form = useForm<CalendarioFormValues>({
         resolver: zodResolver(calendarioSchema),
         defaultValues: {
-            fecha: 0,
+            fecha: "",
             tipo: "",
             descripcion: "",
         }
@@ -34,29 +42,32 @@ export default function CrearCalendarioPage() {
     const setItems = useBreadcrumbStore(state => state.setItems)
 
     useEffect(() => {
-        setItems([
-            { label: 'Escuela Limón', href: '/' },
-            { label: 'Ciclos Escolares', href: '/calendarios' },
-            { label: 'Crear Ciclo Escolar', isCurrentPage: true },
-        ])
-    }, [setItems])
+        if (cicloEscolar && escuela) {
+            setItems([
+                { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
+                { label: 'Ciclos Escolares', href: `/escuela/${slug}/ciclosEscolares` },
+                { label: `${cicloEscolar?.nombre}`, href: `/escuela/${slug}/ciclosEscolares/${idCicloEscolar}` },
+                { label: `Crear`, isCurrentPage: true },
+            ]);
+        }
+    }, [escuela, cicloEscolar, setItems, slug, idCicloEscolar]);
 
     const onSubmit = async (values: CalendarioFormValues) => {
         try {
             setIsSubmitting(true);
             await crearCalendario({
                 escuelaId: escuela?._id as Id<"escuelas">,
-                cicloEscolarId: "2123" as Id<"ciclosEscolares">,
-                fecha: values.fecha,
+                cicloEscolarId: idCicloEscolar,
+                fecha: new Date(values.fecha).getTime(),
                 tipo: values.tipo,
                 descripcion: values.descripcion
             });
-            toast.success("Ciclo Escolar creada", { description: "La ciclo escolar se ha creado correctamente" });
-            router.push("/calendarios");
+            toast.success("Fecha creada", { description: "La fecha se ha creada correctamente" });
+            router.push(`/escuela/${slug}/ciclosEscolares/${idCicloEscolar}`);
 
         } catch (error) {
             toast.error("Error", {
-                description: "Ocurrió un error al guardar la ciclo escolar"
+                description: "Ocurrió un error al guardar el calendario"
             });
             console.error(error);
         } finally {
@@ -69,14 +80,14 @@ export default function CrearCalendarioPage() {
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div className="flex items-center gap-2">
                     <h1 className="text-2xl sm:text-3xl font-bold">
-                        Crear Nueva Ciclo Escolar
+                        Crear Nueva Fecha
                     </h1>
                 </div>
             </div>
 
             <Card className="w-full max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="font-semibold text-center">Información la Ciclo Escolar</CardTitle>
+                    <CardTitle className="font-semibold text-center">Información de la fecha</CardTitle>
                 </CardHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -143,7 +154,7 @@ export default function CrearCalendarioPage() {
                                 disabled={isSubmitting}
                                 className="w-full sm:w-auto"
                             >
-                                {isSubmitting ? "Creando..." : "Crear Ciclo Escolar"}
+                                {isSubmitting ? "Creando..." : "Crear Calendario"}
                             </Button>
                         </CardFooter>
                     </form>

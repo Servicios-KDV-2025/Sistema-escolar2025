@@ -41,18 +41,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   },
   navMain: [
     {
-      title: "Ciclo Escolar",
+      title: "Ciclos Escolares",
       url: `/escuela/${slug}/ciclosEscolares`,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "Ciclo Escolar",
+          title: "Ciclos Escolares",
           url: `/escuela/${slug}/ciclosEscolares`,
         },
         {
-          title: "Calendario",
-          url: `/escuela/${slug}/calendario`,
+          title: "Calendario Actual",
+          url: "/escuela/[slug]/calendario",
         },
         {
           title: "Grupos",
