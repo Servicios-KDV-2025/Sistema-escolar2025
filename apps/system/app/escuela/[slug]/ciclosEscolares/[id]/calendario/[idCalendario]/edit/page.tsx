@@ -3,66 +3,86 @@
 import { use, useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useForm } from "react-hook-form";
-import { CicloEscolarFormValues, cicloEscolarSchema } from "@/app/shemas/cicloEscolar";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
+import { CalendarioFormValues, calendarioSchema } from "@/app/shemas/calendario";
 
-export default function EditarCicloEscolarPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+export default function EditarCicloEscolarPage({ params }: { params: Promise<{ id: string, idCalendario: string }> }) {
+    const { id, idCalendario } = use(params);
+    const idCalendarioCiclo = idCalendario as Id<"calendario">;
     const idCicloEscolar = id as Id<"ciclosEscolares">;
     const router = useRouter();
-    const actualizarCicloEscolar = useMutation(api.ciclosEscolares.actualizarCicloEscolar);
+    const actualizarEventoCalendario = useMutation(api.calendario.actualizarEventoCalendario);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
     const setItems = useBreadcrumbStore(state => state.setItems);
     const escuela = useEscuela((s) => s.escuela);
-    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId, { cicloId: idCicloEscolar, escuelaId: escuela?._id as Id<"escuelas"> });
-
-    const form = useForm<CicloEscolarFormValues>({
-        resolver: zodResolver(cicloEscolarSchema),
+    const calendario = useQuery(api.calendario.obtenerEventoCalendarioPorId,
+        escuela?._id && idCalendarioCiclo
+            ? { escuelaId: escuela?._id as Id<"escuelas">, eventoId: idCalendarioCiclo }
+            : "skip"); const paramSlug = useParams();
+    const slug = typeof paramSlug?.slug === "string" ? paramSlug.slug : "";
+    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId,
+        escuela?._id && idCicloEscolar
+            ? { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar }
+            : "skip");
+    const form = useForm<CalendarioFormValues>({
+        resolver: zodResolver(calendarioSchema),
         defaultValues: {
-            nombre: "",
-            fechaInicio: "",
-            fechaFin: "",
+            fecha: "",
+            tipo: "",
+            descripcion: "",
+            activo: true
         }
     });
 
     useEffect(() => {
-        if (cicloEscolar) {
+        if (calendario) {
             setItems([
-                { label: 'Escuela Limón', href: '/' },
-                { label: 'Ciclos Escolares', href: '/ciclosEscolares' },
-                { label: `${cicloEscolar?.nombre}`, href: `/ciclosEscolares/${cicloEscolar._id}` },
-                { label: 'Editar', isCurrentPage: true },
+                { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
+                { label: 'Ciclos Escolares', href: `/escuela/${slug}/ciclosEscolares` },
+                { label: `${cicloEscolar?.nombre}`, href: `/escuela/${slug}/ciclosEscolares/${idCicloEscolar}` },
+                { label: 'Calendario', href: `/escuela/${slug}/ciclosEscolares/${idCicloEscolar}` },
+                { label: `${new Date(calendario.fecha).toISOString().split("T")[0]}`, href: `/escuela/${slug}/ciclosEscolares/${idCicloEscolar}/calendario/${idCalendarioCiclo}` },
+                { label: "Editar", isCurrentPage: true },
             ]);
         }
-    }, [cicloEscolar, setItems]);
+        form.reset({
+            fecha: calendario?.fecha
+                ? new Date(calendario.fecha).toISOString().split("T")[0]
+                : "",
+            tipo: calendario?.tipo,
+            descripcion: calendario?.descripcion,
+            activo: calendario?.activo
+        });
+    }, [calendario, setItems, escuela, slug, cicloEscolar, idCicloEscolar, idCalendarioCiclo, form]);
 
-    const onSubmit = async (values: CicloEscolarFormValues) => {
+    const onSubmit = async (values: CalendarioFormValues) => {
         try {
             setIsSubmitting(true);
-            await actualizarCicloEscolar({
-                cicloId: idCicloEscolar,
+            await actualizarEventoCalendario({
+                eventoId: idCalendarioCiclo,
                 escuelaId: escuela?._id as Id<"escuelas">,
-                nombre: values.nombre,
-                fechaInicio: Number(values.fechaInicio),
-                fechaFin: Number(values.fechaFin)
+                fecha: new Date(values.fecha).getTime(),
+                tipo: values.tipo,
+                descripcion: values.descripcion,
+                activo: values.activo
             });
-            toast.success("Ciclo Escolar actualizada", { description: "La ciclo escolar se ha actualizado correctamente" });
-            router.push("/ciclosEscolares");
+            toast.success("Fecha actualizada", { description: "La fecha se ha actualizado correctamente" });
+            router.push(`/escuela/${slug}/ciclosEscolares/${idCicloEscolar}`);
         } catch (error) {
-            toast.error("Error", {
-                description: "Ocurrió un error al guardar la ciclo escolar"
-            });
+            toast.error("Error", { description: "Ocurrió un error al guardar la fecha" });
             console.error(error);
         } finally {
             setIsSubmitting(false);
@@ -77,14 +97,14 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <h1 className="text-2xl sm:text-3xl font-bold">
-                        Editar Ciclo Escolar
+                        Editar Fecha
                     </h1>
                 </div>
             </div>
 
             <Card className="w-full max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="font-semibold text-center">Información de la ciclo escolar</CardTitle>
+                    <CardTitle className="font-semibold text-center">Información de la fecha</CardTitle>
                 </CardHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -92,21 +112,7 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <FormField
                                     control={form.control}
-                                    name="nombre"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Nombre</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="Ej: 2024-2025" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="fechaInicio"
+                                    name="fecha"
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Fecha de Inicio</FormLabel>
@@ -117,15 +123,51 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
                                         </FormItem>
                                     )}
                                 />
-
                                 <FormField
                                     control={form.control}
-                                    name="fechaFin"
+                                    name="tipo"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Fecha Final</FormLabel>
+                                            <FormLabel>Nombre</FormLabel>
                                             <FormControl>
-                                                <Input type="date" {...field} />
+                                                <Input placeholder="Ej: 2024-2025" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="descripcion"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Descripción</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ej: 2024-2025" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="activo"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Estado</FormLabel>
+                                            <FormControl>
+                                                <Select
+                                                    onValueChange={value => field.onChange(value === "true")}
+                                                    value={field.value ? "true" : "false"}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Selecciona el estado" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="true">Activo</SelectItem>
+                                                        <SelectItem value="false">Inactivo</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 export const calendarioSchema = z.object({
-    fecha: z.number().min(Date.now(), { message: "La fecha de inicio debe ser una fecha futura" }),
+    fecha: z.string().min(1, { message: "La fecha es requerida" }),
     tipo: z.string().min(1, { message: "El nombre es requerido" }),
     descripcion: z.string().min(1, { message: "El nombre es requerido" }),
+    activo: z.boolean().optional()
 });
 
 export type CalendarioFormValues = z.infer<typeof calendarioSchema>;

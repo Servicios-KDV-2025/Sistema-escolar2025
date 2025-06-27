@@ -22,11 +22,22 @@ export const crearEventoCalendario = mutation({
 });
 
 export const obtenerEventosCalendario = query({
-  args: { escuelaId: v.id("escuelas") },
+  args: { escuelaId: v.id("escuelas"), },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("calendario")
-      .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId).eq("activo", true))
+      .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
+      .collect();
+  },
+});
+
+export const obtenerCalendarioCicloEscolar = query({
+  args: { escuelaId: v.id("escuelas"), cicloEscolarId: v.id("ciclosEscolares") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("calendario")
+      .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
+      .filter((q) => q.eq(q.field("cicloEscolarId"), args.cicloEscolarId))
       .collect();
   },
 });
@@ -38,7 +49,7 @@ export const obtenerEventoCalendarioPorId = query({
   },
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.eventoId);
-    if (!evento || evento.escuelaId !== args.escuelaId || !evento.activo) {
+    if (!evento || evento.escuelaId !== args.escuelaId) {
       throw new Error("Evento no encontrado o no pertenece a esta escuela.");
     }
     return evento;
@@ -52,6 +63,7 @@ export const actualizarEventoCalendario = mutation({
     fecha: v.number(),
     tipo: v.string(),
     descripcion: v.optional(v.string()),
+    activo: v.optional(v.boolean())
   },
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.eventoId);
@@ -60,6 +72,7 @@ export const actualizarEventoCalendario = mutation({
       fecha: args.fecha,
       tipo: args.tipo,
       descripcion: args.descripcion,
+      activo: args.activo
     });
   },
 });

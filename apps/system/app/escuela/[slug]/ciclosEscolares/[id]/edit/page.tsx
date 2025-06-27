@@ -8,6 +8,7 @@ import { Button } from "@repo/ui/components/shadcn/button";
 import { Input } from "@repo/ui/components/shadcn/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { ArrowLeft } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
@@ -25,8 +26,10 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
     const [isSubmitting, setIsSubmitting] = useState(false);
     const setItems = useBreadcrumbStore(state => state.setItems);
     const escuela = useEscuela((s) => s.escuela);
-    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId, { cicloId: idCicloEscolar, escuelaId: escuela?._id as Id<"escuelas">  });
-    const paramSlug = useParams();
+    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId,
+        escuela?._id && idCicloEscolar
+            ? { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar }
+            : "skip");const paramSlug = useParams();
     const slug = typeof paramSlug?.slug === "string" ? paramSlug.slug : "";
 
     const form = useForm<CicloEscolarFormValues>({
@@ -35,6 +38,7 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
             nombre: "",
             fechaInicio: "",
             fechaFin: "",
+            activo: true
         }
     });
 
@@ -42,12 +46,22 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
         if (cicloEscolar && escuela) {
             setItems([
                 { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
-                { label: 'Ciclos Escolares', href: '/ciclosEscolares' },
-                { label: `${cicloEscolar?.nombre}`, href: `/ciclosEscolares/${cicloEscolar._id}` },
+                { label: 'Ciclos Escolares', href: `/escuela/${slug}/ciclosEscolares` },
+                { label: `${cicloEscolar?.nombre}`, href: `/escuela/${slug}/ciclosEscolares/${cicloEscolar?._id}` },
                 { label: 'Editar', isCurrentPage: true },
             ]);
         }
-    }, [escuela, cicloEscolar, setItems, slug]);
+        form.reset({
+            nombre: cicloEscolar?.nombre,
+            fechaInicio: cicloEscolar?.fechaInicio
+                ? new Date(cicloEscolar.fechaInicio).toISOString().split("T")[0]
+                : "",
+            fechaFin: cicloEscolar?.fechaFin
+                ? new Date(cicloEscolar.fechaFin).toISOString().split("T")[0]
+                : "",
+            activo: cicloEscolar?.activo,
+        });
+    }, [escuela, cicloEscolar, setItems, slug, form]);
 
     const onSubmit = async (values: CicloEscolarFormValues) => {
         try {
@@ -56,14 +70,15 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
                 cicloId: idCicloEscolar,
                 escuelaId: escuela?._id as Id<"escuelas">,
                 nombre: values.nombre,
-                fechaInicio: Number(values.fechaInicio),
-                fechaFin: Number(values.fechaFin)
+                fechaInicio: new Date(values.fechaInicio).getTime(),
+                fechaFin: new Date(values.fechaFin).getTime(),
+                activo: values.activo
             });
-            toast.success("Ciclo Escolar actualizada", { description: "La ciclo escolar se ha actualizado correctamente" });
-            router.push("/ciclosEscolares");
+            toast.success("Ciclo Escolar actualizado", { description: "El calendario se ha actualizado correctamente" });
+            router.push(`/escuela/${slug}/ciclosEscolares/${cicloEscolar?._id}`);
         } catch (error) {
             toast.error("Error", {
-                description: "Ocurrió un error al guardar la ciclo escolar"
+                description: "Ocurrió un error al guardar el ciclo escolar"
             });
             console.error(error);
         } finally {
@@ -128,6 +143,30 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
                                             <FormLabel>Fecha Final</FormLabel>
                                             <FormControl>
                                                 <Input type="date" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="activo"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Estado</FormLabel>
+                                            <FormControl>
+                                                <Select
+                                                    onValueChange={value => field.onChange(value === "true")}
+                                                    value={field.value ? "true" : "false"}
+                                                >
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Selecciona el estado" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="true">Activo</SelectItem>
+                                                        <SelectItem value="false">Inactivo</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
