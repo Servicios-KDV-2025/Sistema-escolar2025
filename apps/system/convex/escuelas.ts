@@ -1,3 +1,4 @@
+// File: apps/system/convex/escuelas.ts
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -39,25 +40,30 @@ export const obtenerEscuelaPorNombre = query({
 export const crearEscuela = mutation({
     args: {
         nombre: v.string(),
-        nombreCorto: v.string(), // Esto es obligatorio
+        nombreCorto: v.string(),
         logoUrl: v.optional(v.string()),
         descripcion: v.optional(v.string()),
-        direccion: v.string(),
+        direccion: v.optional(v.string()),
         telefono: v.optional(v.string()),
         email: v.string(),
         director: v.optional(v.string()),
         activa: v.boolean(),
     },
-    handler: async (ctx, { nombre, nombreCorto, direccion, telefono, email, director, activa }) => { // Agrega nombreCorto aquí
-        const nuevaEscuela = await ctx.db.insert("escuelas", {
+    handler: async (ctx, { nombre, nombreCorto, logoUrl, descripcion, direccion, telefono, email, director, activa }) => {
+        const nuevaEscuelaId = await ctx.db.insert("escuelas", {
             nombre,
-            nombreCorto, // Agrega nombreCorto aquí
+            nombreCorto,
+            logoUrl,
+            descripcion,
             direccion,
             telefono,
             email,
             director,
             activa,
         });
-        return nuevaEscuela;
+        
+        // Obtener y devolver la escuela completa
+        const escuela = await ctx.db.get(nuevaEscuelaId);
+        return escuela;
     }
 });

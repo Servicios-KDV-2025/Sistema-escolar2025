@@ -1,3 +1,4 @@
+// file: apps/web/app/pago/page.tsx
 "use client"
 
 import React, { useState } from 'react';

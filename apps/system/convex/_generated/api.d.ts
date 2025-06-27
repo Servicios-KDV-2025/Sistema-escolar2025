@@ -17,7 +17,9 @@ import type * as calendario from "../calendario.js";
 import type * as ciclosEscolares from "../ciclosEscolares.js";
 import type * as escuelas from "../escuelas.js";
 import type * as eventoPorClase from "../eventoPorClase.js";
+import type * as eventosEscolares from "../eventosEscolares.js";
 import type * as grupos from "../grupos.js";
+import type * as materias from "../materias.js";
 import type * as prospectos from "../prospectos.js";
 
 /**
@@ -33,7 +35,9 @@ declare const fullApi: ApiFromModules<{
   ciclosEscolares: typeof ciclosEscolares;
   escuelas: typeof escuelas;
   eventoPorClase: typeof eventoPorClase;
+  eventosEscolares: typeof eventosEscolares;
   grupos: typeof grupos;
+  materias: typeof materias;
   prospectos: typeof prospectos;
 }>;
 export declare const api: FilterApi<
