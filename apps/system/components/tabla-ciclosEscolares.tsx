@@ -60,7 +60,7 @@ export function TablaCiclosEscolares() {
             <TableHead className="w-[100px]">Nombre</TableHead>
             <TableHead>Fecha Inicio</TableHead>
             <TableHead>Fecha Fin</TableHead>
-            <TableHead>Activo</TableHead>
+            <TableHead>Estado</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,9 +80,9 @@ export function TablaCiclosEscolares() {
                 <TableCell className="font-medium">
                   {cicloEscolar.nombre}
                 </TableCell>
-                <TableCell>{cicloEscolar.fechaInicio}</TableCell>
-                <TableCell>{cicloEscolar.fechaFin}</TableCell>
-                <TableCell>{cicloEscolar.activo}</TableCell>
+                <TableCell>{new Date(cicloEscolar.fechaInicio).toISOString().split("T")[0]}</TableCell>
+                <TableCell>{new Date(cicloEscolar.fechaFin).toISOString().split("T")[0]}</TableCell>
+                <TableCell>{cicloEscolar.activo ? "Activo" : "Inactivo"}</TableCell>
               </TableRow>
             ))
           )}
