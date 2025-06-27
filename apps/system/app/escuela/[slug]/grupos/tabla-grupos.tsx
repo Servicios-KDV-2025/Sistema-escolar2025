@@ -33,7 +33,7 @@ export function TablaGrupos() {
   }
 
   const handleVerGrupo = (id: string) => {
-    router.push(`/escuela/${slug}/grupos/create` + `${id}`);
+    router.push(`/escuela/${slug}/grupos/${id}`);
   };
 
   const handleCrear = () => {
@@ -77,7 +77,7 @@ export function TablaGrupos() {
                   {grupo.grado}
                 </TableCell>
                 <TableCell>{grupo.nombre}</TableCell>
-                <TableCell>{grupo.activo}</TableCell>
+                <TableCell>{grupo.activo ? 'Activo' : 'No activo'}</TableCell>
               </TableRow>
             ))
           )}
