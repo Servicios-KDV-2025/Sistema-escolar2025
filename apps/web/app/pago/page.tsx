@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 const PagoPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [prospectoId, setProspectoId] = useState<string | null>(null);
   const [cardData, setCardData] = useState({
     number: '',
     expiry: '',
@@ -20,19 +21,17 @@ const PagoPage = () => {
   });
   const [prospectoEmail, setProspectoEmail] = useState<string | null>(null);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
+  // Obtener el ID del prospecto al cargar la página
   useEffect(() => {
-    // Obtener el email del prospecto desde los parámetros de URL o localStorage
-    const emailFromUrl = searchParams.get('email');
-    const emailFromStorage = localStorage.getItem('prospectoEmail');
+    const id = sessionStorage.getItem('prospectoId');
+    setProspectoId(id);
     
-    if (emailFromUrl) {
-      setProspectoEmail(emailFromUrl);
-    } else if (emailFromStorage) {
-      setProspectoEmail(emailFromStorage);
+    // Si no hay prospectoId, redirigir al formulario
+    if (!id) {
+      router.push('/precompra');
     }
-  }, [searchParams]);
+  }, [router]);
 
   const handleInputChange = (field: string, value: string) => {
     setCardData(prev => ({
@@ -64,29 +63,30 @@ const PagoPage = () => {
     return v;
   };
 
-  const activarEscuela = async (email: string) => {
-    try {
-      const response = await fetch('/api/prospectos', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        // Limpiar el email del localStorage
-        localStorage.removeItem('prospectoEmail');
-        return data.escuela;
-      } else {
-        throw new Error(data.error || 'Error al activar la escuela');
-      }
-    } catch (error) {
-      console.error('Error al activar escuela:', error);
-      throw error;
+  const transferirProspectoAEscuela = async () => {
+    if (!prospectoId) {
+      throw new Error('No se encontró el ID del prospecto');
     }
+
+    const response = await fetch('/api/prospectos/transferir', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        prospectoId: prospectoId,
+        // Puedes agregar campos adicionales aquí si los necesitas
+        direccion: '',
+        telefono: '',
+        director: '',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error al transferir prospecto a escuela');
+    }
+
+    return response.json();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,10 +98,11 @@ const PagoPage = () => {
       // Simular procesamiento de pago
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Si el pago es exitoso y tenemos el email del prospecto, activar la escuela
-      if (prospectoEmail) {
-        await activarEscuela(prospectoEmail);
-      }
+      // Transferir prospecto a escuela
+      await transferirProspectoAEscuela();
+      
+      // Limpiar el sessionStorage
+      sessionStorage.removeItem('prospectoId');
       
       setIsProcessing(false);
       setPaymentStatus('success');
@@ -129,6 +130,18 @@ const PagoPage = () => {
       "Actualizaciones automáticas"
     ]
   };
+
+  // Si no hay prospectoId, mostrar loading
+  if (!prospectoId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Cargando información de pago...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
@@ -187,7 +200,7 @@ const PagoPage = () => {
               {paymentStatus === 'success' && (
                 <Alert className="mb-4 border-green-200 bg-green-50">
                   <AlertDescription className="text-green-800">
-                    ¡Pago procesado exitosamente! Tu escuela ha sido activada. Redirigiendo...
+                    ¡Pago procesado exitosamente! Tu cuenta ha sido activada. Redirigiendo...
                   </AlertDescription>
                 </Alert>
               )}
@@ -195,15 +208,7 @@ const PagoPage = () => {
               {paymentStatus === 'error' && (
                 <Alert className="mb-4 border-red-200 bg-red-50">
                   <AlertDescription className="text-red-800">
-                    Error al procesar el pago. Por favor, intenta nuevamente.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              {!prospectoEmail && (
-                <Alert className="mb-4 border-yellow-200 bg-yellow-50">
-                  <AlertDescription className="text-yellow-800">
-                    No se encontró información del prospecto. Asegúrate de haber completado el registro previo.
+                    Error al procesar el pago. Por favor, intenta de nuevo.
                   </AlertDescription>
                 </Alert>
               )}
