@@ -7,7 +7,6 @@ export const crearGrupo = mutation({
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
     grado: v.string(),
-    seccion: v.string(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -51,7 +50,6 @@ export const actualizarGrupo = mutation({
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
     grado: v.string(),
-    seccion: v.string(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {

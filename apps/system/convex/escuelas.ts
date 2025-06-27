@@ -13,7 +13,7 @@ export const obtenerEscuelaPorId = query({
     handler: async (ctx, { id }) => {
         const escuela = await ctx.db.get(id);
         if (!escuela) {
-            throw new Error("Escuela no encontrada");
+            return null; // Devolver null en lugar de lanzar error
         }
         return escuela;
     }
@@ -22,11 +22,15 @@ export const obtenerEscuelaPorId = query({
 export const obtenerEscuelaPorNombre = query({
     args: { nombre: v.string() },
     handler: async (ctx, { nombre }) => {
+        // Decodificar el nombre que viene de la URL
+        const nombreDecodificado = decodeURIComponent(nombre);
+        
         const escuela = await ctx.db.query("escuelas")
-        .filter((e) => e.eq(e.field("nombre"), nombre))
-        .collect();
+            .filter((e) => e.eq(e.field("nombre"), nombreDecodificado))
+            .collect();
+            
         if (escuela.length === 0) {
-            throw new Error("Escuela no encontrada");
+            return null; // Devolver null en lugar de lanzar error
         }
         return escuela[0];
     }
@@ -35,15 +39,19 @@ export const obtenerEscuelaPorNombre = query({
 export const crearEscuela = mutation({
     args: {
         nombre: v.string(),
+        nombreCorto: v.string(), // Esto es obligatorio
+        logoUrl: v.optional(v.string()),
+        descripcion: v.optional(v.string()),
         direccion: v.string(),
         telefono: v.optional(v.string()),
-        email: v.optional(v.string()),
+        email: v.string(),
         director: v.optional(v.string()),
         activa: v.boolean(),
     },
-    handler: async (ctx, { nombre, direccion, telefono, email, director, activa }) => {
+    handler: async (ctx, { nombre, nombreCorto, direccion, telefono, email, director, activa }) => { // Agrega nombreCorto aquí
         const nuevaEscuela = await ctx.db.insert("escuelas", {
             nombre,
+            nombreCorto, // Agrega nombreCorto aquí
             direccion,
             telefono,
             email,

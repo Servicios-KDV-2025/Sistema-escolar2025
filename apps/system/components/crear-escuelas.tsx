@@ -8,7 +8,7 @@ import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Input } from "@repo/ui/components/shadcn/input";
-import { Label } from "@repo/ui/components/shadcn/label";
+import { Label }  from "@repo/ui/components/shadcn/label";
 import { Checkbox } from "@repo/ui/components/shadcn/checkbox";
 import { Alert, AlertDescription } from "@repo/ui/components/shadcn/alert";
 import { Loader2, ArrowLeft, School } from "lucide-react";
@@ -20,6 +20,12 @@ const escuelaSchema = z.object({
     .min(1, "El nombre es requerido")
     .min(3, "El nombre debe tener al menos 3 caracteres")
     .max(100, "El nombre no puede exceder 100 caracteres"),
+  // AÑADIR: nombreCorto al esquema de Zod
+  nombreCorto: z
+    .string()
+    .min(1, "El nombre corto es requerido")
+    .min(2, "El nombre corto debe tener al menos 2 caracteres")
+    .max(20, "El nombre corto no puede exceder 20 caracteres"),
   direccion: z
     .string()
     .min(1, "La dirección es requerida")
@@ -61,6 +67,7 @@ export default function CrearEscuela({ onVolver }: CrearEscuelaProps) {
   
   const [formData, setFormData] = useState<EscuelaFormData>({
     nombre: "",
+    nombreCorto: "", // AÑADIR: Inicializar nombreCorto en el estado
     direccion: "",
     telefono: "",
     email: "",
@@ -124,9 +131,10 @@ export default function CrearEscuela({ onVolver }: CrearEscuelaProps) {
       // Preparar datos para enviar (filtrar campos vacíos opcionales)
       const dataToSubmit = {
         nombre: formData.nombre,
+        nombreCorto: formData.nombreCorto, // AÑADIR: Incluir nombreCorto aquí
         direccion: formData.direccion,
         telefono: formData.telefono || undefined,
-        email: formData.email || undefined,
+        email: formData.email || "", // CAMBIO: Asegurar que email siempre sea un string (vacío si es nulo/indefinido)
         director: formData.director || undefined,
         activa: formData.activa,
       };
@@ -220,6 +228,24 @@ export default function CrearEscuela({ onVolver }: CrearEscuelaProps) {
                 />
                 {errors.nombre && (
                   <p className="text-sm text-red-600">{errors.nombre}</p>
+                )}
+              </div>
+
+              {/* AÑADIR: Campo para Nombre Corto */}
+              <div className="space-y-2">
+                <Label htmlFor="nombreCorto" className="text-sm font-medium">
+                  Nombre Corto *
+                </Label>
+                <Input
+                  id="nombreCorto"
+                  type="text"
+                  value={formData.nombreCorto}
+                  onChange={(e) => handleInputChange("nombreCorto", e.target.value)}
+                  placeholder="Ej: EBJ"
+                  className={errors.nombreCorto ? "border-red-500" : ""}
+                />
+                {errors.nombreCorto && (
+                  <p className="text-sm text-red-600">{errors.nombreCorto}</p>
                 )}
               </div>
 
