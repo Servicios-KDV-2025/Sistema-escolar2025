@@ -56,3 +56,41 @@ export const eliminarProspecto = mutation({
         return prospecto; // Devolver el prospecto eliminado
     }
 });
+
+export const transferirProspectoAEscuela = mutation({
+    args: { 
+        prospectoId: v.id("prospectos"),
+        direccion: v.optional(v.string()),
+        telefono: v.optional(v.string()),
+        director: v.optional(v.string()),
+    },
+    handler: async (ctx, { prospectoId, direccion, telefono, director }) => {
+        // Obtener el prospecto
+        const prospecto = await ctx.db.get(prospectoId);
+        if (!prospecto) {
+            throw new Error("Prospecto no encontrado");
+        }
+
+        // Crear la escuela con los datos del prospecto
+        const nuevaEscuela = await ctx.db.insert("escuelas", {
+            nombre: prospecto.nombre,
+            nombreCorto: prospecto.nombreCorto,
+            logoUrl: prospecto.logoUrl,
+            descripcion: prospecto.descripcion,
+            direccion: direccion || prospecto.direccion || "",
+            telefono: telefono || prospecto.telefono,
+            email: prospecto.email,
+            director: director || prospecto.director,
+            activa: true, // La escuela se crea como activa
+        });
+
+        // Eliminar el prospecto después de transferirlo
+        await ctx.db.delete(prospectoId);
+
+        return {
+            escuelaId: nuevaEscuela,
+            prospectoEliminado: prospectoId,
+            mensaje: "Prospecto transferido exitosamente a escuela"
+        };
+    }
+});

@@ -61,6 +61,11 @@ const PreCompraForm = () => {
             });
             form.reset();
             
+            // Guardar el ID del prospecto en sessionStorage para usarlo en el pago
+            if (data.prospecto) {
+              sessionStorage.setItem('prospectoId', data.prospecto);
+            }
+            
             // Contador de redirección
             let count = 2;
             const countdownInterval = setInterval(() => {

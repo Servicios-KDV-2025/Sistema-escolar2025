@@ -44,7 +44,9 @@ const PagoExitoPage = () => {
                   Próximos pasos:
                 </h3>
                 <ul className="text-sm text-green-700 space-y-1 text-left">
-                  <li>• Recibirás un email de confirmación en los próximos minutos con tus credenciales de acceso.</li>
+                  <li>• Tu escuela ha sido creada exitosamente en el sistema</li>
+                  <li>• Recibirás un email de confirmación en los próximos minutos con tus credenciales de acceso</li>
+                  <li>• Puedes acceder al sistema usando el botón "Ir a iniciar Sesión"</li>
                 </ul>
               </div>
 
@@ -53,8 +55,8 @@ const PagoExitoPage = () => {
                   Información importante:
                 </h3>
                 <p className="text-sm text-blue-700">
-                  Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos 
-                  a través de nuestro soporte técnico disponible 24/7.
+                  Tu cuenta está ahora activa y lista para usar. Si tienes alguna pregunta o necesitas ayuda, 
+                  no dudes en contactarnos a través de nuestro soporte técnico disponible 24/7.
                 </p>
               </div>
             </div>
