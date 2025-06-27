@@ -25,8 +25,11 @@ export default function EditarCicloEscolarPage({ params }: { params: Promise<{ i
     const [isSubmitting, setIsSubmitting] = useState(false);
     const setItems = useBreadcrumbStore(state => state.setItems);
     const escuela = useEscuela((s) => s.escuela);
-    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId, { cicloId: idCicloEscolar, escuelaId: escuela?._id as Id<"escuelas"> });
-
+    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId,
+        escuela?._id && idCicloEscolar
+            ? { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar }
+            : "skip");
+            
     const form = useForm<CicloEscolarFormValues>({
         resolver: zodResolver(cicloEscolarSchema),
         defaultValues: {

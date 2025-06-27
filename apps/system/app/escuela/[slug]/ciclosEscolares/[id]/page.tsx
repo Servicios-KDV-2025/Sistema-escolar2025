@@ -6,62 +6,54 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@repo/ui/components/shadcn/dialog";
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
-import { Skeleton } from "@repo/ui/components/shadcn/skeleton";
+import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
+import { toast } from "sonner";
 
 export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const idCicloEscolar = id as Id<"ciclosEscolares">;
     const escuela = useEscuela((s) => s.escuela);
     const router = useRouter();
-    const eliminarCicloEscolar = useMutation(api.ciclosEscolares.eliminarCicloEscolar);
+    const paramSlug = useParams();
+    const slug = typeof paramSlug?.slug === "string" ? paramSlug.slug : "";
 
+    const eliminarCicloEscolar = useMutation(api.ciclosEscolares.eliminarCicloEscolar);
     const [modalEliminar, setModalEliminar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const setItems = useBreadcrumbStore(state => state.setItems)
-    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId , { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar });
-    const paramSlug = useParams();
-    const slug = typeof paramSlug?.slug === "string" ? paramSlug.slug : "";
+    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId,
+        escuela?._id && idCicloEscolar
+            ? { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar }
+            : "skip");
+
+    //Calendario
+    const calendarios = useQuery(api.calendario.obtenerCalendarioCicloEscolar,
+        escuela?._id && idCicloEscolar
+            ? { escuelaId: escuela?._id as Id<"escuelas">, cicloEscolarId: idCicloEscolar }
+            : "skip"
+    );
+    const handleVerCicloEscolar = (id: string) => {
+        router.push(`/escuela/${slug}/ciclosEscolares/${cicloEscolar?._id}/calendario/` + `${id}`);
+    };
+
+    const handleCrear = () => {
+        router.push(`/escuela/${slug}/ciclosEscolares/${cicloEscolar?._id}/calendario/create`);
+    };
 
     useEffect(() => {
         if (cicloEscolar && escuela) {
             setItems([
                 { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
-                { label: 'Ciclos Escolares', href: '/ciclosEscolares' },
+                { label: 'Ciclos Escolares', href: `/escuela/${slug}/ciclosEscolares` },
                 { label: `${cicloEscolar?.nombre}`, isCurrentPage: true }
             ]);
         }
-    }, [escuela, cicloEscolar, setItems, slug]);
-    if (cicloEscolar === undefined) {
-        return (
-            <div className="container mx-auto py-10">
-                <div className="flex items-center gap-2 mb-6">
-                    <Button variant="outline" size="icon" onClick={() => router.back()}>
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <Skeleton className="h-8 w-64" />
-                </div>
-                <Card className="max-w-2xl mx-auto">
-                    <CardHeader>
-                        <Skeleton className="h-8 w-full mb-2" />
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                    </CardContent>
-                    <CardFooter>
-                        <Skeleton className="h-10 w-24 mr-2" />
-                        <Skeleton className="h-10 w-24" />
-                    </CardFooter>
-                </Card>
-            </div>
-        );
-    }
+    }, [escuela, cicloEscolar, setItems, slug,]);
 
     if (!cicloEscolar) {
         return (
@@ -78,14 +70,16 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
     }
 
     const handleEditar = () => {
-        router.push(`/ciclosEscolares/${id}/edit`);
+        router.push(`/escuela/${slug}/ciclosEscolares/${id}/edit`);
     };
 
     const handleEliminar = async () => {
+        if (!cicloEscolar) return;
         setIsSubmitting(true);
         try {
             await eliminarCicloEscolar({ cicloId: cicloEscolar._id, escuelaId: escuela?._id as Id<"escuelas"> });
-            router.push("/ciclosEscolares");
+            toast.info("Ciclo escolar eliminado", { description: "El ciclo escolar se ha eliminado correctamente" });
+            router.push(`/escuela/${slug}/ciclosEscolares`);
         } catch (error) {
             console.error("Error al eliminar ciclo escolar:", error);
         } finally {
@@ -107,7 +101,7 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle className="text-2xl">
-                            {cicloEscolar?.nombre}
+                            Perido: {cicloEscolar?.nombre}
                         </CardTitle>
                         <div className="flex gap-2">
                             <Button
@@ -137,32 +131,82 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                     <div>
                         <h3 className="font-medium text-sm text-muted-foreground mb-1">Fecha de Inicio</h3>
                         <div className="p-2 bg-muted rounded-md">
-                            {cicloEscolar.fechaInicio
-                                ? new Date(cicloEscolar.fechaInicio).toLocaleDateString("es-MX", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric"
-                                })
-                                : ""}
+                            {new Date(cicloEscolar.fechaInicio).toISOString().split("T")[0]}
                         </div>
                     </div>
 
                     <div>
                         <h3 className="font-medium text-sm text-muted-foreground mb-1">Fecha Final</h3>
                         <div className="p-2 bg-muted rounded-md">
-                            {cicloEscolar.fechaFin
-                                ? new Date(cicloEscolar.fechaFin).toLocaleDateString("es-MX", {
-                                    year: "numeric",
-                                    month: "long",
-                                    day: "numeric"
-                                })
-                                : ""}
+                            {new Date(cicloEscolar.fechaFin).toISOString().split("T")[0]}
+                        </div>
+                    </div>
+                    <div>
+                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Estado</h3>
+                        <div className="p-2 bg-muted rounded-md">
+                            {cicloEscolar.activo ? "Activo" : "Inactivo"}
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Modal de confirmación para eliminar */}
+            <Card className="max-w-2xl mx-auto mt-6">
+                <CardHeader>
+                    <div className="flex justify-between items-center">
+                        <CardTitle className="text-2xl">
+                            Fechas registradas: {calendarios ? calendarios.length : 0}
+                        </CardTitle>
+
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handleCrear}
+                            >
+                                <Plus className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <Table>
+                        <TableCaption>Lista de calendarios registrados</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">Fecha</TableHead>
+                                <TableHead>Tipo</TableHead>
+                                <TableHead>Descripción</TableHead>
+                                <TableHead>Estado</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {!calendarios || calendarios.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center">
+                                        No hay calendarios registrados
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                calendarios.map((calendario) => (
+                                    <TableRow
+                                        key={calendario._id}
+                                        className="cursor-pointer hover:bg-muted/50"
+                                        onClick={() => handleVerCicloEscolar(calendario._id)}
+                                    >
+                                        <TableCell className="font-medium">
+                                            {new Date(calendario.fecha).toISOString().split("T")[0]}
+                                        </TableCell>
+                                        <TableCell>{calendario.tipo}</TableCell>
+                                        <TableCell>{calendario.descripcion}</TableCell>
+                                        <TableCell>{calendario.activo ? "Activo" : "Inactivo"}</TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+
             <Dialog open={modalEliminar} onOpenChange={setModalEliminar}>
                 <DialogContent>
                     <DialogHeader>
