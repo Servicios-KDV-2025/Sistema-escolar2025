@@ -1,32 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useMutation } from "convex/react";
+import { use, useEffect, useState } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, } from "@repo/ui/components/shadcn/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
+import { ArrowLeft } from "lucide-react";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@repo/ui/components/shadcn/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useForm } from "react-hook-form";
-import { useEscuela } from "@/app/store/useEscuela";
-import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { GrupoFormValues, grupoSchema } from "@/app/shemas/grupo";
+import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
+import { useEscuela } from "@/app/store/useEscuela";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 
-export default function CrearGrupoPage() {
+export default function EditarGrupo({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
+    const idGrupo = id as Id<"grupos">;
     const router = useRouter();
+    const actualizarGrupo = useMutation(api.grupos.actualizarGrupo);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const setItems = useBreadcrumbStore(state => state.setItems);
     const escuela = useEscuela((s) => s.escuela);
-    const creargrupo = useMutation(api.grupos.crearGrupo);
+    const grupo = useQuery(api.grupos.grupoPorId, { id: idGrupo, escuelaId: escuela?._id as Id<"escuelas"> });
+    const allParams = useParams();
+    const slug = typeof allParams?.slug === "string" ? allParams.slug : "";
 
     const form = useForm<GrupoFormValues>({
         resolver: zodResolver(grupoSchema),
@@ -37,32 +39,42 @@ export default function CrearGrupoPage() {
         }
     });
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const setItems = useBreadcrumbStore(state => state.setItems)
+    useEffect(() => {
+        if (grupo) {
+            form.reset({
+                grado: grupo.grado as GrupoFormValues["grado"],
+                nombre: grupo.nombre,
+                activo: grupo.activo,
+            });
+        }
+    }, [grupo, form]);
 
     useEffect(() => {
-        setItems([
-            { label: `${escuela?.nombre}`, href: '/' },
-            { label: 'Grupos', href: '/grupos' },
-            { label: 'Crear Grupo', isCurrentPage: true },
-        ])
-    }, [setItems, escuela]);
+        if (grupo) {
+            setItems([
+                { label: `${escuela?.nombre}`, href: '/' },
+                { label: 'Grupos', href: '/grupos' },
+                { label: `${grupo?.nombre}`, href: `/grupos/${grupo._id}` },
+                { label: 'Editar', isCurrentPage: true },
+            ]);
+        }
+    }, [setItems, escuela, grupo]);
 
     const onSubmit = async (values: GrupoFormValues) => {
         try {
             setIsSubmitting(true);
-            await creargrupo({
+            await actualizarGrupo({
+                id: idGrupo,
                 escuelaId: escuela?._id as Id<"escuelas">,
                 grado: values.grado,
                 nombre: values.nombre,
                 activo: values.activo,
             });
-            toast.success("Grado creado", { description: "El grado se ha creado correctamente" });
-            router.back();
-
+            toast.success("Grado actualizado", { description: "El grado se ha actualizado correctamente" });
+            router.push(`/escuela/${slug}/grupos`);
         } catch (error) {
             toast.error("Error", {
-                description: "Ocurrió un error al guardar el grado"
+                description: "Ocurrió un error al guardar grupo"
             });
             console.error(error);
         } finally {
@@ -74,8 +86,11 @@ export default function CrearGrupoPage() {
         <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => router.back()}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
                     <h1 className="text-2xl sm:text-3xl font-bold">
-                        Crear Nuevo Grupo
+                        Editar Grupo
                     </h1>
                 </div>
             </div>
@@ -98,7 +113,7 @@ export default function CrearGrupoPage() {
                                             <FormLabel>Grado</FormLabel>
                                             <Select
                                                 onValueChange={field.onChange}
-                                                defaultValue={field.value}
+                                                value={field.value}
                                             >
                                                 <FormControl>
                                                     <SelectTrigger>
@@ -132,6 +147,31 @@ export default function CrearGrupoPage() {
                                         </FormItem>
                                     )}
                                 />
+
+                                <FormField
+                                    control={form.control}
+                                    name="activo"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Activo</FormLabel>
+                                            <Select
+                                                onValueChange={(value) => field.onChange(value === "true")}
+                                                value={field.value ? "true" : "false"}
+                                            >
+                                                <FormControl>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Cambia su estado" />
+                                                    </SelectTrigger>
+                                                </FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="true">Activo</SelectItem>
+                                                    <SelectItem value="false">No activo</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </div>
                         </CardContent>
 
@@ -150,13 +190,12 @@ export default function CrearGrupoPage() {
                                 disabled={isSubmitting}
                                 className="w-full sm:w-auto"
                             >
-                                {isSubmitting ? "Creando..." : "Crear Grupo"}
+                                {isSubmitting ? "Actualizando..." : "Guardar Cambios"}
                             </Button>
                         </CardFooter>
                     </form>
                 </Form>
             </Card>
         </div>
-
     );
 }
