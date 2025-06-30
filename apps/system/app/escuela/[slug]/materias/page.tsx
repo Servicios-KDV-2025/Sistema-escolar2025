@@ -1,4 +1,4 @@
-// src/app/escuela/[slug]/materias/page.tsx
+// /app/escuela/[slug]/materias/page.tsx
 "use client";
 
 import { TablaMaterias } from "@/components/tabla-materias";

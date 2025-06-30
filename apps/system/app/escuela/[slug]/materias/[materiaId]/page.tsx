@@ -9,7 +9,7 @@ import { Id } from '@/convex/_generated/dataModel';
 import { useEscuela } from '@/app/store/useEscuela';
 
 // Shadcn UI Components
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn//card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Edit } from "lucide-react";
 

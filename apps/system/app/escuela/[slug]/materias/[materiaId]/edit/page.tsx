@@ -11,21 +11,21 @@ import { useEscuela } from "@/app/store/useEscuela";
 // Componentes de Shadcn UI y librerías de formulario
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Importar Textarea para descripciones más largas
+import { Textarea } from "@repo/ui/components/shadcn/textarea"; // Importar Textarea para descripciones más largas
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@repo/ui/components/shadcn/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@repo/ui/components/shadcn/select";
 import {
   Form,
   FormControl,
@@ -33,7 +33,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@repo/ui/components/shadcn/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -42,7 +42,7 @@ import { ArrowLeft } from "lucide-react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 
 // Importa el esquema y el tipo para Materia
-import { MateriaFormValues, materiaSchema } from "@/app/schemas/materia"; // Asegúrate de que esta ruta sea correcta y que el esquema exista
+import { MateriaFormValues, materiaSchema } from "@/app/shemas/materia";
 
 export default function EditarMateriaPage() {
   const params = useParams();

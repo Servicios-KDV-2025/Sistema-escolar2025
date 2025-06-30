@@ -1,4 +1,4 @@
-// src/app/escuela/[slug]/materias/create/page.tsx
+// app/escuela/[slug]/materias/create/page.tsx
 "use client";
 
 import React, { useState, useEffect } from 'react';
