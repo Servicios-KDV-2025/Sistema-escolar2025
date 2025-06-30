@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import { use, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";

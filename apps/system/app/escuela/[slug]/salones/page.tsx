@@ -1,4 +1,4 @@
-import { TablaSalones } from "@/components/tabla-salones";
+import { TablaSalones } from "@/components/tabla-salones"; 
 
 export default function SalonesPage() {
   return (

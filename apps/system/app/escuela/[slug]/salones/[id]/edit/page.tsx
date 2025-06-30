@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import { use, useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
@@ -29,7 +29,7 @@ import {
   salonSchema,
   SalonFormValues
 } from "@/app/shemas/salon";
-import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
+import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"; 
 import { useEscuela } from "@/app/store/useEscuela";
 import { ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
