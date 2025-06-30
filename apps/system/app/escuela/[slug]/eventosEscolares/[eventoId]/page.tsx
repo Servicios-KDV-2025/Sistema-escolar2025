@@ -25,10 +25,9 @@ export default function DetallesEventoEscolarPage() {
 
   const { escuela } = useEscuela();
 
-  // Consulta Convex para obtener los datos del evento
-  const eventoEscolar = useQuery(
-    api.eventosEscolares.obtenerEventoPorId,
-    eventoId ? { id: eventoId } : "skip"
+  const eventoEscolar = useQuery(api.eventosEscolares.obtenerEventoPorId,
+    escuela?._id && eventoId 
+    ? { id: eventoId, escuelaId: escuela?._id as Id<"escuelas"> } : "skip"
   );
 
   const setItems = useBreadcrumbStore(state => state.setItems);

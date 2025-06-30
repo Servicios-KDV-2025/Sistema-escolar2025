@@ -31,10 +31,10 @@ export default function EditarEventoEscolarPage() {
 
   const { escuela } = useEscuela();
 
-  const eventoEscolar = useQuery(
-    api.eventosEscolares.obtenerEventoPorId,
-    eventoId ? { id: eventoId } : "skip"
-  );
+   const eventoEscolar = useQuery(api.eventosEscolares.obtenerEventoPorId,
+      escuela?._id && eventoId 
+      ? { id: eventoId, escuelaId: escuela?._id as Id<"escuelas"> } : "skip"
+    );
 
   const actualizarEvento = useMutation(api.eventosEscolares.actualizarEventoEscolar);
 
