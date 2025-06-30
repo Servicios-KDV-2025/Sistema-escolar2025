@@ -107,7 +107,7 @@ const applicationTables = {
     activa: v.boolean(),
   })
     .index("by_escuela", ["escuelaId"])
-    .index("by_ciclo", ["cicloEscolarId"])
+    .index("by_ciclo", ["cicloEscolarId"]) 
     .index("by_materia", ["materiaId"])
     .index("by_salon", ["salonId"])
     .index("by_maestro", ["maestroId"]),
