@@ -1,14 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useEscuela } from "../../store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuela";
 import { useEffect } from "react";
-import { useBreadcrumbStore } from "../../store/breadcrumbStore";
+import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Calendar, BarChart3,  Settings, GraduationCap, MapPin, Shield, Clock, Award } from "lucide-react";
+import { SignOutButton } from "@clerk/nextjs";
 
 export default function EscuelaHome() {
   const escuela = useEscuela((s) => s.escuela);
@@ -93,6 +94,7 @@ export default function EscuelaHome() {
 
   return (
     <div className="space-y-8 p-6 max-w-7xl mx-auto">
+      <SignOutButton />
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-background border">
         <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,black)]" />
         <div className="relative p-8">
