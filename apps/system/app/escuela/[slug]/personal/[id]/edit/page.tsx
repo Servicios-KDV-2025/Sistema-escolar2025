@@ -1,6 +1,6 @@
 'use client'
 
-import { AlumnoFormValues, alumnoSchema } from "@/app/shemas/alumno"
+import { PersonalFormValues, personalSchema } from "@/app/shemas/personal"
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
 import { useEscuela } from "@/app/store/useEscuela"
 import { api } from "@/convex/_generated/api"
@@ -18,77 +18,74 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select"
 
-export default function EditarAlumno ({params}: {params: Promise<{id: string}>}) {
+export default function EditarPersonal ({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params)
-  const idAlumno = id as Id<"alumnos">
+  const idPersonal = id as Id<"personal">
   const router = useRouter()
-  const actualizarAlumno = useMutation(api.alumnos.upadateAlumno)
+  const actualizarPersonal = useMutation(api.personal.upadatePersonal)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const setItems = useBreadcrumbStore(state => state.setItems)
   const escuela = useEscuela((s) => s.escuela)
-  const alumno = useQuery(api.alumnos.alumnoById, { id: idAlumno, esculaId: escuela?._id as Id<"escuelas"> })
+  const empleado = useQuery(api.personal.PersonalById, { id: idPersonal, esculaId: escuela?._id as Id<"escuelas"> })
   const allParams = useParams()
   const slug = typeof allParams?.slug === "string" ? allParams.slug : ""
 
-  const form = useForm<AlumnoFormValues>({
-    resolver: zodResolver(alumnoSchema),
+  const form = useForm<PersonalFormValues>({
+    resolver: zodResolver(personalSchema),
     defaultValues: {
-      matricula: "",
       nombre: "",
       apellidos: "",
-      fechaNacimiento: "",
       email: "",
       telefono: undefined,
-      direccion: "",
+      puesto: "",
+      fechaIngreso: undefined,
       activo: true
     }
   })
 
   useEffect(() => {
-    if (alumno) {
+    if (empleado) {
       form.reset({
-        matricula: alumno.matricula,
-        nombre: alumno.nombre,
-        apellidos: alumno.apellidos,
-        fechaNacimiento: alumno.fechaNacimiento,
-        email: alumno.email,
-        telefono: alumno.telefono,
-        direccion: alumno.direccion
+        nombre: empleado.nombre,
+        apellidos: empleado.apellidos,
+        email: empleado.email,
+        telefono: empleado.telefono,
+        puesto: empleado.puesto,
+        fechaIngreso: empleado.fechaIngreso,
       })
     }
-  }, [alumno, form])
+  }, [empleado, form])
 
   useEffect(() => {
-    if (alumno) {
+    if (empleado) {
       setItems([
         { label: `${escuela?.nombre}`, href: '/' },
-        { label: 'Alumnos', href: '/alumnos' },
-        { label: `${alumno?.nombre}`, href: `/alumnos/${alumno._id}` },
+        { label: 'Personal', href: '/personal' },
+        { label: `${empleado?.nombre}`, href: `/personal/${empleado._id}` },
         { label: 'Editar', isCurrentPage: true }
       ])
     }
-  }, [setItems, escuela, alumno])
+  }, [setItems, escuela, empleado])
 
-  const onSubmit = async (values: AlumnoFormValues) => {
+  const onSubmit = async (values: PersonalFormValues) => {
     try {
       setIsSubmitting(true)
-      await actualizarAlumno({
-        id: idAlumno,
+      await actualizarPersonal({
+        id: idPersonal,
         escuelaId: escuela?._id as Id<"escuelas">,
-        matricula: values.matricula,
         nombre: values.nombre,
         apellidos: values.apellidos,
-        fechaNacimiento: values.fechaNacimiento,
         email: values.email,
         telefono: values.telefono,
-        direccion: values.direccion,
+        puesto: values.puesto,
+        fechaIngreso: values.fechaIngreso,
         activo: values.activo
       })
-      toast.success("Alumno actualizado", { description: "El alumno se ha actualizado correctamente" })
-      router.push(`/escuela/${slug}/alumnos`)
+      toast.success("Empleado actualizado", { description: "El empleado se ha actualizado correctamente" })
+      router.push(`/escuela/${slug}/personal`)
     } catch (error) {
       toast.error("Error", {
-        description: "Ocurrió un error al guardar alumno"
+        description: "Ocurrió un error al guardar empleado"
       })
       console.error(error)
     } finally{
@@ -104,31 +101,19 @@ export default function EditarAlumno ({params}: {params: Promise<{id: string}>})
             <ArrowLeft className="h-4 w-4"/>
           </Button>
           <h1 className="text-2xl sm:text-3xl font-bold">
-            Editar Alumno
+            Editar Empleado
           </h1>
         </div>
       </div>
 
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle className="font-semibold text-center">Información del Alumno</CardTitle>
+          <CardTitle className="font-semibold text-center">Información del Empleado</CardTitle>
         </CardHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CardContent className="grid grid-cols-1 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="matricula"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Matricula</FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} placeholder="Matricula"/>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                /> 
                 <FormField
                   control={form.control}
                   name="nombre"
@@ -149,18 +134,6 @@ export default function EditarAlumno ({params}: {params: Promise<{id: string}>})
                       <FormLabel>Apellidos</FormLabel>
                       <FormControl>
                         <Input type="text" {...field} placeholder="Apellidos"/>
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fechaNacimiento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha de Nacimiento</FormLabel>
-                      <FormControl>
-                        <Input type="text" {...field} placeholder="DD/MM/AAAA"/>
                       </FormControl>
                     </FormItem>
                   )}
@@ -191,12 +164,24 @@ export default function EditarAlumno ({params}: {params: Promise<{id: string}>})
                 /> 
                 <FormField
                   control={form.control}
-                  name="direccion"
+                  name="puesto"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Dirección</FormLabel>
+                      <FormLabel>Puesto</FormLabel>
                       <FormControl>
-                        <Input type='text' {...field} placeholder="direccion"/>
+                        <Input type='text' {...field} placeholder="Maestro"/>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                /> 
+                <FormField
+                  control={form.control}
+                  name="fechaIngreso"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fecha de ingreso</FormLabel>
+                      <FormControl>
+                        <Input type='text' {...field} placeholder="AAAA"/>
                       </FormControl>
                     </FormItem>
                   )}
