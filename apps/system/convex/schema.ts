@@ -143,9 +143,9 @@ const applicationTables = {
     matricula: v.string(),
     nombre: v.string(),
     apellidos: v.string(),
-    fechaNacimiento: v.number(),
+    fechaNacimiento: v.string(),
     email: v.optional(v.string()),
-    telefono: v.optional(v.string()),
+    telefono: v.optional(v.number()),
     direccion: v.optional(v.string()),
     activo: v.boolean(),
   })
