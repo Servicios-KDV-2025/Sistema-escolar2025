@@ -9,7 +9,7 @@ import { rootDomain, protocol } from '@/lib/utils';
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function createSubdomainAction(
-  prevState: any,
+  // prevState: any,
   formData: FormData
 ) {
   const subdomain = formData.get('subdomain') as string;
@@ -49,7 +49,7 @@ export async function createSubdomainAction(
     });
 
     redirect(`${protocol}://${sanitizedSubdomain}.${rootDomain}`);
-  } catch (error) {
+  } catch {
     return {
       subdomain,
       success: false,
@@ -59,7 +59,7 @@ export async function createSubdomainAction(
 }
 
 export async function deleteSubdomainAction(
-  prevState: any,
+  // prevState: any,
   formData: FormData
 ) {
   const subdomain = formData.get('subdomain') as string;
@@ -71,7 +71,7 @@ export async function deleteSubdomainAction(
     
     revalidatePath('/admin');
     return { success: 'Domain deleted successfully' };
-  } catch (error) {
+  } catch {
     return { 
       success: false, 
       error: 'Failed to delete subdomain. Please try again.' 
