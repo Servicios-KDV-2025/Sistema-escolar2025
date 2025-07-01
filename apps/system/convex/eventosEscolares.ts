@@ -6,7 +6,7 @@ import { v } from "convex/values";
 // Ahora requiere un escuelaId para obtener los eventos asociados.
 export const obtenerEventosEscolaresPorEscuela = query({
   args: {
-    escuelaId: v.id("escuelas"), // <-- Este argumento es ahora obligatorio
+    escuelaId: v.id("escuelas"), 
   },
   handler: async (ctx, args) => {
     // Opcional: Puedes validar si la escuela existe antes de buscar eventos
@@ -23,7 +23,6 @@ export const obtenerEventosEscolaresPorEscuela = query({
   },
 });
 
-// Opcional: Obtener todos los Eventos (sin filtro de escuela).
 // Solo si realmente necesitas ver TODOS los eventos de TODAS las escuelas.
 export const obtenerTodosLosEventosEscolares = query({
   args: {},
@@ -52,6 +51,23 @@ export const crearEventoEscolar = mutation({
     return await ctx.db.insert("eventosEscolares", args);
   },
 });
+
+
+export const obtenerEventoPorId = query({
+  args: {
+     id: v.id("eventosEscolares"),
+     escuelaId: v.id("escuelas"), 
+    },
+     
+  handler: async (ctx, args) => {
+    const evento = await ctx.db.get(args.id);
+    if (!evento || evento.escuelaId !== args.escuelaId || !evento.activo) {
+      return null;
+      }
+    return await ctx.db.get(args.id);
+  },
+});
+
 
 // 3. Actualizar un Evento Escolar existente
 // Ahora requiere el escuelaId para verificar que el evento pertenece a la escuela correcta.

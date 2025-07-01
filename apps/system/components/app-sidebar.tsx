@@ -58,6 +58,66 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "Grupos",
           url: `/escuela/${slug}/grupos`,
         },
+        {
+          title: "Eventos Escolares",
+          url: `/escuela/${slug}/eventosEscolares`,
+        },
+      ],
+    },
+    {
+      title: "Salones",
+      url: `/escuela/${slug}/salones`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Salones",
+          url: `/escuela/${slug}/salones`,
+        },
+      ],
+    },
+    {
+      title: "Materias",
+      url: `/escuela/${slug}/materias`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Materias",
+          url: `/escuela/${slug}/materias`,
+        },
+      ],
+    },
+    {
+      title: "Departamentos",
+      url: `/escuela/${slug}/departamentos`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Departamentos",
+          url: `/escuela/${slug}/departamentos`,
+        },
+        {
+          title: "Crear Departamento",
+          url: `/escuela/${slug}/departamentos/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+    {
+      title: "Personal",
+      url: `/escuela/${slug}/personal`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Personal",
+          url: `/escuela/${slug}/personal`,
+        },
+        {
+          title: "Crear Personal",
+          url: `/escuela/${slug}/personal/create?escuelaId=${slug}`,
+        },
       ],
     },
     {
