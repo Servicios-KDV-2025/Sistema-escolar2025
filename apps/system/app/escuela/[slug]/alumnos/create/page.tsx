@@ -2,7 +2,7 @@
 
 import { useEscuela } from "@/app/store/useEscuela"
 import { api } from "@/convex/_generated/api"
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { alumnoSchema, AlumnoFormValues } from "@/app/shemas/alumno"
@@ -21,6 +21,7 @@ export default function CrearAlumnoPage () {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const crearAlumno = useMutation(api.alumnos.crearAlumno)
+  const grupos = useQuery(api.grupos.verTodosLosGrupos, {escuelaId: escuela?._id as Id<"escuelas">});
 
   const form = useForm<AlumnoFormValues>({
     resolver: zodResolver(alumnoSchema),
@@ -53,7 +54,7 @@ export default function CrearAlumnoPage () {
       await crearAlumno({
         escuelaId: escuela?._id as Id<"escuelas">,
         padreId: padres as Id<"padres">,
-        grupoId: grupo as Id<"grupos">,
+        grupoId: grupos as Id<"grupos">,
         matricula: values.matricula,
         nombre: values.nombre,
         apellidos: values.apellidos,

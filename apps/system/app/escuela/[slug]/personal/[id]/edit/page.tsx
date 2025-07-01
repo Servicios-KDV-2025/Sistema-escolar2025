@@ -181,7 +181,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
                     <FormItem>
                       <FormLabel>Fecha de ingreso</FormLabel>
                       <FormControl>
-                        <Input type='text' {...field} placeholder="AAAA"/>
+                        <Input type='date' {...field}/>
                       </FormControl>
                     </FormItem>
                   )}

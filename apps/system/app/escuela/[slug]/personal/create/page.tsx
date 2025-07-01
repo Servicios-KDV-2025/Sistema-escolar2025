@@ -56,7 +56,7 @@ export default function CrearPersonalPage () {
         apellidos: values.apellidos,
         email: values.email,
         telefono: values.telefono,
-        fechaIngreso: values.fechaIngreso,
+        fechaIngreso: new Date(values.fechaIngreso).getTime(),
         puesto: values.puesto,
         activo: values.activo
       })
@@ -157,7 +157,7 @@ export default function CrearPersonalPage () {
                     <FormItem>
                       <FormLabel>Fecha de ingreso</FormLabel>
                       <FormControl>
-                        <Input type='text' {...field} placeholder="AAAA"/>
+                        <Input type='date' {...field}/>
                       </FormControl>
                     </FormItem>
                   )}
