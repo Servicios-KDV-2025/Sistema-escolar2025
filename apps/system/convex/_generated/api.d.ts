@@ -26,6 +26,7 @@ import type * as periodoporClase from "../periodoporClase.js";
 import type * as periodos from "../periodos.js";
 import type * as prospectos from "../prospectos.js";
 import type * as salones from "../salones.js";
+import type * as subdomains from "../subdomains.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   periodos: typeof periodos;
   prospectos: typeof prospectos;
   salones: typeof salones;
+  subdomains: typeof subdomains;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

@@ -95,85 +95,133 @@ const PreCompraForm = () => {
       }
 
     return (
-        <Card className="w-full max-w-md mx-auto">
-            <CardHeader>
-                <CardTitle>Completa la información de tu escuela</CardTitle>
-            </CardHeader>
-            <CardContent>
-                {message && (
-                    <Alert className={`mb-4 ${message.type === 'success' ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-                        <AlertDescription className={message.type === 'success' ? 'text-green-800' : 'text-red-800'}>
-                            {message.text}
-                            {message.type === 'success' && countdown > 0 && (
-                                <span className="block text-sm mt-1">
-                                    Redirigiendo en {countdown} segundo{countdown !== 1 ? 's' : ''}...
-                                </span>
-                            )}
-                        </AlertDescription>
-                    </Alert>
-                )}
-                
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="nombre"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nombre de la Escuela</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Ingresa el nombre completo de la escuela" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Nombre oficial de la institución educativa.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="nombreCorto"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nombre Corto</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Abreviatura o nombre corto" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Nombre abreviado o siglas de la escuela.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Correo Electrónico</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="escuela@ejemplo.com" type="email" {...field} />
-                                    </FormControl>
-                                    <FormDescription>
-                                        Email de contacto de la institución.
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+        <div className="w-full ">
+            {message && (
+                <Alert className={`mb-6 border-2 ${
+                    message.type === 'success' 
+                        ? 'border-green-200 bg-green-50/80 backdrop-blur-sm' 
+                        : 'border-red-200 bg-red-50/80 backdrop-blur-sm'
+                }`}>
+                    <AlertDescription className={`font-medium ${
+                        message.type === 'success' ? 'text-green-800' : 'text-red-800'
+                    }`}>
+                        {message.text}
+                        {message.type === 'success' && countdown > 0 && (
+                            <span className="block text-sm mt-2 font-normal">
+                                Redirigiendo en {countdown} segundo{countdown !== 1 ? 's' : ''}...
+                            </span>
+                        )}
+                    </AlertDescription>
+                </Alert>
+            )}
+            
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="nombre"
+                        render={({ field }) => (
+                            <FormItem className="group">
+                                <FormLabel className="text-base font-semibold text-gray-700 mb-3 block">
+                                    <span className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                        Nombre de la Escuela
+                                    </span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input 
+                                        placeholder="Ingresa el nombre completo de la escuela" 
+                                        {...field} 
+                                        className="h-12 px-4 text-base border-2 border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm"
+                                    />
+                                </FormControl>
+                                <FormDescription className="text-sm text-gray-500 mt-2">
+                                    Nombre oficial de la institución educativa.
+                                </FormDescription>
+                                <FormMessage className="text-red-600 font-medium" />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    <FormField
+                        control={form.control}
+                        name="nombreCorto"
+                        render={({ field }) => (
+                            <FormItem className="group">
+                                <FormLabel className="text-base font-semibold text-gray-700 mb-3 block">
+                                    <span className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                        Nombre Corto
+                                    </span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input 
+                                        placeholder="Abreviatura o nombre corto" 
+                                        {...field} 
+                                        className="h-12 px-4 text-base border-2 border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm"
+                                    />
+                                </FormControl>
+                                <FormDescription className="text-sm text-gray-500 mt-2">
+                                    Nombre abreviado o siglas de la escuela.
+                                </FormDescription>
+                                <FormMessage className="text-red-600 font-medium" />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem className="group">
+                                <FormLabel className="text-base font-semibold text-gray-700 mb-3 block">
+                                    <span className="flex items-center gap-2">
+                                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                        Correo Electrónico
+                                    </span>
+                                </FormLabel>
+                                <FormControl>
+                                    <Input 
+                                        placeholder="escuela@ejemplo.com" 
+                                        type="email" 
+                                        {...field} 
+                                        className="h-12 px-4 text-base border-2 border-gray-200 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 rounded-lg bg-white/50 backdrop-blur-sm"
+                                    />
+                                </FormControl>
+                                <FormDescription className="text-sm text-gray-500 mt-2">
+                                    Email de contacto de la institución.
+                                </FormDescription>
+                                <FormMessage className="text-red-600 font-medium" />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    <div className="pt-4">
                         <Button 
                             type="submit" 
-                            className="w-full cursor-pointer" 
+                            className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" 
                             disabled={isSubmitting}
                         >
-                            {isSubmitting ? 'Enviando...' : 'Enviar'}
+                            {isSubmitting ? (
+                                <span className="flex items-center gap-2">
+                                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    Enviando...
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-2">
+                                    <span>🚀</span>
+                                    Comenzar Configuración
+                                </span>
+                            )}
                         </Button>
-                    </form>
-                </Form>
-            </CardContent>
-        </Card>
+                        
+                        <p className="text-xs text-gray-500 text-center mt-4">
+                            Al continuar, aceptas nuestros términos de servicio y política de privacidad.
+                        </p>
+                    </div>
+                </form>
+            </Form>
+        </div>
     )
 }
 
