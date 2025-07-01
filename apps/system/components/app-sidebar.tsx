@@ -89,6 +89,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ],
     },
     {
+      title: "Departamentos",
+      url: `/escuela/${slug}/departamentos`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Departamentos",
+          url: `/escuela/${slug}/departamentos`,
+        },
+        {
+          title: "Crear Departamento",
+          url: `/escuela/${slug}/departamentos/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+    {
+      title: "Personal",
+      url: `/escuela/${slug}/personal`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Personal",
+          url: `/escuela/${slug}/personal`,
+        },
+        {
+          title: "Crear Personal",
+          url: `/escuela/${slug}/personal/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+    {
       title: "Models",
       url: "#",
       icon: Bot,
