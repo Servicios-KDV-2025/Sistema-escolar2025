@@ -22,7 +22,6 @@ import type * as eventosEscolares from "../eventosEscolares.js";
 import type * as grupos from "../grupos.js";
 import type * as materias from "../materias.js";
 import type * as prospectos from "../prospectos.js";
-import type * as subdomains from "../subdomains.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -42,7 +41,6 @@ declare const fullApi: ApiFromModules<{
   grupos: typeof grupos;
   materias: typeof materias;
   prospectos: typeof prospectos;
-  subdomains: typeof subdomains;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
