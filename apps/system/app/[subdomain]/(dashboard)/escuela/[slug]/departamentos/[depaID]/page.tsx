@@ -21,23 +21,33 @@ export default function DetallesDepartamentoPage() {
 
   const slug = typeof params?.slug === "string" ? params.slug : "";
   
-  // Versión más robusta para obtener el departamentoId
-  const departamentoId = (() => {
-    const rawId = params?.departamentoId;
-    const idString = Array.isArray(rawId) ? rawId[0] : rawId;
-    return (typeof idString === "string" && idString.trim() !== "") 
-      ? idString as Id<'departamento'> 
-      : null;
-  })();
+  // Función para obtener departamentoId de manera robusta
+  const getDepartamentoId = (): Id<'departamento'> | null => {
+    console.log("Parámetros recibidos:", params);
+    
+    // Intentar diferentes posibles nombres de parámetro
+    const possibleIds = [
+      params?.departamentoId,
+      params?.depaID,
+      params?.id,
+      params?.departamento
+    ];
+    
+    for (const rawId of possibleIds) {
+      if (rawId) {
+        const idString = Array.isArray(rawId) ? rawId[0] : rawId;
+        if (typeof idString === "string" && idString.trim() !== "") {
+          console.log("ID encontrado:", idString);
+          return idString as Id<'departamento'>;
+        }
+      }
+    }
+    
+    console.log("No se encontró ID válido en:", possibleIds);
+    return null;
+  };
 
-  // Debug logging
-  console.log("Debugging params:", {
-    allParams: params,
-    departamentoIdRaw: params?.departamentoId,
-    isArray: Array.isArray(params?.departamentoId),
-    type: typeof params?.departamentoId,
-    finalId: departamentoId
-  });
+  const departamentoId = getDepartamentoId();
 
   const { escuela } = useEscuela();
 
@@ -46,12 +56,6 @@ export default function DetallesDepartamentoPage() {
   );
 
   const setItems = useBreadcrumbStore(state => state.setItems);
-
-  // Monitor changes for debugging
-  useEffect(() => {
-    console.log("Params changed:", params);
-    console.log("DepartamentoId extracted:", departamentoId);
-  }, [params, departamentoId]);
 
   // Efecto para actualizar las migas de pan (breadcrumb)
   useEffect(() => {
@@ -71,9 +75,7 @@ export default function DetallesDepartamentoPage() {
       <div className="flex items-center justify-center min-h-[60vh] text-center">
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-red-600">Error: ID del departamento no proporcionado en la URL.</h2>
-          <p className="text-muted-foreground">
-            Parámetros recibidos: {JSON.stringify(params)}
-          </p>
+          <p className="text-sm text-gray-600">Parámetros recibidos: {JSON.stringify(params)}</p>
           <Button onClick={() => router.back()}>Volver</Button>
         </div>
       </div>
@@ -143,10 +145,6 @@ export default function DetallesDepartamentoPage() {
           <div>
             <p className="text-sm font-medium text-muted-foreground">Estado:</p>
             <p>{departamento.activo ? "Activo" : "Inactivo"}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">ID del Departamento:</p>
-            <p className="font-mono text-sm break-all">{departamento._id}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-muted-foreground">Creado el:</p>
