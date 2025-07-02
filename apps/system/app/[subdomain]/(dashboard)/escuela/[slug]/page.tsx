@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEscuela } from "../../store/useEscuela";
+import { useEscuela } from "../../../../store/useEscuela";
 import { useEffect } from "react";
-import { useBreadcrumbStore } from "../../store/breadcrumbStore";
+import { useBreadcrumbStore } from "../../../../store/breadcrumbStore";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { Separator } from "@/components/ui/separator";
