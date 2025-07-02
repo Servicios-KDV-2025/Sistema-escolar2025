@@ -10,22 +10,25 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
 import { Id } from "@/convex/_generated/dataModel"
-import { grupoPorId } from "@/convex/grupos"
 import { toast } from "sonner"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@repo/ui/components/shadcn/form"
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Button } from "@repo/ui/components/shadcn/button"
+import { Select } from "@repo/ui/components/shadcn/select"
 
 export default function CrearAlumnoPage () {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const crearAlumno = useMutation(api.alumnos.crearAlumno)
   const grupos = useQuery(api.grupos.verTodosLosGrupos, {escuelaId: escuela?._id as Id<"escuelas">});
+  const padres = useQuery(api.padres.verPadres, {escuelaId: escuela?._id as Id<"escuelas">});
 
   const form = useForm<AlumnoFormValues>({
     resolver: zodResolver(alumnoSchema),
     defaultValues: {
+      padreId: "",
+      grupoId: "",
       matricula: "",
       nombre: "",
       apellidos: "",
@@ -53,8 +56,8 @@ export default function CrearAlumnoPage () {
       setIsSubmitting(true)
       await crearAlumno({
         escuelaId: escuela?._id as Id<"escuelas">,
-        padreId: padres as Id<"padres">,
-        grupoId: grupos as Id<"grupos">,
+        padreId: values.padreId as Id<"padres">,
+        grupoId: values.grupoId as Id<"grupos">,
         matricula: values.matricula,
         nombre: values.nombre,
         apellidos: values.apellidos,
@@ -94,6 +97,48 @@ export default function CrearAlumnoPage () {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CardContent className="grid grid-cols-1 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="padreId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Padres/Tutor</FormLabel>
+                      <FormControl>
+                        <Select 
+                          {...field}
+                        >
+                          <option value="">Seleccionar Padres o Tutor</option>
+                          {padres?.map((padre) => (
+                            <option key={padre.id} value={padre.id}>
+                              {padre.nombre} ({padre.apellidos})
+                            </option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                /> 
+                <FormField
+                  control={form.control}
+                  name="grupoId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Grupo</FormLabel>
+                      <FormControl>
+                        <Select 
+                          {...field}
+                        >
+                          <option value="">Seleccionar un Grupo</option>
+                          {grupos?.map((grupo) => (
+                            <option key={grupo.id} value={grupo.id}>
+                              {grupo.nombre} ({grupo.grado})
+                            </option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                /> 
                 <FormField
                   control={form.control}
                   name="matricula"

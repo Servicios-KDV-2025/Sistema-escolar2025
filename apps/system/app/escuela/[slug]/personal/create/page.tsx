@@ -10,21 +10,23 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useEffect, useState } from "react"
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
 import { Id } from "@/convex/_generated/dataModel"
-import { grupoPorId } from "@/convex/grupos"
 import { toast } from "sonner"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card"
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@repo/ui/components/shadcn/form"
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Button } from "@repo/ui/components/shadcn/button"
+import { Select } from "@repo/ui/components/shadcn/select"
 
 export default function CrearPersonalPage () {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const crearPersonal = useMutation(api.personal.crearPersonal)
+  const departamentos = useQuery(api.departamento.verDepartamentos, {escuelaId: escuela?._id as Id<"escuelas">})
 
   const form = useForm<PersonalFormValues>({
     resolver: zodResolver(personalSchema),
     defaultValues: {
+      departamentoId: "",
       nombre: "",
       apellidos: "",
       email: "",
@@ -51,7 +53,7 @@ export default function CrearPersonalPage () {
       setIsSubmitting(true)
       await crearPersonal({
         escuelaId: escuela?._id as Id<"escuelas">,
-        departamentoId: departamento as Id<"departamento">,
+        departamentoId: values.departamentoId as Id<"departamento">,
         nombre: values.nombre,
         apellidos: values.apellidos,
         email: values.email,
@@ -90,6 +92,27 @@ export default function CrearPersonalPage () {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <CardContent className="grid grid-cols-1 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> 
+                <FormField
+                  control={form.control}
+                  name="departamentoId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Padres/Tutor</FormLabel>
+                      <FormControl>
+                        <Select 
+                          {...field}
+                        >
+                          <option value="">Seleccionar Padres o Tutor</option>
+                          {departamentos?.map((departamento) => (
+                            <option key={departamento.id} value={departamento.id}>
+                              {departamento.nombre}
+                            </option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="nombre"
