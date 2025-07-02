@@ -44,7 +44,24 @@ export default function EditarDepartamentoPage() {
   const router = useRouter();
 
   const slug = typeof params?.slug === "string" ? params.slug : "";
-  const departamentoId = typeof params?.departamentoId === "string" ? params.departamentoId as Id<'departamento'> : null;
+  
+  // Versión más robusta para obtener el departamentoId
+  const departamentoId = (() => {
+    const rawId = params?.departamentoId;
+    const idString = Array.isArray(rawId) ? rawId[0] : rawId;
+    return (typeof idString === "string" && idString.trim() !== "") 
+      ? idString as Id<'departamento'> 
+      : null;
+  })();
+
+  // Debug logging
+  console.log("Debugging params:", {
+    allParams: params,
+    departamentoIdRaw: params?.departamentoId,
+    isArray: Array.isArray(params?.departamentoId),
+    type: typeof params?.departamentoId,
+    finalId: departamentoId
+  });
 
   const { escuela } = useEscuela();
 
@@ -70,6 +87,12 @@ export default function EditarDepartamentoPage() {
       activo: true,
     },
   });
+
+  // Monitor changes for debugging
+  useEffect(() => {
+    console.log("Params changed:", params);
+    console.log("DepartamentoId extracted:", departamentoId);
+  }, [params, departamentoId]);
 
   // **Efecto para cargar datos en el formulario:**
   // Se ejecuta cuando 'departamento' o 'escuela' cambian.
@@ -154,6 +177,9 @@ export default function EditarDepartamentoPage() {
       <div className="flex items-center justify-center min-h-[60vh] text-center">
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-red-600">Error: ID del departamento no proporcionado en la URL.</h2>
+          <p className="text-muted-foreground">
+            Parámetros recibidos: {JSON.stringify(params)}
+          </p>
           <Button onClick={() => router.back()}>Volver</Button>
         </div>
       </div>
