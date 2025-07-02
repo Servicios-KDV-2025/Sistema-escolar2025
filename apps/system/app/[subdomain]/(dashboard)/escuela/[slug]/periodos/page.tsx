@@ -25,7 +25,7 @@ type PeriodoForm = z.infer<typeof periodoSchema>;
 export default function PeriodosPage() {
   const { escuela } = useEscuela();
 
-  const escuelaId = escuela?._id;
+  const escuelaId = escuela?._id as import("@/convex/_generated/dataModel").Id<"escuelas"> | undefined;
 
   const periodos = useQuery(api.periodos.obtenerPeriodosPorEscuela, escuelaId ? { escuelaId } : "skip");
   const crearPeriodo = useMutation(api.periodos.crearPeriodo);
@@ -33,7 +33,8 @@ export default function PeriodosPage() {
   const eliminarPeriodo = useMutation(api.periodos.eliminarPeriodo);
 
   const [open, setOpen] = useState(false);
-  const [editPeriodo, setEditPeriodo] = useState<any | null>(null);
+  type Periodo = PeriodoForm & { _id: string };
+  const [editPeriodo, setEditPeriodo] = useState<Periodo | null>(null);
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<PeriodoForm>({
     resolver: zodResolver(periodoSchema),
@@ -52,9 +53,13 @@ export default function PeriodosPage() {
   }, [editPeriodo, setValue, reset]);
 
   const onSubmit = async (data: PeriodoForm) => {
+    if (!escuelaId) {
+      toast("Error: Escuela no seleccionada");
+      return;
+    }
     try {
       if (editPeriodo) {
-        await actualizarPeriodo({ id: editPeriodo._id, escuelaId, ...data });
+        await actualizarPeriodo({ id: editPeriodo._id as import("@/convex/_generated/dataModel").Id<"periodos">, escuelaId, ...data });
         toast("Periodo actualizado");
       } else {
         await crearPeriodo({ escuelaId, ...data });
@@ -63,18 +68,27 @@ export default function PeriodosPage() {
       setOpen(false);
       setEditPeriodo(null);
       reset();
-    } catch (e: any) {
-      toast(`Error: ${e.message}`);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast(`Error: ${errorMessage}`);
     }
   };
 
   const onDelete = async (id: string) => {
     if (!confirm("¿Eliminar este periodo?")) return;
+    if (!escuelaId) {
+      toast("Error: Escuela no seleccionada");
+      return;
+    }
     try {
-      await eliminarPeriodo({ id, escuelaId });
+      await eliminarPeriodo({
+        id: id as import("@/convex/_generated/dataModel").Id<"periodos">,
+        escuelaId: escuelaId as import("@/convex/_generated/dataModel").Id<"escuelas">
+      });
       toast("Periodo eliminado");
-    } catch (e: any) {
-      toast(`Error: ${e.message}`);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast(`Error: ${errorMessage}`);
     }
   };
 
@@ -114,7 +128,7 @@ export default function PeriodosPage() {
       </div>
       <div className="space-y-2">
         {periodos?.length === 0 && <p className="text-muted-foreground">No hay periodos registrados.</p>}
-        {periodos?.map((p: any) => (
+        {periodos?.map((p: Periodo) => (
           <div key={p._id} className="border rounded p-4 flex justify-between items-center">
             <div>
               <div className="font-semibold">{p.nombre}</div>
