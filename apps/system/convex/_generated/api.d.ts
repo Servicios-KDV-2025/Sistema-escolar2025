@@ -22,6 +22,7 @@ import type * as eventoPorClase from "../eventoPorClase.js";
 import type * as eventosEscolares from "../eventosEscolares.js";
 import type * as grupos from "../grupos.js";
 import type * as materias from "../materias.js";
+import type * as personal from "../personal.js";
 import type * as prospectos from "../prospectos.js";
 import type * as salones from "../salones.js";
 import type * as subdomains from "../subdomains.js";
@@ -44,6 +45,7 @@ declare const fullApi: ApiFromModules<{
   eventosEscolares: typeof eventosEscolares;
   grupos: typeof grupos;
   materias: typeof materias;
+  personal: typeof personal;
   prospectos: typeof prospectos;
   salones: typeof salones;
   subdomains: typeof subdomains;
