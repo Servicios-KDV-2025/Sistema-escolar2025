@@ -51,8 +51,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/escuela/${slug}/ciclosEscolares`,
         },
         {
-          title: "Calendario Actual",
-          url: "/escuela/[slug]/calendario",
+          title: "Calendario Escolar",
+          url: `/escuela/${slug}/calendario`,
         },
         {
           title: "Grupos",
