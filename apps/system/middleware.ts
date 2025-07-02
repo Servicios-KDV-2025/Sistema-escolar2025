@@ -79,8 +79,6 @@ export default clerkMiddleware(async (auth, req) => {
       '/static'
     ];
 
-    
-    
     const shouldExclude = excludedPaths.some(path => pathname.startsWith(path));
     
     if (!shouldExclude) {
@@ -90,7 +88,8 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.rewrite(new URL(`/${subdomain}/`, request.url));
       } else {
         // Para cualquier otra ruta, agregar el subdominio al inicio
-        return NextResponse.rewrite(new URL(`/${subdomain}${pathname}`, request.url));
+        const targetUrl = new URL(`/${subdomain}${pathname}`, request.url);
+        return NextResponse.rewrite(targetUrl);
       }
     }
   }
