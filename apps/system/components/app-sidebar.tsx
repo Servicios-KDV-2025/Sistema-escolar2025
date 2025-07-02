@@ -121,6 +121,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ],
     },
     {
+      title: "Periodos",
+      url: `/escuela/${slug}/periodos`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Periodos",
+          url: `/escuela/${slug}/periodos`,
+        },
+      ],
+    },
+    {
       title: "Models",
       url: "#",
       icon: Bot,

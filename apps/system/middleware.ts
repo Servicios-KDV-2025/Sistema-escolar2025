@@ -10,8 +10,12 @@ const isPublicRoute = createRouteMatcher([
   '/error',
   '/_vercel',
   '/static',
+  '/sign-in',
+  '/inicio',
+ 
 
 ])
+
 
 
 function extractSubdomain(request: NextRequest): string | null {
