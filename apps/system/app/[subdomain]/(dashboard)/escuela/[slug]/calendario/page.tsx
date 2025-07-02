@@ -55,11 +55,7 @@ const tiposEvento = {
   },
 };
 
-interface CalendarioEscolarProps {
-  className?: string;
-}
-
-export default function CalendarioEscolar({ className }: CalendarioEscolarProps) {
+export default function CalendarioEscolar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
@@ -166,7 +162,7 @@ export default function CalendarioEscolar({ className }: CalendarioEscolarProps)
           </p>
         </div>
       </div>
-      <div className={cn("flex flex-col xl:flex-row gap-6 p-4 md:p-6 min-h-screen", className)}>
+      <div className="flex flex-col xl:flex-row gap-6 p-4 md:p-6 min-h-screen">
         <div className="flex-1 space-y-6">
           <Card className="lg:col-span-1 shadow-xl bg-white/90 backdrop-blur-md ">
             <CardContent className="p-4">
