@@ -3,6 +3,13 @@ import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
  
 const applicationTables = {
+  // Tabla de subdominios
+  subdominios: defineTable({
+    subdomain: v.string(),
+    createdAt: v.number(),
+    activo: v.boolean(),
+  }).index("by_subdomain", ["subdomain"]),
+
   // Tabla principal de escuelas
   escuelas: defineTable({
     nombre: v.string(),
