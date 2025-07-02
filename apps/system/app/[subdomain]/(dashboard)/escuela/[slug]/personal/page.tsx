@@ -1,6 +1,6 @@
 'use client'
 
-import { TablaPersonal } from "./tabla-personal"
+import { TablaPersonal } from "../../../../../../components/tabla-personal"
 
 export default function Page() {
   return(
