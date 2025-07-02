@@ -16,6 +16,7 @@ import type {
 import type * as alumnos from "../alumnos.js";
 import type * as calendario from "../calendario.js";
 import type * as ciclosEscolares from "../ciclosEscolares.js";
+import type * as departamento from "../departamento.js";
 import type * as escuelas from "../escuelas.js";
 import type * as eventoPorClase from "../eventoPorClase.js";
 import type * as eventosEscolares from "../eventosEscolares.js";
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   alumnos: typeof alumnos;
   calendario: typeof calendario;
   ciclosEscolares: typeof ciclosEscolares;
+  departamento: typeof departamento;
   escuelas: typeof escuelas;
   eventoPorClase: typeof eventoPorClase;
   eventosEscolares: typeof eventosEscolares;

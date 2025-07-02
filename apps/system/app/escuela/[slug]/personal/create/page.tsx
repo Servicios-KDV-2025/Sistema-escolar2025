@@ -2,7 +2,7 @@
 
 import { useEscuela } from "@/app/store/useEscuela"
 import { api } from "@/convex/_generated/api"
-import { useMutation } from "convex/react"
+import { useMutation, useQuery } from "convex/react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { personalSchema, PersonalFormValues } from "@/app/shemas/personal"
@@ -21,7 +21,7 @@ export default function CrearPersonalPage () {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const crearPersonal = useMutation(api.personal.crearPersonal)
-  const departamentos = useQuery(api.departamento.verDepartamentos, {escuelaId: escuela?._id as Id<"escuelas">})
+  const departamentos = useQuery(api.departamento.obtenerDepartamentos , {escuelaId: escuela?._id as Id<"escuelas">})
 
   const form = useForm<PersonalFormValues>({
     resolver: zodResolver(personalSchema),
@@ -104,7 +104,7 @@ export default function CrearPersonalPage () {
                         >
                           <option value="">Seleccionar Padres o Tutor</option>
                           {departamentos?.map((departamento) => (
-                            <option key={departamento.id} value={departamento.id}>
+                            <option key={departamento._id} value={departamento._id}>
                               {departamento.nombre}
                             </option>
                           ))}
