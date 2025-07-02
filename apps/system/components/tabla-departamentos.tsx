@@ -20,15 +20,6 @@ import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
 import { toast } from "sonner";
 
-// Función para crear slug a partir del nombre
-function createSlug(name: string): string {
-    return name
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, '') // Elimina caracteres especiales
-        .replace(/[\s_-]+/g, '-') // Reemplaza espacios, guiones bajos y múltiples guiones con un solo guión
-        .replace(/^-+|-+$/g, ''); // Elimina guiones al inicio y final
-}
 
 export function TablaDepartamentos() {
     const router = useRouter();
@@ -58,14 +49,13 @@ export function TablaDepartamentos() {
         }
     }, [escuela, setItems, slug]);
 
-    const handleEditarDepartamento = (id: Id<"departamento">, nombre: string) => {
-        const departamentoSlug = createSlug(nombre);
-        router.push(`/escuela/${slug}/departamentos/${departamentoSlug}--${id}/edit`);
+    const handleEditarDepartamento = (id: Id<"departamento">) => {
+        router.push(`/escuela/${slug}/departamentos/${id}/edit`);
     };
 
-    const handleVerDetallesDepartamento = (id: Id<"departamento">, nombre: string) => {
-        const departamentoSlug = createSlug(nombre);
-        router.push(`/escuela/${slug}/departamentos/${departamentoSlug}--${id}`);
+    const handleVerDetallesDepartamento = (id: Id<"departamento">) => {
+       
+        router.push(`/escuela/${slug}/departamentos/${id}`);
     };
 
     const handleCrear = () => {
@@ -186,7 +176,7 @@ export function TablaDepartamentos() {
                                             size="icon"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleVerDetallesDepartamento(departamento._id, departamento.nombre);
+                                                handleVerDetallesDepartamento(departamento._id);
                                             }}
                                         >
                                             <Eye className="h-4 w-4" />
@@ -196,7 +186,7 @@ export function TablaDepartamentos() {
                                             size="icon"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleEditarDepartamento(departamento._id, departamento.nombre);
+                                                handleEditarDepartamento(departamento._id);
                                             }}
                                         >
                                             <Edit className="h-4 w-4" />
