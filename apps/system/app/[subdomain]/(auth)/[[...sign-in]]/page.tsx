@@ -1,9 +1,9 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+
 import { SignIn, SignOutButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@repo/ui/components/shadcn/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/shadcn/card'
 
 export default function Home() {
   const { user } = useUser()
