@@ -18,9 +18,9 @@ export function TablaCiclosEscolares() {
     api.ciclosEscolares.obtenerCiclosEscolares,
     escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
   );
-  const setItems = useBreadcrumbStore(state => state.setItems)
   const params = useParams();
   const slug = typeof params?.slug === "string" ? params.slug : "";
+  const setItems = useBreadcrumbStore(state => state.setItems)
 
   useEffect(() => {
     if (escuela) {

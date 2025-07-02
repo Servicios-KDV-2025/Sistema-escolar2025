@@ -154,7 +154,7 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle className="text-2xl">
-                            Fechas registradas: {calendarios ? calendarios.length : 0}
+                            Calendario
                         </CardTitle>
 
                         <div className="flex gap-2">

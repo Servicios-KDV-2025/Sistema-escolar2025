@@ -154,7 +154,7 @@ export default function CrearCalendarioPage({ params }: { params: Promise<{ id: 
                                 disabled={isSubmitting}
                                 className="w-full sm:w-auto"
                             >
-                                {isSubmitting ? "Creando..." : "Crear Calendario"}
+                                {isSubmitting ? "Creando..." : "Crear fecha"}
                             </Button>
                         </CardFooter>
                     </form>
