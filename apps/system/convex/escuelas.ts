@@ -36,6 +36,19 @@ export const obtenerEscuelaPorNombre = query({
     }
 });
 
+export const obtenerEscuelaPorNombreCorto = query({
+    args: { nombreCorto: v.string() },
+    handler: async (ctx, { nombreCorto }) => {
+      const escuela = await ctx.db.query("escuelas")
+        .filter((e) => e.eq(e.field("nombreCorto"), nombreCorto))
+        .collect();
+      if (escuela.length === 0) {
+        return null;
+      }
+      return escuela[0];
+    }
+  });
+
 export const crearEscuela = mutation({
     args: {
         nombre: v.string(),
