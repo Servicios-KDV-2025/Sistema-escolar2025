@@ -60,7 +60,7 @@ const applicationTables = {
     apellidos: v.string(),
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
-    puesto: v.string(), // "maestro", "director", "administrativo", etc.
+    maestro: v.boolean(), // true si es maestro
     fechaIngreso: v.number(),
     activo: v.boolean(),
   })
