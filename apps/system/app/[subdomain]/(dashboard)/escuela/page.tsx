@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,6 @@ export default function EscuelaRedirectPage() {
   const router = useRouter();
   const [subdomain, setSubdomain] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Mutations
-  const crearEscuela = useMutation(api.escuelas.crearEscuela);
 
   // Obtener el subdominio del hostname
   useEffect(() => {
@@ -38,30 +35,9 @@ export default function EscuelaRedirectPage() {
   }, []);
 
   // Buscar la escuela por el subdominio
-  const escuela = useQuery(api.escuelas.obtenerEscuelaPorNombre, 
-    subdomain ? { nombre: subdomain } : "skip"
+  const escuela = useQuery(api.escuelas.obtenerEscuelaPorNombreCorto, 
+    subdomain ? { nombreCorto: subdomain } : "skip"
   );
-
-  // Crear escuela de prueba si no existe y el subdominio es "test"
-  useEffect(() => {
-    const crearEscuelaDePrueba = async () => {
-      if (subdomain === "test" && escuela === null && !isLoading) {
-        try {
-          await crearEscuela({
-            nombre: "test",
-            nombreCorto: "TEST",
-            direccion: "Dirección de prueba para desarrollo",
-            email: "test@example.com",
-            activa: true,
-          });
-        } catch (error) {
-          console.error("Error al crear escuela de prueba:", error);
-        }
-      }
-    };
-
-    crearEscuelaDePrueba();
-  }, [subdomain, escuela, isLoading, crearEscuela]);
 
   // Redirigir cuando se encuentre la escuela
   useEffect(() => {
@@ -84,7 +60,7 @@ export default function EscuelaRedirectPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-center text-muted-foreground">
-              No se encontró una escuela asociada al subdominio <strong>{subdomain}</strong>.
+              No se encontró una escuela asociada al subdominio <span className="font-bold">{subdomain}</span>.
             </p>
             <div className="flex justify-center">
               <Button onClick={() => router.push('/')}>
