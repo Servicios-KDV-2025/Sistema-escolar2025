@@ -49,6 +49,19 @@ export const obtenerEscuelaPorNombreCorto = query({
     }
   });
 
+export const obtenerEscuelaPorEmail = query({
+    args: { email: v.string() },
+    handler: async (ctx, { email }) => {
+      const escuela = await ctx.db.query("escuelas")
+        .filter((e) => e.eq(e.field("email"), email))
+        .collect();
+      if (escuela.length === 0) {
+        return null;
+      }
+      return escuela[0];
+    }
+  });
+
 export const crearEscuela = mutation({
     args: {
         nombre: v.string(),
@@ -72,5 +85,41 @@ export const crearEscuela = mutation({
             activa,
         });
         return nuevaEscuela;
+    }
+});
+
+export const actualizarEscuela = mutation({
+    args: {
+        id: v.id("escuelas"),
+        nombre: v.optional(v.string()),
+        nombreCorto: v.optional(v.string()),
+        logoUrl: v.optional(v.string()),
+        descripcion: v.optional(v.string()),
+        direccion: v.optional(v.string()),
+        telefono: v.optional(v.string()),
+        email: v.optional(v.string()),
+        director: v.optional(v.string()),
+        activa: v.optional(v.boolean()),
+    },
+    handler: async (ctx, { id, ...data }) => {
+        const escuela = await ctx.db.get(id);
+        if (!escuela) {
+            throw new Error("Escuela no encontrada");
+        }
+        
+        const escuelaActualizada = await ctx.db.patch(id, data);
+        return escuelaActualizada;
+    }
+});
+
+export const eliminarEscuela = mutation({
+    args: { id: v.id("escuelas") },
+    handler: async (ctx, { id }) => {
+        const escuela = await ctx.db.get(id);
+        if (!escuela) {
+            return null;
+        }
+        await ctx.db.delete(id);
+        return escuela;
     }
 });
