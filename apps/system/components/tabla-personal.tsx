@@ -1,5 +1,5 @@
 'use client'
-
+ 
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
 import { useEscuela } from "@/app/store/useEscuela"
 import { api } from "@/convex/_generated/api"
@@ -10,7 +10,7 @@ import { useQuery } from "convex/react"
 import { Plus } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
-
+ 
 export function TablaPersonal() {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
@@ -18,7 +18,7 @@ export function TablaPersonal() {
   const setItems = useBreadcrumbStore(state => state.setItems)
   const params = useParams()
   const slug = typeof params?.slug === "string" ? params.slug : ""
-
+ 
   useEffect(() => {
     if (escuela){
       setItems([
@@ -27,20 +27,20 @@ export function TablaPersonal() {
       ])
     }
   }, [escuela, setItems, slug])
-
+ 
   if (personal === undefined) {
     return <div>Cargando el Personal...</div>
   }
-
+ 
   const handleVerEmpleado = (id: string) => {
     router.push(`/escuela/${slug}/personal/${id}`)
   }
-
+ 
   const handleCrear = () => {
     router.push(`/escuela/${slug}/personal/create`)
   }
-
-  return( 
+ 
+  return(
     <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Personal</h2>
@@ -58,7 +58,7 @@ export function TablaPersonal() {
             <TableHead>Apellidos</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Telefono</TableHead>
-            <TableHead>Puesto</TableHead>
+            <TableHead>Maestro</TableHead>
             <TableHead>Fecha de Ingreso</TableHead>
             <TableHead>Activo</TableHead>
           </TableRow>
@@ -67,7 +67,7 @@ export function TablaPersonal() {
           {personal.length === 0 ? (
             <TableRow>
               <TableCell colSpan={3} className="text-center">
-                No hay Alumnos registrados
+                No hay Personal registrados
               </TableCell>
             </TableRow>
           ) : (
@@ -82,7 +82,7 @@ export function TablaPersonal() {
                 <TableCell>{empleado.id.apellidos}</TableCell>
                 <TableCell>{empleado.id.email}</TableCell>
                 <TableCell>{empleado.id.telefono}</TableCell>
-                <TableCell>{empleado.id.puesto}</TableCell>
+                <TableCell>{empleado.id.maestro ? 'Si': 'No'}</TableCell>
                 <TableCell>{empleado.id.fechaIngreso}</TableCell>
                 <TableCell>{empleado.id.activo}</TableCell>
               </TableRow>
