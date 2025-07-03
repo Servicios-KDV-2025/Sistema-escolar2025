@@ -80,7 +80,7 @@ export default function CrearCicloEscolarPage() {
 
             <Card className="w-full max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="font-semibold text-center">Información la Ciclo Escolar</CardTitle>
+                    <CardTitle className="font-semibold text-center">Información del ciclo escolar</CardTitle>
                 </CardHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -147,7 +147,7 @@ export default function CrearCicloEscolarPage() {
                                 disabled={isSubmitting}
                                 className="w-full sm:w-auto"
                             >
-                                {isSubmitting ? "Creando..." : "Crear Ciclo Escolar"}
+                                {isSubmitting ? "Creando..." : "Crear ciclo escolar"}
                             </Button>
                         </CardFooter>
                     </form>
