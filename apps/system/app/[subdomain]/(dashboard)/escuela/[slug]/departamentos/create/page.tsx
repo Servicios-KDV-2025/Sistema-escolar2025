@@ -21,21 +21,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
 // Schema corregido - activo debe ser requerido, no opcional
-const departamentoSchema = z.object({
-  nombre: z
-    .string()
-    .min(1, "El nombre del departamento es requerido")
-    .min(3, "El nombre debe tener al menos 3 caracteres")
-    .max(100, "El nombre no puede exceder 100 caracteres")
-    .trim(),
-  descripcion: z
-    .string()
-    .max(500, "La descripción no puede exceder 500 caracteres")
-    .optional(),
-  activo: z.boolean(), // Removido .default(true) y .optional()
-});
+import { departamentoSchema, DepartamentoFormValues } from "@/app/shemas/departamento";
 
-type DepartamentoFormValues = z.infer<typeof departamentoSchema>;
 
 export default function CreateDepartamentoPage() {
   const router = useRouter();
