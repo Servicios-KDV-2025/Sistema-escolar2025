@@ -13,37 +13,35 @@ import { Skeleton } from "@repo/ui/components/shadcn/skeleton";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
 
-export default function DetalleClasePage({ params }: { params: Promise<{ id: string }> }) {
+export default function DetalleEventosPorClasePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
-    const idCatalogoClases = id as Id<"catalogosDeClases">;
+    const idEventoClase = id as Id<"eventoPorClases">;
     const escuela = useEscuela((s) => s.escuela);
     const router = useRouter();
-    const eliminarCatalogo = useMutation(api.catalogosDeClases.eliminarCatalogoDeClase);
+    const eliminarEventoPorClase = useMutation(api.eventoPorClase.eliminarEventoXClase);
     const allParams = useParams();
     const slug = typeof allParams?.slug === "string" ? allParams.slug : "";
 
     const [modalEliminar, setModalEliminar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const setItems = useBreadcrumbStore(state => state.setItems)
-    const catalogo = useQuery(api.catalogosDeClases.verUnCatalogoDeClase, { escuelaId: escuela?._id as Id<"escuelas">, id: idCatalogoClases });
-
-    const salon = useQuery(api.salones.obtenerSalonPorId, { escuelaId: escuela?._id as Id<'escuelas'>, salonId: catalogo?.salonId as Id<'salones'> });
-    const maestro = useQuery(api.personal.verMaestrosDelPersonal, { escuelaId: escuela?._id as Id<'escuelas'> });
-    const maestroAsignado = maestro?.find(m => m._id === catalogo?.maestroId);
-    const grupo = useQuery(api.grupos.grupoPorId, { escuelaId: escuela?._id as Id<'escuelas'>, id: catalogo?.grupoId as Id<'grupos'> });
-    const materia = useQuery(api.materias.obtenerMateriaPorIdConEscuela, { id: catalogo?.materiaId as Id<'materias'> });
+    const evento = useQuery(api.eventoPorClase.verUnEventoXClase , { escuelaId: escuela?._id as Id<"escuelas">, id: idEventoClase });
+    const catalogoClases = useQuery(api.catalogosDeClases.verUnCatalogoDeClase, { escuelaId: escuela?._id as Id<"escuelas">, id: evento?.catalogoClaseId as Id<'catalogosDeClases'> });
+    const calendario = useQuery(api.calendario.obtenerEventosCalendario, { escuelaId: escuela?._id as Id<"escuelas"> });
+    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCicloEscolarPorId, { escuelaId: escuela?._id as Id<"escuelas">,  cicloId: evento?.cicloEscolarId as Id<'ciclosEscolares'>});
+    const eventosEscolares = useQuery(api.eventosEscolares.obtenerEventoPorId, { escuelaId: escuela?._id as Id<"escuelas">, id: evento?.eventoEscolarId as Id<'eventosEscolares'> });
 
     useEffect(() => {
-        if (catalogo) {
+        if (evento) {
             setItems([
                 { label: `${escuela?.nombre}`, href: '/' },
-                { label: 'Catalogo de Clase', href: '/catalogoDeClases' },
-                { label: `${catalogo?.nombre}`, isCurrentPage: true }
+                { label: 'Eventos de la Clase', href: '/eventosPorClase' },
+                { label: `${evento?._id}`, isCurrentPage: true }
             ]);
         }
-    }, [catalogo, setItems, escuela]);
+    }, [evento, setItems, escuela]);
 
-    if (catalogo === undefined) {
+    if (evento === undefined) {
         return (
             <div className="container mx-auto py-10">
                 <div className="flex items-center gap-2 mb-6">
@@ -70,31 +68,31 @@ export default function DetalleClasePage({ params }: { params: Promise<{ id: str
         );
     }
 
-    if (!catalogo) {
+    if (!evento) {
         return (
             <div className="container mx-auto py-10">
                 <div className="flex items-center gap-2 mb-6">
                     <Button variant="outline" size="icon" onClick={() => router.back()}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <h1 className="text-3xl font-bold">Clase no encontrada</h1>
+                    <h1 className="text-3xl font-bold">Eventos no encontrados</h1>
                 </div>
-                <p>No se pudo encontrar la clase con el ID proporcionado.</p>
+                <p>No se pudieron encontrar los eventos con el ID proporcionado.</p>
             </div>
         );
     }
 
     const handleEditar = () => {
-        router.push(`/escuela/${slug}/catalogoDeClases/${id}/edit`);
+        router.push(`/escuela/${slug}/grupos/${id}/edit`);
     };
 
     const handleEliminar = async () => {
         setIsSubmitting(true);
         try {
-            await eliminarCatalogo({ id: idCatalogoClases, escuelaId: escuela?._id as Id<"escuelas"> });
+            await eliminarEventoPorClase({ id: idEventoClase, escuelaId: escuela?._id as Id<"escuelas"> });
             router.back();
         } catch (error) {
-            console.error("Error al eliminar la Clase:", error);
+            console.error("Error al eliminar el evento:", error);
         } finally {
             setIsSubmitting(false);
             setModalEliminar(false);
@@ -107,14 +105,14 @@ export default function DetalleClasePage({ params }: { params: Promise<{ id: str
                 <Button variant="outline" size="icon" onClick={() => router.back()}>
                     <ArrowLeft className="h-4 w-4" />
                 </Button>
-                <h1 className="text-3xl font-bold">Detalle de la Clase</h1>
+                <h1 className="text-3xl font-bold">Detalle del Evento</h1>
             </div>
 
             <Card className="max-w-2xl mx-auto">
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle className="text-2xl">
-                            {`Nombre: ${catalogo?.nombre}`}
+                            Descripción:
                         </CardTitle>
                         <div className="flex gap-2">
                             <Button
@@ -137,24 +135,28 @@ export default function DetalleClasePage({ params }: { params: Promise<{ id: str
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Maestro</h3>
-                        <div className="p-2 bg-muted rounded-md">{maestroAsignado ? `${maestroAsignado.nombre} ${maestroAsignado.apellidos}` : 'Sin Asignar'}</div>
+                        <div className="p-2 bg-muted rounded-md">{evento.descripcion}</div>
                     </div>
                     <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Materia</h3>
-                        <div className="p-2 bg-muted rounded-md">{materia?.nombre}</div>
+                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Catálogo de Clases</h3>
+                        <div className="p-2 bg-muted rounded-md">{catalogoClases ? catalogoClases.nombre : 'No hay clases asignadas'}</div>
                     </div>
                     <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Salón</h3>
-                        <div className="p-2 bg-muted rounded-md">{salon?.nombre}</div>
+                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Calendario</h3>
+                        <div className="p-2 bg-muted rounded-md">{calendario ? calendario.map(cal => (
+                            <div key={cal._id}>
+                                <p>Fecha: {cal.fecha}</p>
+                                <p>Descripción: {cal.descripcion}</p>
+                            </div>
+                        )) : 'No Activo'}</div>
                     </div>
                     <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Grupo</h3>
-                        <div className="p-2 bg-muted rounded-md">{grupo?.nombre}</div>
+                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Ciclo Escolar</h3>
+                        <div className="p-2 bg-muted rounded-md">{cicloEscolar?.nombre}</div>
                     </div>
                     <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Activo</h3>
-                        <div className="p-2 bg-muted rounded-md">{catalogo.activa ? 'Activo' : 'No Activo'}</div>
+                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Eventos Escolares</h3>
+                        <div className="p-2 bg-muted rounded-md">{eventosEscolares?.nombre}</div>
                     </div>
                 </CardContent>
             </Card>
@@ -165,7 +167,7 @@ export default function DetalleClasePage({ params }: { params: Promise<{ id: str
                     <DialogHeader>
                         <DialogTitle>¿Estás completamente seguro?</DialogTitle>
                         <DialogDescription>
-                            Esta acción no se puede deshacer. La clase será eliminado permanentemente
+                            Esta acción no se puede deshacer. El grupo será eliminado permanentemente
                             de la base de datos.
                         </DialogDescription>
                     </DialogHeader>

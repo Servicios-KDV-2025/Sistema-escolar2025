@@ -43,7 +43,7 @@ export function TablaEventosPorClase() {
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold">Lista de Grupos</h2>
+                <h2 className="text-xl font-semibold">Lista de Eventos por Clases</h2>
                 <Button onClick={handleCrear} className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
                     Nuevo Evento
