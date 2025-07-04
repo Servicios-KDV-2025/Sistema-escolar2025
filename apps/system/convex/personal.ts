@@ -28,7 +28,7 @@ export const obtenerPersonal = query({
       .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
       .collect()
 
-    return perosnal.map(( _id, ...rest) => ({
+    return perosnal.map((_id, ...rest) => ({
       id: _id,
       ...rest
     }))
@@ -63,8 +63,8 @@ export const upadatePersonal = mutation({
   },
   handler: async (ctx, args) => {
     const personal = await ctx.db.get(args.id)
-    if (!personal || personal.escuelaId !== args.escuelaId) throw new Error ("Acceso denegado")
-    
+    if (!personal || personal.escuelaId !== args.escuelaId) throw new Error("Acceso denegado")
+
     const { id, ...data } = args
     await ctx.db.patch(id, data)
   }
@@ -78,8 +78,27 @@ export const deletePersonal = mutation({
   },
   handler: async (ctx, args) => {
     const personal = await ctx.db.get(args.id)
-    if (!personal || personal.escuelaId !== args.escuelaId) throw new Error ("Acceso denegado")
-    
+    if (!personal || personal.escuelaId !== args.escuelaId) throw new Error("Acceso denegado")
+
     await ctx.db.delete(args.id)
   }
 })
+
+export const verMaestrosDelPersonal = query({
+  args: {
+    escuelaId: v.id("escuelas")
+  },
+  handler: async (ctx, args) => {
+    const personal = await ctx.db
+      .query('personal')
+      .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
+      .collect();
+ 
+    return personal
+      .filter(persona => persona.maestro)
+      .map((maestro) => ({
+        id: maestro._id,
+        ...maestro
+      }));
+  }
+});

@@ -9,7 +9,7 @@ export default function Page() {
             <h1 className="text-3xl font-bold mb-6">Grupo</h1>
             <p className="text-muted-foreground mb-6">
                 Haz clic en cualquier Grupo para ver sus detalles completos,
-                editarlo o eliminarlo. Para crear una nuevo Grupo, usa el botón
+                editarlo o eliminarlo. Para crear un nuevo Grupo, usa el botón
                 Nuevo Grupo.
             </p>
             <TablaGrupos />
