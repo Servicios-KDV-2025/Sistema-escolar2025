@@ -12,7 +12,6 @@ import {
   DialogFooter, 
   DialogHeader, 
   DialogTitle,
-  DialogTrigger 
 } from '@repo/ui/components/shadcn/dialog'
 import { Button } from '@repo/ui/components/shadcn/button'
 import { Form } from '@repo/ui/components/shadcn/form'
@@ -110,6 +109,7 @@ export function CrudDialog({
   const setDialogOpen = isControlled ? onOpenChange : setOpen
 
   const form = useForm<Record<string, unknown>>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(schema as any),
     defaultValues: defaultValues || {}
   })

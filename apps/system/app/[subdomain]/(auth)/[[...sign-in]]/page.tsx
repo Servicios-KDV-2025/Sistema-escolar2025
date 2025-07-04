@@ -12,7 +12,7 @@ import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { toast } from 'sonner'
 import { Button } from '@repo/ui/components/shadcn/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
 import { Input } from '@repo/ui/components/shadcn/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
@@ -266,7 +266,7 @@ export default function Home() {
                 ))}
                 {grupos?.length === 0 && (
                   <p className="text-center text-muted-foreground py-8">
-                    No hay grupos creados. Crea el primer grupo usando el botón "Nuevo Grupo".
+                    No hay grupos creados. Crea el primer grupo usando el botón &quot;Nuevo Grupo&quot;.
                   </p>
                 )}
               </div>
