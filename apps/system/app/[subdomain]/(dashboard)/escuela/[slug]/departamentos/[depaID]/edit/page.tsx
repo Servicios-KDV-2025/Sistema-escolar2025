@@ -44,7 +44,34 @@ export default function EditarDepartamentoPage() {
   const router = useRouter();
 
   const slug = typeof params?.slug === "string" ? params.slug : "";
-  const departamentoId = typeof params?.departamentoId === "string" ? params.departamentoId as Id<'departamento'> : null;
+  
+  // Función para obtener departamentoId de manera robusta
+  const getDepartamentoId = (): Id<'departamento'> | null => {
+    console.log("Parámetros recibidos:", params);
+    
+    // Intentar diferentes posibles nombres de parámetro
+    const possibleIds = [
+      params?.departamentoId,
+      params?.depaID,
+      params?.id,
+      params?.departamento
+    ];
+    
+    for (const rawId of possibleIds) {
+      if (rawId) {
+        const idString = Array.isArray(rawId) ? rawId[0] : rawId;
+        if (typeof idString === "string" && idString.trim() !== "") {
+          console.log("ID encontrado:", idString);
+          return idString as Id<'departamento'>;
+        }
+      }
+    }
+    
+    console.log("No se encontró ID válido en:", possibleIds);
+    return null;
+  };
+
+  const departamentoId = getDepartamentoId();
 
   const { escuela } = useEscuela();
 
@@ -154,6 +181,7 @@ export default function EditarDepartamentoPage() {
       <div className="flex items-center justify-center min-h-[60vh] text-center">
         <div className="space-y-4">
           <h2 className="text-xl font-bold text-red-600">Error: ID del departamento no proporcionado en la URL.</h2>
+          <p className="text-sm text-gray-600">Parámetros recibidos: {JSON.stringify(params)}</p>
           <Button onClick={() => router.back()}>Volver</Button>
         </div>
       </div>

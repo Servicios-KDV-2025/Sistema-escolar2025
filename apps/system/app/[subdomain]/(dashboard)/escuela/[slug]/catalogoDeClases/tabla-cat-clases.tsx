@@ -54,11 +54,11 @@ export function TablaCatalogoClases() {
         <TableCaption>Lista de Grupos Registrados</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Materia</TableHead>
+            <TableHead className="w-[100px]">Nombre</TableHead>
             <TableHead>Salón</TableHead>
             <TableHead>Maestro</TableHead>
             <TableHead>Grupo</TableHead>
-            <TableHead>Nombre</TableHead>
+            <TableHead>Materia</TableHead>
             <TableHead>Activo</TableHead>
           </TableRow>
         </TableHeader>
@@ -77,12 +77,12 @@ export function TablaCatalogoClases() {
                 onClick={() => handleVerClase(clase.id)}
               >
                 <TableCell className="font-medium">
-                  {clase.materiaId}
+                  {clase.nombre}
                 </TableCell>
                 <TableCell>{clase.salonId}</TableCell>
                 <TableCell>{clase.maestroId}</TableCell>
                 <TableCell>{clase.grupoId}</TableCell>
-                <TableCell>{clase.nombre}</TableCell>
+                <TableCell>{clase.materiaId}</TableCell>
                 <TableCell>{clase.activa ? 'Activa' : 'No activa'}</TableCell>
               </TableRow>
             ))
