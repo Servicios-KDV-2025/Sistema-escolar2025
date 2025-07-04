@@ -53,6 +53,10 @@ export const verUnEventoXClase = query({
 // Update
 export const actualizarEventoXClase = mutation({
   args: {
+    catalogoClaseId: v.id("catalogosDeClases"),
+    calendarioId: v.id("calendario"),
+    cicloEscolarId: v.id("ciclosEscolares"),
+    eventoEscolarId: v.id("eventosEscolares"),
     id: v.id("eventoPorClases"),
     escuelaId: v.id("escuelas"),
     fecha: v.number(),
@@ -62,7 +66,7 @@ export const actualizarEventoXClase = mutation({
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.id);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
-
+ 
     const { id, ...data } = args;
     await ctx.db.patch(id, data);
   },
