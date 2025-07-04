@@ -16,13 +16,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "@repo/ui/comp
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Button } from "@repo/ui/components/shadcn/button"
 import { Select } from "@repo/ui/components/shadcn/select"
- 
-export default function CrearPersonalPage() {
+
+export default function CrearPersonalPage () {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const crearPersonal = useMutation(api.personal.crearPersonal)
-  const departamentos = useQuery(api.departamento.obtenerDepartamentos, { escuelaId: escuela?._id as Id<"escuelas"> })
- 
+  const departamentos = useQuery(api.departamento.obtenerDepartamentos , {escuelaId: escuela?._id as Id<"escuelas">})
+
   const form = useForm<PersonalFormValues>({
     resolver: zodResolver(personalSchema),
     defaultValues: {
@@ -184,8 +184,7 @@ export default function CrearPersonalPage() {
                       </div>
                     </FormItem>
                   )}
-                />
- 
+                /> 
                 <FormField
                   control={form.control}
                   name="fechaIngreso"

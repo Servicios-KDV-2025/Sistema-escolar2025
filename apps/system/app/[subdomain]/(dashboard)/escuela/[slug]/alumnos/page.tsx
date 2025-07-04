@@ -1,8 +1,11 @@
 'use client';
 
+import { useEscuela } from "@/app/store/useEscuela";
 import { TablaAlumnos } from "../../../../../../components/tabla-alumnos";
 
 export default function Page() {
+    const escuela = useEscuela();
+    console.log(escuela);
 
     return (
         <main className="container mx-auto py-10">

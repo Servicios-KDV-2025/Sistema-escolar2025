@@ -32,7 +32,7 @@ import { useParams } from "next/navigation"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const params = useParams();
   const slug = typeof params?.slug === "string" ? params.slug : "";
-  
+
   const data = {
   user: {
     name: "shadcn",
@@ -59,7 +59,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/escuela/${slug}/grupos`,
         },
         {
+          title: "Catalogo de Clases",
+          url: `/escuela/${slug}/catalogoDeClases`,
+        },
+        {
           title: "Eventos Escolares",
+          url: `/escuela/${slug}/eventosPorClase`,
+        },
+        {
+          title: "Eventos Por Clase",
           url: `/escuela/${slug}/eventosEscolares`,
         },
       ],
