@@ -4,12 +4,13 @@ type Escuela = {
   _id: string;
   nombre: string;
   nombreCorto: string;
-  email: string;
-  telefono: string;
-  director: string;
-  descripcion: string;
+  email?: string;
+  telefono?: string;
+  director?: string;
+  descripcion?: string;
   direccion?: string;
   logoUrl?: string;
+  activa: boolean;
 };
 
 type EscuelaStore = {
