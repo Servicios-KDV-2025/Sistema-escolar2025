@@ -133,6 +133,55 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       ],
     },
     {
+      title: "Horarios",
+      url: `/escuela/${slug}/horarios`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Horarios",
+          url: `/escuela/${slug}/horarios`,
+        },
+        {
+          title: "Crear Horario",
+          url: `/escuela/${slug}/horarios/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+    {
+      title: "Alumnos",
+      url: `/escuela/${slug}/alumnos`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Alumnos",
+          url: `/escuela/${slug}/alumnos`,
+        },
+        {
+          title: "Crear Alumno",
+          url: `/escuela/${slug}/alumnos/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+    {
+      title: "Calificaciones",
+      url: `/escuela/${slug}/calificaciones`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Calificaciones",
+          url: `/escuela/${slug}/calificaciones`,
+        },
+        {
+          title: "Crear Calificación",
+          url: `/escuela/${slug}/calificaciones/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+
+    {
       title: "Models",
       url: "#",
       icon: Bot,

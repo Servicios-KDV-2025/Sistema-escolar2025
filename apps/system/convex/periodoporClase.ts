@@ -65,15 +65,10 @@ export const actualizarPeriodoPorClase = mutation({
     activo: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { id, escuelaId, catalogoClaseId, periodoId, ...data } = args;
+    const { id, escuelaId, ...data } = args;
     const registro = await ctx.db.get(id);
-    if (
-      !registro ||
-      registro.escuelaId !== escuelaId ||
-      registro.catalogoClaseId !== catalogoClaseId ||
-      registro.periodoId !== periodoId
-    ) {
-      throw new Error("No se puede actualizar: Registro no encontrado o no pertenece a los IDs especificados.");
+    if (!registro || registro.escuelaId !== escuelaId) {
+      throw new Error("No se puede actualizar: Registro no encontrado o no pertenece a la escuela.");
     }
     await ctx.db.patch(id, data);
     return await ctx.db.get(id);
