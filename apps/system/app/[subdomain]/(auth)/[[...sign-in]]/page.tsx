@@ -4,9 +4,13 @@
 import { SignIn, SignOutButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/shadcn/card'
+import { useEscuela } from '@/app/store/useEscuela'
 
 export default function Home() {
   const { user } = useUser()
+  const escuela = useEscuela();
+
+  console.log(escuela);
 
   if (!user) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
