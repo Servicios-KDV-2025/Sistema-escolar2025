@@ -84,11 +84,30 @@ export const transferirProspectoAEscuela = mutation({
             activa: true, // La escuela se crea como activa
         });
 
+        const sanitizedSubdomain = prospecto.nombreCorto
+            .toLowerCase()
+            .replace(/[^a-z0-9-]/g, '');
+
+        // Verificar si el subdominio ya existe
+        const existing = await ctx.db
+            .query("subdominios")
+            .withIndex("by_subdomain", (q) => q.eq("subdomain", sanitizedSubdomain))
+            .first();
+
+        if (!existing) {
+            await ctx.db.insert("subdominios", {
+                subdomain: sanitizedSubdomain,
+                createdAt: Date.now(),
+                activo: true,
+            });
+        }
+
         // Eliminar el prospecto después de transferirlo
         await ctx.db.delete(prospectoId);
 
         return {
             escuelaId: nuevaEscuela,
+            subdominio: sanitizedSubdomain,
             prospectoEliminado: prospectoId,
             mensaje: "Prospecto transferido exitosamente a escuela"
         };

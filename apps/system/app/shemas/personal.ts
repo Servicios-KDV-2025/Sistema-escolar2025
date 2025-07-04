@@ -1,5 +1,5 @@
 import { z } from "zod"
-
+ 
 export const personalSchema = z.object({
   departamentoId: z.string().min(1, { message: "Denes seleccionar un departamento" }),
   nombre: z.string().min(1, { message: "El nombre es requerido" }),
@@ -10,5 +10,5 @@ export const personalSchema = z.object({
   fechaIngreso: z.number().min(1, { message: "fecha de ingreso requerida" }),
   activo: z.boolean(),
 })
-
+ 
 export type PersonalFormValues = z.infer<typeof personalSchema>

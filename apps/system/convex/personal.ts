@@ -83,3 +83,22 @@ export const deletePersonal = mutation({
     await ctx.db.delete(args.id)
   }
 })
+
+export const verMaestrosDelPersonal = query({
+  args: {
+    escuelaId: v.id("escuelas")
+  },
+  handler: async (ctx, args) => {
+    const personal = await ctx.db
+      .query('personal')
+      .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
+      .collect();
+ 
+    return personal
+      .filter(persona => persona.maestro)
+      .map((maestro) => ({
+        id: maestro._id,
+        ...maestro
+      }));
+  }
+});

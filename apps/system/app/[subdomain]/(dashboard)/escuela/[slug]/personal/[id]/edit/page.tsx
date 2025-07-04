@@ -1,5 +1,5 @@
 'use client'
-
+ 
 import { PersonalFormValues, personalSchema } from "@/app/shemas/personal"
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
 import { useEscuela } from "@/app/store/useEscuela"
@@ -17,7 +17,7 @@ import { toast } from "sonner"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select"
-
+ 
 export default function EditarPersonal ({params}: {params: Promise<{id: string}>}) {
   const {id} = use(params)
   const idPersonal = id as Id<"personal">
@@ -29,7 +29,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
   const empleado = useQuery(api.personal.PersonalById, { id: idPersonal, esculaId: escuela?._id as Id<"escuelas"> })
   const allParams = useParams()
   const slug = typeof allParams?.slug === "string" ? allParams.slug : ""
-
+ 
   const form = useForm<PersonalFormValues>({
     resolver: zodResolver(personalSchema),
     defaultValues: {
@@ -42,7 +42,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
       activo: true
     }
   })
-
+ 
   useEffect(() => {
     if (empleado) {
       form.reset({
@@ -55,7 +55,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
       })
     }
   }, [empleado, form])
-
+ 
   useEffect(() => {
     if (empleado) {
       setItems([
@@ -66,7 +66,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
       ])
     }
   }, [setItems, escuela, empleado])
-
+ 
   const onSubmit = async (values: PersonalFormValues) => {
     try {
       setIsSubmitting(true)
@@ -92,7 +92,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
       setIsSubmitting(false)
     }
   }
-
+ 
   return (
     <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -105,7 +105,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
           </h1>
         </div>
       </div>
-
+ 
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="font-semibold text-center">Información del Empleado</CardTitle>
@@ -137,7 +137,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
                       </FormControl>
                     </FormItem>
                   )}
-                /> 
+                />
                 <FormField
                   control={form.control}
                   name="email"
@@ -149,7 +149,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
                       </FormControl>
                     </FormItem>
                   )}
-                /> 
+                />
                 <FormField
                   control={form.control}
                   name="telefono"
@@ -161,7 +161,7 @@ export default function EditarPersonal ({params}: {params: Promise<{id: string}>
                       </FormControl>
                     </FormItem>
                   )}
-                /> 
+                />
                 <FormField
                   control={form.control}
                   name="maestro"

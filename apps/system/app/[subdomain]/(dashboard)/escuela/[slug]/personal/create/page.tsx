@@ -1,5 +1,5 @@
 'use client'
-
+ 
 import { useEscuela } from "@/app/store/useEscuela"
 import { api } from "@/convex/_generated/api"
 import { useMutation, useQuery } from "convex/react"
@@ -17,11 +17,11 @@ import { Input } from "@repo/ui/components/shadcn/input"
 import { Button } from "@repo/ui/components/shadcn/button"
 import { Select } from "@repo/ui/components/shadcn/select"
 
-export default function CrearPersonalPage() {
+export default function CrearPersonalPage () {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const crearPersonal = useMutation(api.personal.crearPersonal)
-  const departamentos = useQuery(api.departamento.obtenerDepartamentos, { escuelaId: escuela?._id as Id<"escuelas"> })
+  const departamentos = useQuery(api.departamento.obtenerDepartamentos , {escuelaId: escuela?._id as Id<"escuelas">})
 
   const form = useForm<PersonalFormValues>({
     resolver: zodResolver(personalSchema),
@@ -36,10 +36,10 @@ export default function CrearPersonalPage() {
       activo: true
     }
   })
-
+ 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const setItems = useBreadcrumbStore(state => state.setItems)
-
+ 
   useEffect(() => {
     setItems([
       { label: `${escuela?.nombre}`, href: '/' },
@@ -47,7 +47,7 @@ export default function CrearPersonalPage() {
       { label: 'Crear Empleado', isCurrentPage: true }
     ])
   }, [setItems, escuela])
-
+ 
   const onSubmit = async (values: PersonalFormValues) => {
     try {
       setIsSubmitting(true)
@@ -73,7 +73,7 @@ export default function CrearPersonalPage() {
       setIsSubmitting(false)
     }
   }
-
+ 
   return (
     <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
@@ -83,7 +83,7 @@ export default function CrearPersonalPage() {
           </h1>
         </div>
       </div>
-
+ 
       <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="font-semibold text-center">Información del Empleado</CardTitle>
@@ -184,8 +184,7 @@ export default function CrearPersonalPage() {
                       </div>
                     </FormItem>
                   )}
-                />
-
+                /> 
                 <FormField
                   control={form.control}
                   name="fechaIngreso"
