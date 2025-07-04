@@ -2,7 +2,6 @@
 
 import { useQuery } from "convex/react";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
-import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
@@ -10,11 +9,12 @@ import { useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
+import { Button } from "@repo/ui/components/shadcn/button";
 
-export function TablaCalendarios() {
+export function TablaCatalogoClases() {
   const router = useRouter();
   const escuela = useEscuela((s) => s.escuela);
-  const calendarios = useQuery(api.calendario.obtenerEventosCalendario, {escuelaId: escuela?._id as Id<"escuelas">});
+  const clases = useQuery(api.catalogosDeClases.verTodosLosCatalogosDeClases, {escuelaId: escuela?._id as Id<"escuelas">});
   const setItems = useBreadcrumbStore(state => state.setItems)
   const params = useParams();
   const slug = typeof params?.slug === "string" ? params.slug : "";
@@ -23,63 +23,67 @@ export function TablaCalendarios() {
     if (escuela){
       setItems([
       { label: `${escuela?.nombre}` , href: `/escuela/${slug}` },
-      { label: 'Calendarios', isCurrentPage: true },
+      { label: 'Catalogo de Clases', isCurrentPage: true },
     ])
     }
   }, [escuela, setItems, slug])
 
-  if (calendarios === undefined) {
-    return <div>Cargando los Calendarios...</div>;
+  if (clases === undefined) {
+    return <div>Cargando las Clases...</div>;
   }
 
-  const handleVerCicloEscolar = (id: string) => {
-    router.push(`/escuela/${slug}/calendarios/create` + `${id}`);
+  const handleVerClase = (id: string) => {
+    router.push(`/escuela/${slug}/catalogoDeClases/${id}`);
   };
 
   const handleCrear = () => {
-    router.push(`/escuela/${slug}/calendarios/create`);
+    router.push(`/escuela/${slug}/catalogoDeClases/create`);
   };
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Lista de Calendarios</h2>
+        <h2 className="text-xl font-semibold">Lista de Grupos</h2>
         <Button onClick={handleCrear} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
-          Nuevo Calendarios
+          Nueva Clase
         </Button>
       </div>
 
       <Table>
-        <TableCaption>Lista de calendarios registrados</TableCaption>
+        <TableCaption>Lista de Grupos Registrados</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Fecha</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>descripcion</TableHead>
+            <TableHead className="w-[100px]">Nombre</TableHead>
+            <TableHead>Salón</TableHead>
+            <TableHead>Maestro</TableHead>
+            <TableHead>Grupo</TableHead>
+            <TableHead>Materia</TableHead>
             <TableHead>Activo</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {calendarios.length === 0 ? (
+          {clases.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={3} className="text-center">
-                No hay calendarios registrados
+              <TableCell colSpan={6} className="text-center">
+                No hay Clases registradas
               </TableCell>
             </TableRow>
           ) : (
-            calendarios.map((calendario) => (
+            clases.map((clase) => (
               <TableRow
-                key={calendario._id}
+                key={clase.id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleVerCicloEscolar(calendario._id)}
+                onClick={() => handleVerClase(clase.id)}
               >
                 <TableCell className="font-medium">
-                  {calendario.fecha}
+                  {clase.nombre}
                 </TableCell>
-                <TableCell>{calendario.tipo}</TableCell>
-                <TableCell>{calendario.descripcion}</TableCell>
-                <TableCell>{calendario.activo}</TableCell>
+                <TableCell>{clase.salonId}</TableCell>
+                <TableCell>{clase.maestroId}</TableCell>
+                <TableCell>{clase.grupoId}</TableCell>
+                <TableCell>{clase.materiaId}</TableCell>
+                <TableCell>{clase.activa ? 'Activa' : 'No activa'}</TableCell>
               </TableRow>
             ))
           )}

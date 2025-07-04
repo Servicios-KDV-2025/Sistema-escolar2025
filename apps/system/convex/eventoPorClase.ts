@@ -54,6 +54,10 @@ export const verUnEventoXClase = query({
 // Update
 export const actualizarEventoXClase = mutation({
   args: {
+    catalogoClaseId: v.id("catalogosDeClases"),
+    calendarioId: v.id("calendario"),
+    cicloEscolarId: v.id("ciclosEscolares"),
+    eventoEscolarId: v.id("eventosEscolares"),
     id: v.id("eventoPorClases"),
     escuelaId: v.id("escuelas"),
     fecha: v.number(),
