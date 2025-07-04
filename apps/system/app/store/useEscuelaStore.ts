@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { useConvex } from "convex/react";
-import { useEffect, useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 
 // Tipo de Escuela basado en tu schema de Convex
@@ -19,12 +18,6 @@ type Escuela = {
   activa: boolean;
 };
 
-// Estado de carga
-type LoadingState = {
-  isLoading: boolean;
-  error: string | null;
-};
-
 // Store de Escuela
 type EscuelaStore = {
   // Datos de la escuela
@@ -37,25 +30,17 @@ type EscuelaStore = {
   userEmail: string | null;
   
   // Estado de carga
-  loadingState: LoadingState;
+  isLoading: boolean;
+  error: string | null;
   
   // Setters
   setEscuela: (escuela: Escuela) => void;
   setSubdomain: (subdomain: string | null) => void;
   setUserEmail: (email: string | null) => void;
-  setLoadingState: (state: Partial<LoadingState>) => void;
-  
-  // Funciones de detección y fetch
-  detectAndLoadSubdomain: () => void;
-  loadEscuelaByEmail: (email: string) => Promise<void>;
-  fetchEscuela: (subdomain: string) => Promise<void>;
-  
-  // Funciones de mutación
-  updateEscuela: (data: Partial<Escuela>) => Promise<void>;
-  
-  // Utilidades
-  resetEscuela: () => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
   clearError: () => void;
+  reset: () => void;
 };
 
 // Estado inicial
@@ -63,232 +48,83 @@ const initialState = {
   escuela: null,
   subdomain: null,
   userEmail: null,
-  loadingState: {
-    isLoading: false,
-    error: null,
-  },
+  isLoading: false,
+  error: null,
 };
 
-export const useEscuelaStore = create<EscuelaStore>((set, get) => ({
+export const useEscuelaStore = create<EscuelaStore>((set) => ({
   ...initialState,
   
   // Setters
   setEscuela: (escuela) => set({ escuela }),
   setSubdomain: (subdomain) => set({ subdomain }),
   setUserEmail: (email) => set({ userEmail: email }),
-  
-  setLoadingState: (state) => 
-    set((prev) => ({
-      loadingState: { ...prev.loadingState, ...state }
-    })),
-  
-  // Función para detectar y cargar el subdomain automáticamente
-  detectAndLoadSubdomain: () => {
-    const { setSubdomain, fetchEscuela } = get();
-    
-    // Detectar subdomain del hostname
-    const hostname = window.location.hostname;
-    let detectedSubdomain: string | null = null;
-    
-    // Local development environment
-    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-      const match = hostname.match(/^([^.]+)\.localhost/);
-      if (match && match[1]) {
-        detectedSubdomain = match[1];
-      }
-    } else {
-      // Production environment - extract subdomain
-      const parts = hostname.split('.');
-      if (parts.length > 2) {
-        detectedSubdomain = parts[0];
-      }
-    }
-    
-    // Guardar el subdomain detectado
-    setSubdomain(detectedSubdomain);
-    
-    // Si se detectó un subdomain, cargar la escuela
-    if (detectedSubdomain) {
-      fetchEscuela(detectedSubdomain);
-    }
-  },
-  
-  // Función para cargar escuela por email del usuario
-  loadEscuelaByEmail: async (email: string) => {
-    const { setLoadingState, setUserEmail } = get();
-    
-    setUserEmail(email);
-    setLoadingState({ isLoading: true, error: null });
-    
-    try {
-      // Esta función se implementará en el hook personalizado
-      console.log(`Loading escuela by email: ${email}`);
-      
-    } catch (error) {
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido' 
-      });
-    } finally {
-      setLoadingState({ isLoading: false });
-    }
-  },
-  
-  // Función principal para obtener la escuela por subdominio
-  fetchEscuela: async (subdomain: string) => {
-    const { setLoadingState } = get();
-    
-    setLoadingState({ isLoading: true, error: null });
-    
-    try {
-      // Esta función se implementará en el hook personalizado
-      console.log(`Fetching escuela for subdomain: ${subdomain}`);
-      
-    } catch (error) {
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido' 
-      });
-    } finally {
-      setLoadingState({ isLoading: false });
-    }
-  },
-  
-  // Función para actualizar datos de la escuela
-  updateEscuela: async (data: Partial<Escuela>) => {
-    const { setLoadingState, escuela } = get();
-    
-    if (!escuela) {
-      setLoadingState({ error: 'No hay escuela cargada' });
-      return;
-    }
-    
-    setLoadingState({ isLoading: true, error: null });
-    
-    try {
-      // Esta función se implementará en el hook personalizado
-      console.log('Updating escuela:', data);
-      
-    } catch (error) {
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Error al actualizar' 
-      });
-    } finally {
-      setLoadingState({ isLoading: false });
-    }
-  },
-  
-  // Utilidades
-  resetEscuela: () => set(initialState),
-  
-  clearError: () => set((prev) => ({
-    loadingState: { ...prev.loadingState, error: null }
-  })),
+  setLoading: (isLoading) => set({ isLoading }),
+  setError: (error) => set({ error }),
+  clearError: () => set({ error: null }),
+  reset: () => set(initialState),
 }));
 
-// Hook personalizado para usar el store con Convex
 export const useEscuela = () => {
-  const convex = useConvex();
   const { 
     escuela, 
     subdomain,
     userEmail,
-    loadingState, 
+    isLoading,
+    error,
     setEscuela, 
     setSubdomain,
     setUserEmail,
-    setLoadingState, 
-    detectAndLoadSubdomain,
+    setLoading,
+    setError,
     clearError 
   } = useEscuelaStore();
   
-  // Query para obtener la escuela por subdomain
+  // ✅ Queries de Convex que funcionan correctamente
   const escuelaQuery = useQuery(
     api.escuelas.obtenerEscuelaPorNombreCorto,
     subdomain ? { nombreCorto: subdomain } : "skip"
   );
   
-  // Query para obtener la escuela por email (nuevo)
   const escuelaByEmailQuery = useQuery(
     api.escuelas.obtenerEscuelaPorEmail,
     userEmail ? { email: userEmail } : "skip"
   );
   
-  // Mutation para actualizar escuela
+  // ✅ Mutation para actualizar
   const updateEscuelaMutation = useMutation(api.escuelas.actualizarEscuela);
   
-  // Función para detectar y cargar automáticamente (memoizada)
-  const autoLoadEscuela = useCallback(() => {
-    detectAndLoadSubdomain();
-  }, [detectAndLoadSubdomain]);
-  
-  // Función para cargar la escuela por email (memoizada)
-  const loadEscuelaByEmail = useCallback(async (email: string) => {
-    if (!email) return;
+  // ✅ Función para detectar subdomain automáticamente
+  const detectSubdomain = useCallback(() => {
+    const hostname = window.location.hostname;
+    let detectedSubdomain: string | null = null;
     
-    setUserEmail(email);
-    setLoadingState({ isLoading: true, error: null });
-    
-    try {
-      // Verificar que el email existe en alguna escuela
-      const escuelaData = await convex.query(api.escuelas.obtenerEscuelaPorEmail, { email });
-      
-      if (!escuelaData) {
-        throw new Error(`No se encontró escuela con el email: ${email}`);
-      }
-      
-      // La escuela se cargará automáticamente con el query de arriba
-      
-    } catch (error) {
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido' 
-      });
-    } finally {
-      setLoadingState({ isLoading: false });
+    if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+      const match = hostname.match(/^([^.]+)\.localhost/);
+      detectedSubdomain = match?.[1] || null;
+    } else {
+      const parts = hostname.split('.');
+      detectedSubdomain = parts.length > 2 ? parts[0] : null;
     }
-  }, [convex, setUserEmail, setLoadingState]);
-  
-  // Función para cargar la escuela manualmente (memoizada)
-  const loadEscuela = useCallback(async (subdomain: string) => {
-    if (!subdomain) return;
     
-    setSubdomain(subdomain);
-    setLoadingState({ isLoading: true, error: null });
-    
-    try {
-      // Verificar que el subdomain existe
-      const subdomainData = await convex.query(api.subdomains.getSubdomainData, { subdomain });
-      
-      if (!subdomainData) {
-        throw new Error(`Subdomain '${subdomain}' no encontrado`);
-      }
-      
-      // La escuela se cargará automáticamente con el query de arriba
-      
-    } catch (error) {
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Error desconocido' 
-      });
-    } finally {
-      setLoadingState({ isLoading: false });
-    }
-  }, [convex, setSubdomain, setLoadingState]);
+    setSubdomain(detectedSubdomain);
+  }, [setSubdomain]);
   
-  // Función para actualizar la escuela (memoizada)
+  // ✅ Función para actualizar escuela
   const updateEscuela = useCallback(async (data: Partial<Escuela>) => {
-    if (!escuela) {
-      setLoadingState({ error: 'No hay escuela cargada' });
+    const currentEscuela = escuelaByEmailQuery || escuelaQuery || escuela;
+    
+    if (!currentEscuela) {
+      setError('No hay escuela cargada');
       return;
     }
     
-    setLoadingState({ isLoading: true, error: null });
+    setLoading(true);
+    setError(null);
     
     try {
       const escuelaActualizada = await updateEscuelaMutation({
-        id: escuela._id as Id<"escuelas">, // Type assertion para el ID de Convex
+        id: currentEscuela._id as Id<"escuelas">,
         ...data
       });
       
@@ -297,16 +133,13 @@ export const useEscuela = () => {
       }
       
     } catch (error) {
-      setLoadingState({ 
-        isLoading: false, 
-        error: error instanceof Error ? error.message : 'Error al actualizar' 
-      });
+      setError(error instanceof Error ? error.message : 'Error al actualizar');
     } finally {
-      setLoadingState({ isLoading: false });
+      setLoading(false);
     }
-  }, [escuela, updateEscuelaMutation, setEscuela, setLoadingState]);
+  }, [escuelaByEmailQuery, escuelaQuery, escuela, updateEscuelaMutation, setEscuela, setLoading, setError]);
   
-  // Actualizar el store cuando cambie el query (prioridad: email > subdomain)
+  // useEffect para actualizar el store
   useEffect(() => {
     if (escuelaByEmailQuery && !escuela) {
       setEscuela(escuelaByEmailQuery);
@@ -315,14 +148,18 @@ export const useEscuela = () => {
     }
   }, [escuelaByEmailQuery, escuelaQuery, escuela, setEscuela]);
   
+  // ✅ Escuela actual (sin actualizar el store durante renderizado)
+  const escuelaActual = escuelaByEmailQuery || escuelaQuery || escuela;
+  
   return {
-    escuela: escuelaByEmailQuery || escuelaQuery || escuela,
+    escuela: escuelaActual,
     subdomain,
     userEmail,
-    loadingState,
-    autoLoadEscuela,
-    loadEscuelaByEmail,
-    loadEscuela,
+    isLoading,
+    error,
+    detectSubdomain,
+    setEmail: setUserEmail,
+    setSubdomain,
     updateEscuela,
     clearError,
   };

@@ -13,9 +13,10 @@ export default function Home() {
     escuela, 
     subdomain,
     userEmail,
-    loadingState, 
-    autoLoadEscuela, 
-    loadEscuelaByEmail,
+    isLoading,
+    error,
+    detectSubdomain, 
+    setEmail,
     clearError 
   } = useEscuela() 
 
@@ -27,21 +28,21 @@ export default function Home() {
     if (!hasLoaded.current) {
       if (user?.emailAddresses?.[0]?.emailAddress) {
         // Si hay usuario autenticado, cargar por email
-        loadEscuelaByEmail(user.emailAddresses[0].emailAddress);
+        setEmail(user.emailAddresses[0].emailAddress);
       } else {
         // Si no hay usuario, cargar por subdomain
-        autoLoadEscuela();
+        detectSubdomain();
       }
       hasLoaded.current = true;
     }
-  }, [user, autoLoadEscuela, loadEscuelaByEmail])
+  }, [user, detectSubdomain, setEmail])
 
   // Cargar escuela cuando el usuario se autentique
   useEffect(() => {
     if (user?.emailAddresses?.[0]?.emailAddress && !escuela) {
-      loadEscuelaByEmail(user.emailAddresses[0].emailAddress);
+      setEmail(user.emailAddresses[0].emailAddress);
     }
-  }, [user, escuela, loadEscuelaByEmail])
+  }, [user, escuela, setEmail])
 
   if (!user) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -100,7 +101,7 @@ export default function Home() {
             </div>
           )}
           {/* Mostrar estado de carga */}
-          {loadingState.isLoading && (
+          {isLoading && (
             <div className="pt-4 border-t">
               <p className="text-sm text-muted-foreground">
                 Cargando información de la escuela...
@@ -108,18 +109,18 @@ export default function Home() {
             </div>
           )}
           {/* Mostrar error si existe */}
-          {loadingState.error && (
+          {error && (
             <div className="pt-4 border-t">
               <p className="text-sm text-red-500">
-                Error: {loadingState.error}
+                Error: {error}
               </p>
               <button 
                 onClick={() => {
                   clearError();
                   if (user?.emailAddresses?.[0]?.emailAddress) {
-                    loadEscuelaByEmail(user.emailAddresses[0].emailAddress);
+                    setEmail(user.emailAddresses[0].emailAddress);
                   } else {
-                    autoLoadEscuela();
+                    detectSubdomain();
                   }
                 }}
                 className="text-xs text-blue-500 underline"
