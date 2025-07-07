@@ -3,20 +3,21 @@ import { v } from "convex/values";
 
 
 // Crear
-// export const crearEventoXClase = mutation({
-//   args: {
-//     catalogoClaseId: v.id("catalogosDeClases"),
-//     calendarioId: v.id("calendario"),
-//     cicloEscolarId: v.id("ciclosEscolares"),
-//     eventoEscolarId: v.id("eventosEscolares"),
-//     fecha: v.number(),
-//     descripcion: v.optional(v.string()),
-//     activo: v.boolean(),
-//   },
-//   handler: async (ctx, args) => {
-//     await ctx.db.insert("eventoPorClases", { ...args, escuelaId: args.catalogoClaseId });
-//   },
-// });
+export const crearEventoXClase = mutation({
+  args: {
+    escuelaId: v.id("escuelas"),
+    catalogoClaseId: v.id("catalogosDeClases"),
+    calendarioId: v.id("calendario"),
+    cicloEscolarId: v.id("ciclosEscolares"),
+    eventoEscolarId: v.id("eventosEscolares"),
+    fecha: v.number(),
+    descripcion: v.optional(v.string()),
+    activo: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.insert("eventoPorClases", { ...args });
+  },
+});
 
 
 
