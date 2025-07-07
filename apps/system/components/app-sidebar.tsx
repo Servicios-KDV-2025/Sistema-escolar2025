@@ -254,6 +254,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
     },
+    {
+      title: "Alumnos",
+      url: `/escuela/${slug}/alumnos`,
+      icon: SquareTerminal ,
+      items: [
+        {
+          title: "Padres",
+          url: `/escuela/${slug}/alumnos/padres`,
+        }
+      ],
+    },
   ],
   navSecondary: [
     {
