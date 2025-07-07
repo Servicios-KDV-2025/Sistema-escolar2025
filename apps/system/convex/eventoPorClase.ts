@@ -1,7 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// Create
+
+// Crear
 export const crearEventoXClase = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -17,6 +18,7 @@ export const crearEventoXClase = mutation({
     await ctx.db.insert("eventoPorClases", { ...args });
   },
 });
+
 
 
 // Read all
