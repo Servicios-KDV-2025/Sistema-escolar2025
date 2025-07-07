@@ -1,19 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { Switch } from "@/components/ui/switch";
-import { useForm } from "react-hook-form";
-
+import { useForm, Controller } from "react-hook-form";
+import { Checkbox } from "@repo/ui/components/shadcn/checkbox"; // Asegúrate de tener un componente Checkbox adecuado
+// import { Checkbox } from "@repo/ui/components/checkbox";
 
 const DIAS_SEMANA = [
   { value: 1, label: "Lunes" },
@@ -25,17 +26,37 @@ const DIAS_SEMANA = [
   { value: 7, label: "Domingo" },
 ];
 
+// Esquema actualizado para arrays
 const periodoClaseSchema = z.object({
   catalogoClaseId: z.string().min(1, "Clase requerida"),
-  periodoId: z.string().min(1, "Periodo requerido"),
-  diaSemana: z.number().min(1).max(7),
+  periodoIds: z.array(z.string()).min(1, "Selecciona al menos un periodo"),
+  diasSemana: z.array(z.number()).min(1, "Selecciona al menos un día"),
   activo: z.boolean(),
 });
 
 type PeriodoClaseForm = z.infer<typeof periodoClaseSchema>;
 
 export default function PeriodosClasePage() {
-  const { escuela } = useEscuela();
+  // Usa el hook del store
+  const { 
+    escuela, 
+    isLoading, 
+    error, 
+    detectSubdomain, 
+    setEmail, 
+    clearError 
+  } = useEscuela();
+
+  // Detectar escuela al montar
+  const hasLoaded = useRef(false);
+  useEffect(() => {
+    if (!hasLoaded.current) {
+      detectSubdomain();
+      hasLoaded.current = true;
+    }
+  }, [detectSubdomain, setEmail]);
+
+  // HOOKS SIEMPRE AL INICIO
   const escuelaId = escuela?._id;
 
   // Queries para selects
@@ -70,74 +91,95 @@ export default function PeriodosClasePage() {
     activo: boolean;
   };
   
-    const [editItem, setEditItem] = useState<PeriodoPorClaseItem | null>(null);
+  const [editItem, setEditItem] = useState<PeriodoPorClaseItem | null>(null);
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<PeriodoClaseForm>({
+  const { register, handleSubmit, reset, setValue, watch, control, formState: { errors } } = useForm<PeriodoClaseForm>({
     resolver: zodResolver(periodoClaseSchema),
-    defaultValues: { catalogoClaseId: "", periodoId: "", diaSemana: 1, activo: true },
+    defaultValues: { 
+      catalogoClaseId: "", 
+      periodoIds: [], 
+      diasSemana: [], 
+      activo: true 
+    },
   });
 
   useEffect(() => {
     if (editItem) {
       setValue("catalogoClaseId", editItem.catalogoClaseId);
-      setValue("periodoId", editItem.periodoId);
-      setValue("diaSemana", editItem.diaSemana);
+      setValue("periodoIds", [editItem.periodoId]);
+      setValue("diasSemana", [editItem.diaSemana]);
       setValue("activo", editItem.activo);
     } else {
-      reset({ catalogoClaseId: "", periodoId: "", diaSemana: 1, activo: true });
+      reset({ catalogoClaseId: "", periodoIds: [], diasSemana: [], activo: true });
     }
   }, [editItem, setValue, reset]);
 
   const onSubmit = async (data: PeriodoClaseForm) => {
+    if (isLoading) return;
+    if (!escuelaId) {
+      toast("Error: Escuela no seleccionada");
+      return;
+    }
+
     try {
-      if (!escuelaId) return;
       if (editItem) {
+        // Para editar, solo actualiza el registro existente
         await actualizarperiodoporClase({
           id: editItem._id as Id<"periodoPorClase">,
           escuelaId: escuelaId as Id<"escuelas">,
           catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
-          periodoId: data.periodoId as Id<"periodos">,
-          diaSemana: data.diaSemana,
+          periodoId: data.periodoIds[0] as Id<"periodos">, // Solo toma el primer periodo para editar
+          diaSemana: data.diasSemana[0], // Solo toma el primer día para editar
           activo: data.activo,
         });
         toast("Periodo por clase actualizado");
       } else {
-        await crearperiodoporClase({
-          escuelaId: escuelaId as Id<"escuelas">,
-          catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
-          periodoId: data.periodoId as Id<"periodos">,
-          diaSemana: data.diaSemana,
-          activo: data.activo,
-        });
-        toast("Periodo por clase creado");
+        // Para crear, crea una combinación por cada día y periodo seleccionado
+        const combinaciones = [];
+        for (const dia of data.diasSemana) {
+          for (const periodoId of data.periodoIds) {
+            combinaciones.push({
+              escuelaId: escuelaId as Id<"escuelas">,
+              catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
+              periodoId: periodoId as Id<"periodos">,
+              diaSemana: dia,
+              activo: data.activo,
+            });
+          }
+        }
+
+        // Crear todos los registros
+        await Promise.all(
+          combinaciones.map(combo => crearperiodoporClase(combo))
+        );
+        
+        toast(`${combinaciones.length} horarios creados exitosamente`);
       }
       setOpen(false);
       setEditItem(null);
       reset();
     } catch (e: unknown) {
-      if (e instanceof Error) {
-        toast("Error", { description: e.message });
-      } else {
-        toast("Error", { description: "Error desconocido" });
-      }
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast(`Error: ${errorMessage}`);
     }
   };
 
   const onDelete = async (item: PeriodoPorClaseItem) => {
     if (!confirm("¿Eliminar este periodo por clase?")) return;
+    if (isLoading) return;
     if (!escuelaId) {
-      toast("Error", { description: "Escuela no definida" });
+      toast("Error: Escuela no seleccionada");
       return;
     }
     try {
-      await eliminarperiodoporClase({ id: item._id as Id<"periodoPorClase">, escuelaId: escuelaId as Id<"escuelas"> });
+      await eliminarperiodoporClase({ 
+        id: item._id as Id<"periodoPorClase">, 
+        escuelaId: escuelaId as Id<"escuelas"> 
+      });
       toast("Eliminado");
-    } catch (e) {
-      if (e instanceof Error) {
-        toast("Error", { description: e.message });
-      } else {
-        toast("Error", { description: "Error desconocido" });
-      }
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast(`Error: ${errorMessage}`);
     }
   };
 
@@ -163,6 +205,33 @@ export default function PeriodosClasePage() {
     return `${hora12}:${m.toString().padStart(2, "0")} ${ampm}`;
   }
 
+  // RETURNS CONDICIONALES DESPUÉS DE LOS HOOKS
+  if (isLoading) {
+    return <div className="text-center py-10">Cargando escuela...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        Error: {error}
+        <br />
+        <button
+          onClick={() => {
+            clearError();
+            detectSubdomain();
+          }}
+          className="text-xs text-blue-500 underline mt-2"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (!escuela) {
+    return <div className="text-center py-10">No se encontró la escuela.</div>;
+  }
+
   return (
     <div className="w-full px-4 py-8">
       <div className="flex justify-between items-center mb-6">
@@ -171,7 +240,7 @@ export default function PeriodosClasePage() {
           <DialogTrigger asChild>
             <Button onClick={() => { setEditItem(null); setOpen(true); }}>Nuevo</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>{editItem ? "Editar" : "Nuevo"} Periodo por Clase</DialogTitle>
             </DialogHeader>
@@ -190,32 +259,67 @@ export default function PeriodosClasePage() {
                 </select>
                 {errors.catalogoClaseId && <p className="text-red-500 text-xs">{errors.catalogoClaseId.message}</p>}
               </div>
+
+              {/* Selección múltiple de periodos */}
               <div>
-                <label className="block text-sm font-medium mb-1">Periodo</label>
-                <select
-                  {...register("periodoId")}
-                  className="w-full border rounded px-2 py-1"
-                  disabled={!periodos}
-                >
-                  <option value="">Selecciona un periodo</option>
-                  {periodos?.map((p: { _id: string; nombre: string }) => (
-                    <option key={p._id} value={p._id}>{p.nombre}</option>
+                <label className="block text-sm font-medium mb-2">Periodos</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded p-2">
+                  {periodos?.map((periodo: { _id: string; nombre: string; horaInicio?: string; horaFin?: string }) => (
+                    <div key={periodo._id} className="flex items-center space-x-2">
+                      <Controller
+                        name="periodoIds"
+                        control={control}
+                        render={({ field }) => (
+                          <Checkbox
+                            checked={field.value.includes(periodo._id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                field.onChange([...field.value, periodo._id]);
+                              } else {
+                                field.onChange(field.value.filter(id => id !== periodo._id));
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                      <label className="text-sm">
+                        {periodo.nombre} ({formatoHora12(periodo.horaInicio || "")} - {formatoHora12(periodo.horaFin || "")})
+                      </label>
+                    </div>
                   ))}
-                </select>
-                {errors.periodoId && <p className="text-red-500 text-xs">{errors.periodoId.message}</p>}
+                </div>
+                {errors.periodoIds && <p className="text-red-500 text-xs">{errors.periodoIds.message}</p>}
               </div>
+
+              {/* Selección múltiple de días */}
               <div>
-                <label className="block text-sm font-medium mb-1">Día de la semana</label>
-                <select
-                  {...register("diaSemana", { valueAsNumber: true })}
-                  className="w-full border rounded px-2 py-1"
-                >
-                  {DIAS_SEMANA.map((d) => (
-                    <option key={d.value} value={d.value}>{d.label}</option>
+                <label className="block text-sm font-medium mb-2">Días de la semana</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {DIAS_SEMANA.map((dia) => (
+                    <div key={dia.value} className="flex items-center space-x-2">
+                      <Controller
+                        name="diasSemana"
+                        control={control}
+                        render={({ field }) => (
+                          <Checkbox
+                            checked={field.value.includes(dia.value)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                field.onChange([...field.value, dia.value]);
+                              } else {
+                                field.onChange(field.value.filter(d => d !== dia.value));
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                      <label className="text-sm">{dia.label}</label>
+                    </div>
                   ))}
-                </select>
-                {errors.diaSemana && <p className="text-red-500 text-xs">{errors.diaSemana.message}</p>}
+                </div>
+                {errors.diasSemana && <p className="text-red-500 text-xs">{errors.diasSemana.message}</p>}
               </div>
+
               <div className="flex items-center gap-2">
                 <Switch
                   {...register("activo")}
@@ -224,6 +328,19 @@ export default function PeriodosClasePage() {
                 />
                 <span>{watch("activo") ? "Activo" : "Inactivo"}</span>
               </div>
+
+              {/* Mostrar resumen de lo que se creará */}
+              {!editItem && watch("periodoIds").length > 0 && watch("diasSemana").length > 0 && (
+                <div className="bg-blue-50 p-3 rounded border">
+                  <p className="text-sm font-medium text-blue-800">
+                    Se crearán {watch("periodoIds").length * watch("diasSemana").length} horarios:
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    {watch("periodoIds").length} periodo(s) × {watch("diasSemana").length} día(s)
+                  </p>
+                </div>
+              )}
+
               <DialogFooter>
                 <Button type="submit">{editItem ? "Actualizar" : "Crear"}</Button>
               </DialogFooter>
@@ -264,15 +381,15 @@ export default function PeriodosClasePage() {
                   </Link>
                   <div className="mt-1">
                     <Badge
-          variant="secondary"
-          className={
-            item.activo
-              ? "bg-green-800 text-white"
-              : "bg-red-500 text-white"
-          }
-        >
-          {item.activo ? "Activo" : "Inactivo"}
-        </Badge>
+                      variant="secondary"
+                      className={
+                        item.activo
+                          ? "bg-green-800 text-white"
+                          : "bg-red-500 text-white"
+                      }
+                    >
+                      {item.activo ? "Activo" : "Inactivo"}
+                    </Badge>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-2">
@@ -286,7 +403,7 @@ export default function PeriodosClasePage() {
       ) : (
         // Si NO hay clase seleccionada, muestra todos los horarios por escuela
         <div>
-          <h2 className="font-semibold mb-2">Por Escuela</h2>
+          <h2 className="font-semibold mb-2">Todos los horarios</h2>
           {periodosPorEscuela?.length === 0 && <p>No hay registros.</p>}
           <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {periodosPorEscuela?.map((item: PeriodoPorClaseItem) => (
@@ -297,15 +414,15 @@ export default function PeriodosClasePage() {
                   </Link>
                   <div className="mt-1">
                     <Badge
-          variant="secondary"
-          className={
-            item.activo
-              ? "bg-green-800 text-white"
-              : "bg-red-500 text-white"
-          }
-        >
-          {item.activo ? "Activo" : "Inactivo"}
-        </Badge>
+                      variant="secondary"
+                      className={
+                        item.activo
+                          ? "bg-green-800 text-white"
+                          : "bg-red-500 text-white"
+                      }
+                    >
+                      {item.activo ? "Activo" : "Inactivo"}
+                    </Badge>
                   </div>
                 </div>
                 <div className="flex gap-2 mt-2">

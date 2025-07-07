@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const periodoClaseSchema = z.object({
   catalogoClaseId: z.string().min(1, "Clase requerida"),
@@ -34,8 +34,27 @@ const DIAS_SEMANA = [
 export default function PeriodoPorClaseDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { escuela } = useEscuela();
-  const escuelaId = escuela?._id;
+  
+  // Usar el hook del store
+  const { 
+    escuela, 
+    isLoading, 
+    error, 
+    detectSubdomain, 
+    setEmail, 
+    clearError 
+  } = useEscuela();
+
+  // Detectar escuela al montar
+  const hasLoaded = useRef(false);
+  useEffect(() => {
+    if (!hasLoaded.current) {
+      detectSubdomain();
+      hasLoaded.current = true;
+    }
+  }, [detectSubdomain, setEmail]);
+
+  const escuelaId = escuela?._id as import("@/convex/_generated/dataModel").Id<"escuelas"> | undefined;
 
   const id = params.id as string;
   const isValidId = id && id !== "create";
@@ -52,7 +71,6 @@ export default function PeriodoPorClaseDetailPage() {
   // const maestros = useQuery(api.maestros.obtenerMaestrosPorEscuela, escuelaId ? { escuelaId } : "skip");
   // const grupos = useQuery(api.grupos.obtenerGruposPorEscuela, escuelaId ? { escuelaId } : "skip");
   // const ciclos = useQuery(api.ciclosEscolares.obtenerCiclosPorEscuela, escuelaId ? { escuelaId } : "skip");
-
 
   const actualizarPeriodoPorClase = useMutation(api.periodoporClase.actualizarPeriodoPorClase);
   const eliminarPeriodoPorClase = useMutation(api.periodoporClase.eliminarPeriodoPorClase);
@@ -74,8 +92,13 @@ export default function PeriodoPorClaseDetailPage() {
   }, [registro, setValue]);
 
   const onSubmit = async (data: PeriodoClaseForm) => {
+    if (isLoading) return;
+    if (!escuelaId) {
+      toast("Error: Escuela no seleccionada");
+      return;
+    }
+
     try {
-      if (!escuelaId) return;
       await actualizarPeriodoPorClase({
         id,
         escuelaId,
@@ -87,34 +110,69 @@ export default function PeriodoPorClaseDetailPage() {
       toast("Actualizado");
       setEditOpen(false);
       router.refresh();
-    } catch (e: any) {
-      toast("Error", { description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast(`Error: ${errorMessage}`);
     }
   };
 
   const onDelete = async () => {
-    if (!escuelaId) return;
+    if (isLoading) return;
+    if (!escuelaId) {
+      toast("Error: Escuela no seleccionada");
+      return;
+    }
     if (!confirm("¿Eliminar este periodo por clase?")) return;
+    
     try {
       await eliminarPeriodoPorClase({ id, escuelaId });
       toast("Eliminado");
       router.push("/periodos-clase");
-    } catch (e: any) {
-      toast("Error", { description: e.message, variant: "destructive" });
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      toast(`Error: ${errorMessage}`);
     }
   };
 
-  if (!registro) return <div className="py-10 text-center">Cargando...</div>;
+  // RETURNS CONDICIONALES DESPUÉS DE LOS HOOKS
+  if (isLoading) {
+    return <div className="text-center py-10">Cargando escuela...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        Error: {error}
+        <br />
+        <button
+          onClick={() => {
+            clearError();
+            detectSubdomain();
+          }}
+          className="text-xs text-blue-500 underline mt-2"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
+
+  if (!escuela) {
+    return <div className="text-center py-10">No se encontró la escuela.</div>;
+  }
+
+  if (!registro) {
+    return <div className="py-10 text-center">Cargando registro...</div>;
+  }
 
   // Helpers para mostrar nombres
   const clase = catalogosClases?.find((c: any) => c.id === registro.catalogoClaseId);
   const periodo = periodos?.find((p: any) => p._id === registro.periodoId);
   const materia = materias?.find((m: any) => m.id === clase?.materiaId);
-    // const salon = salones?.find((s: any) => s.id === clase?.salonId);
+  // const salon = salones?.find((s: any) => s.id === clase?.salonId);
   // const maestro = maestros?.find((m: any) => m.id === clase?.maestroId);
   // const grupo = grupos?.find((g: any) => g.id === clase?.grupoId);
   // const ciclo = ciclos?.find((c: any) => c.id === clase?.cicloEscolarId);
-
 
   const getDiaNombre = (n: number) =>
     DIAS_SEMANA.find((d) => d.value === n)?.label || n;
@@ -122,7 +180,10 @@ export default function PeriodoPorClaseDetailPage() {
   return (
     <div className="w-full h-full min-h-screen flex flex-col gap-8 bg-gray-50">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-6 pt-8">
-        <h1 className="text-3xl font-bold">Detalle de Periodo por Clase</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Detalle de Periodo por Clase</h1>
+          <p className="text-gray-600 mt-1">Escuela: {escuela.nombre}</p>
+        </div>
         <div className="flex gap-2">
           <Button onClick={() => setEditOpen(true)}>Editar</Button>
           <Button variant="destructive" onClick={onDelete}>Eliminar</Button>
@@ -161,7 +222,11 @@ export default function PeriodoPorClaseDetailPage() {
           <span className="text-gray-500 text-xs">ID escuela</span>
           <div className="font-mono break-all">{escuelaId}</div>
         </div>
-         {/* <div>
+        <div>
+          <span className="text-gray-500 text-xs">Nombre escuela</span>
+          <div>{escuela.nombre}</div>
+        </div>
+        {/* <div>
           <span className="text-gray-500 text-xs">Maestro</span>
           <div>{maestro?.nombre || "-"} <span className="text-gray-400 text-xs">({clase?.maestroId})</span></div>
         </div>
@@ -173,7 +238,7 @@ export default function PeriodoPorClaseDetailPage() {
           <span className="text-gray-500 text-xs">Ciclo escolar</span>
           <div>{ciclo?.nombre || "-"} <span className="text-gray-400 text-xs">({clase?.cicloEscolarId})</span></div>
         </div> */}
-         {/* <div>
+        {/* <div>
           <span className="text-gray-500 text-xs">Salón</span>
           <div>{salon?.nombre || "-"} <span className="text-gray-400 text-xs">({clase?.salonId})</span></div>
         </div> */}
@@ -223,7 +288,13 @@ export default function PeriodoPorClaseDetailPage() {
               <span>{watch("activo") ? "Activo" : "Inactivo"}</span>
             </div>
             <DialogFooter>
-              <Button type="submit" className="w-full">Guardar cambios</Button>
+              <Button 
+                type="submit" 
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? "Guardando..." : "Guardar cambios"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
