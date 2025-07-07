@@ -63,11 +63,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/escuela/${slug}/catalogoDeClases`,
         },
         {
-          title: "Eventos Escolares",
+          title: "Eventos Por Clase",
           url: `/escuela/${slug}/eventosPorClase`,
         },
         {
-          title: "Eventos Por Clase",
+          title: "Eventos Escolares",
           url: `/escuela/${slug}/eventosEscolares`,
         },
       ],
@@ -118,6 +118,53 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
     },
+    {
+      title: "Periodos",
+      url: `/escuela/${slug}/periodos`,
+      icon: SquareTerminal,
+      isActive: true,
+      
+    },
+    {
+      title: "Periodos por Clase",
+      url: `/escuela/${slug}/periodosPorClase`,
+      icon: SquareTerminal,
+      isActive: true,
+    
+    },
+    {
+      title: "Alumnos",
+      url: `/escuela/${slug}/alumnos`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Alumnos",
+          url: `/escuela/${slug}/alumnos`,
+        },
+        {
+          title: "Crear Alumno",
+          url: `/escuela/${slug}/alumnos/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+    {
+      title: "Calificaciones",
+      url: `/escuela/${slug}/calificaciones`,
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "Calificaciones",
+          url: `/escuela/${slug}/calificaciones`,
+        },
+        {
+          title: "Crear Calificación",
+          url: `/escuela/${slug}/calificaciones/create?escuelaId=${slug}`,
+        },
+      ],
+    },
+
     {
       title: "Models",
       url: "#",

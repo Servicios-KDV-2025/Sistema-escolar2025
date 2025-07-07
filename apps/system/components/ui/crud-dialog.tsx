@@ -215,7 +215,7 @@ export function CrudDialog({
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeletingState}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-white"
             >
               {isDeletingState ? 'Eliminando...' : deleteButtonText}
             </AlertDialogAction>
