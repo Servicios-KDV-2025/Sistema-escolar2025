@@ -1,5 +1,5 @@
-// app/escuela/[slug]/departamentos/[departamentoId]/page.tsx
-"use client";
+// app/escuela/[slug]/departamentos/[depaID]/page.tsx
+'use client';
 
 import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -8,151 +8,104 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useEscuela } from '@/app/store/useEscuela';
 
-// Componentes de Shadcn UI
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit } from "lucide-react";
-
-import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/shadcn/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Edit } from 'lucide-react';
+import { useBreadcrumbStore } from '@/app/store/breadcrumbStore';
 
 export default function DetallesDepartamentoPage() {
   const params = useParams();
   const router = useRouter();
+  const slug = typeof params?.slug === 'string' ? params.slug : '';
 
-  const slug = typeof params?.slug === "string" ? params.slug : "";
-  
-  // Función para obtener departamentoId de manera robusta
-  const getDepartamentoId = (): Id<'departamento'> | null => {
-    console.log("Parámetros recibidos:", params);
-    
-    // Intentar diferentes posibles nombres de parámetro
-    const possibleIds = [
-      params?.departamentoId,
-      params?.depaID,
-      params?.id,
-      params?.departamento
-    ];
-    
-    for (const rawId of possibleIds) {
-      if (rawId) {
-        const idString = Array.isArray(rawId) ? rawId[0] : rawId;
-        if (typeof idString === "string" && idString.trim() !== "") {
-          console.log("ID encontrado:", idString);
-          return idString as Id<'departamento'>;
-        }
+  // Extraer ID robustamente
+  const getId = (): Id<'departamento'> | null => {
+    const possible = [params?.depaID, params?.departamentoId, params?.id];
+    for (const p of possible) {
+      if (p) {
+        const s = Array.isArray(p) ? p[0] : p;
+        if (typeof s === 'string' && s) return s as Id<'departamento'>;
       }
     }
-    
-    console.log("No se encontró ID válido en:", possibleIds);
     return null;
   };
-
-  const departamentoId = getDepartamentoId();
-
+  const departamentoId = getId();
   const { escuela } = useEscuela();
 
-  const departamento = useQuery(api.departamento.obtenerDepartamentosPorId,
-    departamentoId ? { id: departamentoId } : "skip"
+  const departamento = useQuery(
+    api.departamento.obtenerDepartamentosPorId,
+    departamentoId ? { id: departamentoId } : 'skip'
   );
 
-  const setItems = useBreadcrumbStore(state => state.setItems);
-
-  // Efecto para actualizar las migas de pan (breadcrumb)
+  const setItems = useBreadcrumbStore(s => s.setItems);
   useEffect(() => {
+    // Verificar que escuela no sea null antes de usar sus propiedades
     if (escuela && departamento) {
       setItems([
-        { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
+        { label: escuela.nombre, href: `/escuela/${slug}` },
         { label: 'Departamentos', href: `/escuela/${slug}/departamentos` },
-        { label: `${departamento?.nombre}`, isCurrentPage: true },
+        { label: departamento.nombre, isCurrentPage: true },
       ]);
     }
-  }, [departamento, escuela, setItems, slug]);
-
-  // --- Renderizado Condicional para Estados de Carga y Errores ---
+  }, [escuela, departamento, setItems, slug]);
 
   if (!departamentoId) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] text-center">
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-red-600">Error: ID del departamento no proporcionado en la URL.</h2>
-          <p className="text-sm text-gray-600">Parámetros recibidos: {JSON.stringify(params)}</p>
-          <Button onClick={() => router.back()}>Volver</Button>
-        </div>
+      <div className="flex items-center justify-center h-full">
+        <p>ID de departamento no válido.</p>
+        <Button onClick={() => router.back()}>Volver</Button>
       </div>
     );
   }
-
   if (departamento === undefined || escuela === undefined) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-muted-foreground">Cargando detalles del departamento...</p>
-        </div>
-      </div>
-    );
+    return <p>Cargando detalles...</p>;
+  }
+  if (departamento === null) {
+    return <p>Departamento no encontrado.</p>;
   }
 
-  if (departamento === null || escuela === null) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] text-center">
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold text-red-600">Departamento no encontrado o escuela no seleccionada.</h2>
-          <p className="text-muted-foreground">Asegúrate de que el departamento exista y de haber seleccionado una escuela.</p>
-          <Button onClick={() => router.push('/escuelas')}>Ir a Escuelas</Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Función para navegar a la página de edición
-  const handleEditClick = () => {
+  const handleEdit = () => {
     router.push(`/escuela/${slug}/departamentos/${departamentoId}/edit`);
   };
 
-  // --- Renderizado de los Detalles del Departamento ---
   return (
-    <div className="container px-4 sm:px-6 lg:px-8 py-10 mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div className="container mx-auto py-10">
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold">
-            Detalles del Departamento: <span className="text-primary">{departamento.nombre}</span>
-          </h1>
+          <h1 className="text-2xl font-bold">Detalles: {departamento.nombre}</h1>
         </div>
-        <Button onClick={handleEditClick} className="flex items-center gap-2">
-          <Edit className="h-4 w-4" />
-          Editar Departamento
+        <Button onClick={handleEdit} className="flex items-center gap-2">
+          <Edit className="h-4 w-4" /> Editar
         </Button>
       </div>
-
-      <Card className="w-full max-w-2xl mx-auto">
+      <Card className="max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Información General</CardTitle>
           <CardDescription>Detalles completos del departamento.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Nombre:</p>
-            <p className="text-lg font-semibold">{departamento.nombre}</p>
+            <p className="font-medium text-sm">Nombre:</p>
+            <p className="text-lg">{departamento.nombre}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Descripción:</p>
-            <p>{departamento.descripcion || "No hay descripción disponible."}</p>
+            <p className="font-medium text-sm">Descripción:</p>
+            <p>{departamento.descripcion || 'Sin descripción.'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Estado:</p>
-            <p>{departamento.activo ? "Activo" : "Inactivo"}</p>
+            <p className="font-medium text-sm">Estado:</p>
+            <p>{departamento.activo ? 'Activo' : 'Inactivo'}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Creado el:</p>
+            <p className="font-medium text-sm">Creado el:</p>
             <p>{new Date(departamento._creationTime).toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Escuela:</p>
-            <p className="text-lg font-medium">{escuela.nombre}</p>
+            <p className="font-medium text-sm">Escuela:</p>
+            <p>{escuela?.nombre || 'Sin escuela asignada'}</p>
           </div>
         </CardContent>
       </Card>
