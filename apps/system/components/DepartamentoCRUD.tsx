@@ -1,4 +1,4 @@
-// file: apps/system/components/DepartamentoCRUD.tsx
+// apps/system/components/DepartamentoCRUD.tsx
 import React from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -6,13 +6,19 @@ import { Id } from '@/convex/_generated/dataModel';
 import { useEscuela } from '@/app/store/useEscuela';
 import { useBreadcrumbStore } from '@/app/store/breadcrumbStore';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Pencil } from 'lucide-react';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/shadcn/table';
 import { Button } from '@/components/ui/button';
 import { CrudDialog, useCrudDialog } from '@/components/ui/crud-dialog';
 import { departamentoSchema, DepartamentoFormValues } from '@/app/shemas/departamento';
 import { DepartamentoForm } from '@/components/DepartamentoForm';
 import { UseFormReturn } from 'react-hook-form';
+import { Badge } from '@repo/ui/components/shadcn/badge';
+
+// Definir tipo extendido para departamento con ID
+type DepartamentoConId = DepartamentoFormValues & {
+  _id: Id<'departamento'>;
+};
 
 export function DepartamentoCRUD() {
   const routerSchool = useEscuela((s) => s.escuela);
@@ -134,12 +140,12 @@ export function DepartamentoCRUD() {
           operation === 'edit'
             ? `Editar Departamento: ${data?.nombre}`
             : operation === 'view'
-            ? `Detalle: ${data?.nombre}`
+            ? `Detalle: ${(data as DepartamentoConId)?.nombre}`
             : 'Nuevo Departamento'
         }
         description={
           operation === 'view'
-            ? `Información de ${data?.nombre}`
+            ? `Información de ${(data as DepartamentoConId)?.nombre}`
             : undefined
         }
         schema={departamentoSchema}
@@ -147,7 +153,73 @@ export function DepartamentoCRUD() {
         onSubmit={handleSubmit}
         onDelete={operation === 'delete' ? handleDelete : undefined}
       >
-        {(form) => <DepartamentoForm form={form as unknown as UseFormReturn<DepartamentoFormValues>} />}
+        {(form) => (
+          <>
+            {operation === 'view' && data ? (
+              <div className="space-y-6">
+                {/* Información Principal */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-semibold text-blue-900 mb-2">Información del Departamento</h3>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <span className="text-blue-600 text-sm font-medium">Nombre</span>
+                      <div className="font-medium">{(data as DepartamentoConId).nombre}</div>
+                    </div>
+                    <div>
+                      <span className="text-blue-600 text-sm font-medium">Descripción</span>
+                      <div className="font-medium">{(data as DepartamentoConId).descripcion || 'N/A'}</div>
+                    </div>
+                    <div>
+                      <span className="text-blue-600 text-sm font-medium">Estado</span>
+                      <div className="font-medium">
+                        <Badge
+                          variant="secondary"
+                          className={
+                            (data as DepartamentoConId).activo
+                              ? "bg-green-800 text-white"
+                              : "bg-red-500 text-white"
+                          }
+                        >
+                          {(data as DepartamentoConId).activo ? "Activo" : "Inactivo"}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botones de Acción */}
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      close();
+                      setTimeout(() => {
+                        openEdit(data as DepartamentoConId);
+                      }, 100);
+                    }}
+                  >
+                    <Pencil className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      close();
+                      setTimeout(() => {
+                        openDelete(data as DepartamentoConId);
+                      }, 100);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Eliminar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <DepartamentoForm form={form as unknown as UseFormReturn<DepartamentoFormValues>} />
+            )}
+          </>
+        )}
       </CrudDialog>
     </>
   );

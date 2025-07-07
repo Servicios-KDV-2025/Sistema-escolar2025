@@ -101,12 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/departamentos`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Departamentos",
-          url: `/escuela/${slug}/departamentos`,
-        },
-      ],
     },
     {
       title: "Personal",
