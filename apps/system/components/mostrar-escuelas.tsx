@@ -67,7 +67,7 @@ export default function MostrarEscuelas() {
       </div>
 
       {/* Grid de escuelas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-4xl">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-6 w-full max-w-4xl">
         {escuelas.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <School className="h-16 w-16 text-gray-400 mx-auto mb-4" />
@@ -81,6 +81,7 @@ export default function MostrarEscuelas() {
         ) : (
           escuelas.map((escuela) => (
             <Card 
+            
               key={escuela._id} 
               className="hover:shadow-lg transition-shadow cursor-pointer"
               onClick={() => handleSeleccionarEscuela(escuela)}

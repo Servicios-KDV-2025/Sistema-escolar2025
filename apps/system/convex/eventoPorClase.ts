@@ -66,7 +66,7 @@ export const actualizarEventoXClase = mutation({
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.id);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
-
+ 
     const { id, ...data } = args;
     await ctx.db.patch(id, data);
   },

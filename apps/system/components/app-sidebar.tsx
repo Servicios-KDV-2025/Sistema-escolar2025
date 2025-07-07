@@ -101,16 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/departamentos`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Departamentos",
-          url: `/escuela/${slug}/departamentos`,
-        },
-        {
-          title: "Crear Departamento",
-          url: `/escuela/${slug}/departamentos/create?escuelaId=${slug}`,
-        },
-      ],
     },
     {
       title: "Personal",
