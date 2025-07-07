@@ -106,10 +106,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "Departamentos",
           url: `/escuela/${slug}/departamentos`,
         },
-        {
-          title: "Crear Departamento",
-          url: `/escuela/${slug}/departamentos/create?escuelaId=${slug}`,
-        },
       ],
     },
     {
