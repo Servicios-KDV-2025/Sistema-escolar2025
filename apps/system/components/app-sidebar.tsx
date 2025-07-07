@@ -136,8 +136,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       
     },
     {
-      title: "Horarios",
-      url: `/escuela/${slug}/horarios`,
+      title: "Periodos por Clase",
+      url: `/escuela/${slug}/periodosPorClase`,
       icon: SquareTerminal,
       isActive: true,
     
