@@ -63,11 +63,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: `/escuela/${slug}/catalogoDeClases`,
         },
         {
-          title: "Eventos Escolares",
+          title: "Eventos Por Clase",
           url: `/escuela/${slug}/eventosPorClase`,
         },
         {
-          title: "Eventos Por Clase",
+          title: "Eventos Escolares",
           url: `/escuela/${slug}/eventosEscolares`,
         },
       ],
