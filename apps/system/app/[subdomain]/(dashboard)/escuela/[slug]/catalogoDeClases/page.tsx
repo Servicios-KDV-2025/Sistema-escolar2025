@@ -206,7 +206,7 @@ export default function Page() {
                     <FormularioCatalogoDeClases
                         form={form}
                         operation={operation}
-                        materias={materias || []}
+                        materias={materias}
                         grupos={grupos || []}
                         ciclosEscolares={ciclosEscolares || []}
                         salones={salones || []}
