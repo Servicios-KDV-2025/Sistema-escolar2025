@@ -2,32 +2,48 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // 1. Obtener materias POR una escuela específica
+// export const obtenerMateriasPorEscuela = query({
+//   args: {
+//     escuelaId: v.id("escuelas"),
+//   },
+//   handler: async (ctx, args) => {
+//     // Validar si la escuela existe antes de buscar sus materias
+//     const escuela = await ctx.db.get(args.escuelaId);
+//     if (!escuela) {
+//       throw new Error("La escuela especificada no existe.");
+//     }
+//     return await ctx.db
+//       .query("materias")
+//       .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
+//       .collect();
+//   },
+// });
 export const obtenerMateriasPorEscuela = query({
-  args: {
-    escuelaId: v.id("escuelas"), // Ahora el ID de la escuela es OBLIGATORIO
-  },
+  args: { escuelaId: v.id("escuelas") },
   handler: async (ctx, args) => {
-    // Validar si la escuela existe antes de buscar sus materias
-    const escuela = await ctx.db.get(args.escuelaId);
-    if (!escuela) {
-      throw new Error("La escuela especificada no existe.");
-    }
-    return await ctx.db
+    const materias = await ctx.db
       .query("materias")
-      .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
+      .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
       .collect();
+
+    return materias.map(({ _id, ...rest }) => ({
+      id: _id,
+      ...rest,
+    }));
   },
 });
 
 // 2. Obtener una sola materia por su ID, asegurándose de que pertenezca a una escuela
 export const obtenerMateriaPorIdConEscuela = query({
   args: {
-    id: v.id("materias")
+    id: v.id("materias"),
+    escuelaId: v.id("escuelas"), 
+    
   },
   handler: async (ctx, args) => {
     const materia = await ctx.db.get(args.id);
     // Verificamos que la materia exista y que pertenezca a la escuela correcta
-    if (!materia) {
+    if (!materia || materia.escuelaId !== args.escuelaId) {
       throw new Error("Materia no encontrada o no pertenece a esta escuela.");
     }
     return materia;
@@ -85,12 +101,12 @@ export const actualizarMateriaConEscuela = mutation({
 // 5. Eliminar una materia, asegurándose de que pertenezca a la escuela
 export const eliminarMateriaConEscuela = mutation({
   args: {
-    id: v.id("materias"), // ID de la materia a eliminar
+    id: v.id("materias"), 
+    escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {
-    // Verificar que la materia existe y pertenece a la escuela antes de eliminar
     const materiaExistente = await ctx.db.get(args.id);
-    if (!materiaExistente) {
+    if (!materiaExistente || materiaExistente.escuelaId !== args.escuelaId ) {
       throw new Error(
         "No se puede eliminar: Materia no encontrada o no pertenece a la escuela especificada."
       );

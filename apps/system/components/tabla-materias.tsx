@@ -1,11 +1,11 @@
-// src/components/TablaMaterias.tsx
+// /components/TablaMaterias.tsx
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
+import { SignIn, useUser } from "@clerk/nextjs";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -13,110 +13,144 @@ import {
 } from "@repo/ui/components/shadcn/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit, Eye } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
-import { useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { toast } from "sonner";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/shadcn/form";
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+// } from "@repo/ui/components/shadcn/card";
+import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { Input } from "@repo/ui/components/shadcn/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/shadcn/select";
+import { materiaSchema } from "@/app/shemas/materia";
 
 export function TablaMaterias() {
-  const router = useRouter();
-  const escuela = useEscuela((s) => s.escuela);
+  const { user } = useUser();
 
-  // Hook para obtener las materias de la escuela actual
+  const { 
+    escuela,
+  } = useEscuela() 
+
+  // Ejemplo de CRUD para materias
+  const crearMateria = useMutation(api.materias.crearMateriaConEscuela);
+  const actualizarMateria = useMutation(
+    api.materias.actualizarMateriaConEscuela
+  );
+  const eliminarMateria = useMutation(api.materias.eliminarMateriaConEscuela);
   const materias = useQuery(
-    api.materias.obtenerMateriasPorEscuela, // Asume que tienes esta función en tu API Convex
+    api.materias.obtenerMateriasPorEscuela,
     escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
   );
 
-  // Hook para la mutación de eliminar materia
-  const eliminarMateria = useMutation(
-    api.materias.eliminarMateriaConEscuela
-  );
+  const {
+    isOpen,
+    operation,
+    data,
+    openCreate,
+    openEdit,
+    openView,
+    openDelete,
+    close,
+  } = useCrudDialog(materiaSchema, {
+    nombre: undefined,
+    descripcion: undefined,
+    creditos: 5,
+    activa: true,
+  });
 
-  const setItems = useBreadcrumbStore((state) => state.setItems);
-  const params = useParams();
-  const slug = typeof params?.slug === "string" ? params.slug : "";
-
-  useEffect(() => {
-    if (escuela) {
-      setItems([
-        { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
-        { label: "Materias", isCurrentPage: true },
-      ]);
-    }
-  }, [escuela, setItems, slug]);
-
-  const handleEditarMateria = (id: Id<"materias">) => {
-    router.push(`/escuela/${slug}/materias/${id}/edit`);
-  };
-
-  const handleVerDetallesMateria = (id: Id<"materias">) => {
-    router.push(`/escuela/${slug}/materias/${id}`);
-  };
-
-  const handleCrear = () => {
-    if (escuela?._id) {
-      router.push(`/escuela/${slug}/materias/create?escuelaId=${escuela._id}`);
-    } else {
-      toast.error("Error", {
-        description:
-          "Por favor, selecciona una escuela antes de crear una materia.",
-      });
-    }
-  };
-
-  const handleDeleteMateria = async (
-    materiaId: Id<"materias">,
-    nombreMateria: string
-  ) => {
+  const handleSubmit = async (values: Record<string, unknown>) => {
     if (!escuela?._id) {
       toast.error("Error", {
-        description:
-          "No hay una escuela seleccionada para eliminar la materia.",
+        description: "No se pudo identificar la escuela",
       });
       return;
     }
 
-    const confirmed = confirm(
-      `¿Estás seguro de que quieres eliminar la materia "${nombreMateria}"? Esta acción no se puede deshacer.`
-    );
+    console.log("handleSubmit - operation:", operation);
+    console.log("handleSubmit - values:", values);
+    console.log("handleSubmit - data:", data);
 
-    if (confirmed) {
-      try {
-        await eliminarMateria({
-          id: materiaId       
+    try {
+      if (operation === "create") {
+        console.log("Creando materia...");
+        await crearMateria({
+          escuelaId: escuela._id as Id<"escuelas">,
+          nombre: values.nombre as string,
+          descripcion: values.descripcion as string | undefined,
+          activa: values.activa as boolean,
+          creditos: values.creditos as number | undefined,
         });
-        toast.success("Materia eliminada", {
-          description: `"${nombreMateria}" ha sido eliminada correctamente.`,
+        console.log("Materia creada exitosamente");
+      } else if (operation === "edit" && data?._id) {
+        console.log("Editando materia con ID:", data._id);
+        await actualizarMateria({
+          id: data._id as Id<"materias">,
+          escuelaId: escuela._id as Id<"escuelas">,
+          nombre: values.nombre as string,
+          descripcion: values.descripcion as string,
+          activa: values.activa as boolean,
+          creditos: values.creditos as number,
         });
-      } catch (error: unknown) { 
-  let errorMessage = "Ocurrió un error desconocido al eliminar la materia.";
-
-  // Verifica si el error es una instancia de Error (lo más común)
-  if (error instanceof Error) {
-    errorMessage = error.message;
-  }
-  // Puedes añadir más verificaciones si sabes que pueden ocurrir otros tipos de errores.
-  // Por ejemplo, si tu Convex API a veces devuelve un objeto con un campo 'data.message'
-  else if (typeof error === 'object' && error !== null && 'message' in error) {
-    errorMessage = (error as { message: string }).message;
-  }
-  // O si el error es simplemente una cadena
-  else if (typeof error === 'string') {
-    errorMessage = error;
-  }
-
-  toast.error("Error al eliminar", {
-    description: errorMessage,
-  });
-  console.error("Error al eliminar materia:", error);
-}
+        console.log("Grupo editado exitosamente");
+      } else {
+        console.error("Operación no válida o datos faltantes:", {
+          operation,
+          data,
+        });
+        throw new Error("Operación no válida o datos faltantes");
+      }
+    } catch (error) {
+      console.error("Error en operación CRUD:", error);
+      throw error; // Re-lanzar para que el CrudDialog maneje el toast
     }
   };
 
+  const handleDelete = async (id: string) => {
+    if (!escuela?._id) {
+      toast.error("Error", {
+        description: "No se pudo identificar la escuela",
+      });
+      return;
+    }
+
+    console.log("handleDelete - id:", id);
+    console.log("handleDelete - escuelaId:", escuela._id);
+
+    try {
+      await eliminarMateria({
+        id: id as Id<"materias">,
+        escuelaId: escuela._id as Id<"escuelas">,
+      });
+      console.log("Grupo eliminado exitosamente");
+    } catch (error) {
+      console.error("Error al eliminar materia:", error);
+      throw error; // Re-lanzar para que el CrudDialog maneje el toast
+    }
+  };
+
+  if (!user)
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <SignIn />
+      </div>
+    );
   if (materias === undefined) {
     return (
       <div className="text-center text-gray-600 py-8">
@@ -137,16 +171,13 @@ export function TablaMaterias() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Materias</h2>
-        <Button onClick={handleCrear} className="flex items-center gap-2">
+        <Button onClick={openCreate} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Nueva Materia
         </Button>
       </div>
 
       <Table>
-        <TableCaption>
-          Lista de materias registradas para {escuela.nombre}
-        </TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Nombre</TableHead>
@@ -165,19 +196,19 @@ export function TablaMaterias() {
             </TableRow>
           ) : (
             materias.map((materia) => (
-              <TableRow key={materia._id} className="hover:bg-muted/50">
+              <TableRow key={materia.id} className="hover:bg-muted/50">
                 <TableCell className="font-medium">{materia.nombre}</TableCell>
                 <TableCell>{materia.descripcion || "N/A"}</TableCell>
                 <TableCell>{materia.creditos || "N/A"}</TableCell>
                 <TableCell>{materia.activa ? "Activa" : "Inactiva"}</TableCell>
                 <TableCell className="text-right whitespace-nowrap">
-                  <div className="flex justify-end gap-2">
+                  {/* <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleVerDetallesMateria(materia._id);
+                        handleVerDetallesMateria(materia.id);
                       }}
                     >
                       <Eye className="h-4 w-4" />
@@ -187,7 +218,7 @@ export function TablaMaterias() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEditarMateria(materia._id);
+                        handleEditarMateria(materia.id);
                       }}
                     >
                       <Edit className="h-4 w-4" />
@@ -197,8 +228,32 @@ export function TablaMaterias() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteMateria(materia._id, materia.nombre);
+                        handleDeleteMateria(materia.id, materia.nombre);
                       }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div> */}
+
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openView({ ...materia, _id: materia.id })}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEdit({ ...materia, _id: materia.id })}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => openDelete({ ...materia, _id: materia.id })}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -209,6 +264,213 @@ export function TablaMaterias() {
           )}
         </TableBody>
       </Table>
+
+      {/* Ejemplo de CRUD para materias */}
+      {/* {escuela && (
+        <Card className="w-full">
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Gestión de Materias</CardTitle>
+              <Button onClick={openCreate}>
+                <Plus className="h-4 w-4 mr-2" />
+                Nueva Materia
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4">
+              {materias?.map((materia) => (
+                <div
+                  key={materia.id}
+                  className="flex justify-between items-center p-3 border rounded-lg"
+                >
+                  <div>
+                    <p className="font-medium">{materia.nombre}</p>
+                    {materia.creditos !== undefined && (
+                      <p className="text-sm text-muted-foreground">
+                        Créditos: {materia.creditos}
+                      </p>
+                    )}
+                    {materia.descripcion && (
+                      <p className="text-sm text-muted-foreground">
+                        Descripción: {materia.descripcion}
+                      </p>
+                    )}
+                    <p className="text-sm text-muted-foreground">
+                      Estado: {materia.activa ? "Activa" : "Inactiva"}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openView({ ...materia, _id: materia.id })}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEdit({ ...materia, _id: materia.id })}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() =>
+                        openDelete({ ...materia, _id: materia.id })
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {materias?.length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  No hay materias creadas. Crea la primera materia usando el
+                  botón &quot;Nueva Materia&quot;.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )} */}
+
+      {/* CrudDialog para Materias */}
+      <CrudDialog
+        operation={operation}
+        title={
+          operation === "create"
+            ? "Crear Nueva Materia"
+            : operation === "edit"
+              ? "Editar Materia"
+              : "Ver Materia"
+        }
+        description={
+          operation === "create"
+            ? "Completa la información de la nueva materia"
+            : operation === "edit"
+              ? "Modifica la información de la materia"
+              : "Información de la materia"
+        }
+        schema={materiaSchema}
+        defaultValues={{
+          nombre: "",
+          descripcion: "",
+          creditos: 5,
+          activa: true,
+        }}
+        data={data}
+        isOpen={isOpen}
+        onOpenChange={close}
+        onSubmit={handleSubmit}
+        onDelete={handleDelete}
+      >
+        {(
+          form,
+          currentOperation // Renombrado 'operation' a 'currentOperation' para evitar conflicto
+        ) => (
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <FormField
+              control={form.control}
+              name="nombre"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Nombre de la materia"
+                      value={field.value as string}
+                      disabled={currentOperation === "view"}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="creditos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Créditos</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      placeholder="Número de créditos"
+                      value={field.value as number}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? undefined
+                            : Number(e.target.value)
+                        )
+                      }
+                      disabled={currentOperation === "view"}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="descripcion"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Descripción de la materia (opcional)"
+                      value={field.value as string}
+                      disabled={currentOperation === "view"}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="activa"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Estado</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={(value) =>
+                        field.onChange(value === "true")
+                      }
+                      value={field.value ? "true" : "false"}
+                      disabled={currentOperation === "view"}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar estado" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">Activa</SelectItem>
+                        <SelectItem value="false">Inactiva</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        )}
+      </CrudDialog>
     </div>
   );
 }
