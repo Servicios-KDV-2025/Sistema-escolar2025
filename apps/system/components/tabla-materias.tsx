@@ -1,7 +1,6 @@
 // src/components/TablaMaterias.tsx
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import {
   Table,
   TableBody,
@@ -13,28 +12,52 @@ import {
 } from "@repo/ui/components/shadcn/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit, Eye } from "lucide-react";
-import { useParams, useRouter } from "next/navigation";
-import { api } from "@/convex/_generated/api";
+import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import { Id } from "@/convex/_generated/dataModel";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
+import { useMateria } from "@/app/store/useMateriaStore";
+import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { materiaSchema } from "@/app/shemas/materia";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
+import { Input } from "@repo/ui/components/shadcn/input";
+import { Textarea } from "@repo/ui/components/shadcn/textarea";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
 
 export function TablaMaterias() {
-  const router = useRouter();
   const escuela = useEscuela((s) => s.escuela);
 
-  // Hook para obtener las materias de la escuela actual
-  const materias = useQuery(
-    api.materias.obtenerMateriasPorEscuela, // Asume que tienes esta función en tu API Convex
-    escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
-  );
+  // Hook para obtener las materias usando el store
+  const {
+    materias,
+    isCreating: isCreatingMateria,
+    isUpdating: isUpdatingMateria,
+    isDeleting: isDeletingMateria,
+    createError: createMateriaError,
+    updateError: updateMateriaError,
+    deleteError: deleteMateriaError,
+    crearMateria,
+    actualizarMateria,
+    eliminarMateria,
+    clearErrors: clearMateriaErrors,
+  } = useMateria(escuela?._id);
 
-  // Hook para la mutación de eliminar materia
-  const eliminarMateria = useMutation(
-    api.materias.eliminarMateriaConEscuela
-  );
+  const {
+    isOpen,
+    operation,
+    data,
+    openCreate,
+    openEdit,
+    openView,
+    openDelete,
+    close
+  } = useCrudDialog(materiaSchema, {
+    nombre: "",
+    descripcion: "",
+    creditos: "",
+    activa: true
+  });
 
   const setItems = useBreadcrumbStore((state) => state.setItems);
   const params = useParams();
@@ -49,71 +72,45 @@ export function TablaMaterias() {
     }
   }, [escuela, setItems, slug]);
 
-  const handleEditarMateria = (id: Id<"materias">) => {
-    router.push(`/escuela/${slug}/materias/${id}/edit`);
-  };
-
-  const handleVerDetallesMateria = (id: Id<"materias">) => {
-    router.push(`/escuela/${slug}/materias/${id}`);
-  };
-
-  const handleCrear = () => {
-    if (escuela?._id) {
-      router.push(`/escuela/${slug}/materias/create?escuelaId=${escuela._id}`);
-    } else {
-      toast.error("Error", {
-        description:
-          "Por favor, selecciona una escuela antes de crear una materia.",
-      });
-    }
-  };
-
-  const handleDeleteMateria = async (
-    materiaId: Id<"materias">,
-    nombreMateria: string
-  ) => {
+  const handleSubmit = async (values: Record<string, unknown>) => {
     if (!escuela?._id) {
-      toast.error("Error", {
-        description:
-          "No hay una escuela seleccionada para eliminar la materia.",
-      });
+      toast.error('Error', { description: 'No se pudo identificar la escuela' });
       return;
     }
 
-    const confirmed = confirm(
-      `¿Estás seguro de que quieres eliminar la materia "${nombreMateria}"? Esta acción no se puede deshacer.`
-    );
-
-    if (confirmed) {
-      try {
-        await eliminarMateria({
-          id: materiaId       
+    try {
+      if (operation === 'create') {
+        await crearMateria({
+          escuelaId: escuela._id,
+          nombre: values.nombre as string,
+          descripcion: values.descripcion as string,
+          creditos: values.creditos ? Number(values.creditos) : undefined,
+          activa: values.activa as boolean
         });
-        toast.success("Materia eliminada", {
-          description: `"${nombreMateria}" ha sido eliminada correctamente.`,
+      } else if (operation === 'edit' && data?._id) {
+        await actualizarMateria({
+          id: data._id,
+          escuelaId: escuela._id,
+          nombre: values.nombre as string,
+          descripcion: values.descripcion as string,
+          creditos: values.creditos ? Number(values.creditos) : undefined,
+          activa: values.activa as boolean
         });
-      } catch (error: unknown) { 
-  let errorMessage = "Ocurrió un error desconocido al eliminar la materia.";
+      } else {
+        throw new Error('Operación no válida o datos faltantes');
+      }
+    } catch (error) {
+      toast.error('Error en operación CRUD', { description: (error as Error).message });
+      throw error;
+    }
+  };
 
-  // Verifica si el error es una instancia de Error (lo más común)
-  if (error instanceof Error) {
-    errorMessage = error.message;
-  }
-  // Puedes añadir más verificaciones si sabes que pueden ocurrir otros tipos de errores.
-  // Por ejemplo, si tu Convex API a veces devuelve un objeto con un campo 'data.message'
-  else if (typeof error === 'object' && error !== null && 'message' in error) {
-    errorMessage = (error as { message: string }).message;
-  }
-  // O si el error es simplemente una cadena
-  else if (typeof error === 'string') {
-    errorMessage = error;
-  }
-
-  toast.error("Error al eliminar", {
-    description: errorMessage,
-  });
-  console.error("Error al eliminar materia:", error);
-}
+  const handleDelete = async (id: string) => {
+    try {
+      await eliminarMateria(id);
+    } catch (error) {
+      toast.error('Error al eliminar materia', { description: (error as Error).message });
+      throw error;
     }
   };
 
@@ -137,11 +134,28 @@ export function TablaMaterias() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Materias</h2>
-        <Button onClick={handleCrear} className="flex items-center gap-2">
+        <Button onClick={openCreate} disabled={isCreatingMateria} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Nueva Materia
         </Button>
       </div>
+
+      {/* Mostrar errores del store de materias */}
+      {(createMateriaError || updateMateriaError || deleteMateriaError) && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="text-sm text-red-600">
+            {createMateriaError && <div>Error al crear materia: {createMateriaError}</div>}
+            {updateMateriaError && <div>Error al actualizar materia: {updateMateriaError}</div>}
+            {deleteMateriaError && <div>Error al eliminar materia: {deleteMateriaError}</div>}
+          </div>
+          <button 
+            onClick={clearMateriaErrors} 
+            className="text-xs text-blue-500 underline mt-1"
+          >
+            Limpiar errores
+          </button>
+        </div>
+      )}
 
       <Table>
         <TableCaption>
@@ -177,8 +191,9 @@ export function TablaMaterias() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleVerDetallesMateria(materia._id);
+                        openView(materia);
                       }}
+                      disabled={isUpdatingMateria || isDeletingMateria}
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -187,8 +202,9 @@ export function TablaMaterias() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEditarMateria(materia._id);
+                        openEdit(materia);
                       }}
+                      disabled={isUpdatingMateria || isDeletingMateria}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -197,8 +213,9 @@ export function TablaMaterias() {
                       size="icon"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteMateria(materia._id, materia.nombre);
+                        openDelete(materia);
                       }}
+                      disabled={isDeletingMateria}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -209,6 +226,113 @@ export function TablaMaterias() {
           )}
         </TableBody>
       </Table>
+
+      {/* CrudDialog */}
+      <CrudDialog
+        operation={operation}
+        title={operation === 'create' ? 'Crear Nueva Materia' : 
+              operation === 'edit' ? 'Editar Materia' : 'Ver Materia'}
+        description={operation === 'create' ? 'Completa la información de la nueva materia' :
+                    operation === 'edit' ? 'Modifica la información de la materia' : 'Información de la materia'}
+        schema={materiaSchema}
+        defaultValues={{
+          nombre: "",
+          descripcion: "",
+          creditos: "",
+          activa: true
+        }}
+        data={data}
+        isOpen={isOpen}
+        onOpenChange={close}
+        onSubmit={handleSubmit}
+        onDelete={handleDelete}
+        isSubmitting={isCreatingMateria || isUpdatingMateria}
+        isDeleting={isDeletingMateria}
+      >
+        {(form, operation) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="nombre"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Nombre</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      placeholder="Nombre de la materia" 
+                      value={field.value as string}
+                      disabled={operation === 'view'}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="descripcion"
+              render={({ field }) => (
+                <FormItem className="md:col-span-2">
+                  <FormLabel>Descripción</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      placeholder="Descripción de la materia" 
+                      value={field.value as string}
+                      disabled={operation === 'view'}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="creditos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Créditos</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...field} 
+                      type="number"
+                      placeholder="Número de créditos" 
+                      value={field.value as string}
+                      disabled={operation === 'view'}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="activa"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Estado</FormLabel>
+                    <div className="text-sm text-muted-foreground">
+                      {field.value ? 'Materia activa' : 'Materia inactiva'}
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value as boolean}
+                      onCheckedChange={field.onChange}
+                      disabled={operation === 'view'}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
+      </CrudDialog>
     </div>
   );
 }
