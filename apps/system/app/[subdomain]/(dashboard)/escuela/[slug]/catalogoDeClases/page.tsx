@@ -29,6 +29,15 @@ export default function Page() {
     const maestros = useQuery(api.personal.verMaestrosDelPersonal, { escuelaId: escuela?._id as Id<"escuelas"> });
     const grupos = useQuery(api.grupos.verTodosLosGrupos, { escuelaId: escuela?._id as Id<"escuelas"> });
 
+    const maestrosAdaptados = maestros?.map(maestro => ({
+        ...maestro,
+        fechaIngreso: typeof maestro.fechaIngreso === 'string'
+            ? new Date(maestro.fechaIngreso).getTime()
+            : maestro.fechaIngreso,
+        email: maestro.email ?? null,
+        telefono: maestro.telefono ?? null,
+    }));
+
     const {
         isOpen,
         operation,
@@ -201,12 +210,10 @@ export default function Page() {
                         grupos={grupos || []}
                         ciclosEscolares={ciclosEscolares || []}
                         salones={salones || []}
-                        maestros={maestros || []}
+                        maestros={maestrosAdaptados || []}
                     />
                 )}
             </CrudDialog>
-
-            {/* <TablaCatalogoClases /> */}
         </main>
     );
 }
