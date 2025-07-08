@@ -1,7 +1,7 @@
 'use client';
 
 import { useEscuela } from "@/app/store/useEscuela";
-import { TablaAlumnos } from "../../../../../../components/tabla-alumnos";
+import { AlumnosCRUD } from "../../../../../../components/AlumnosCRUD";
 
 export default function Page() {
     const escuela = useEscuela();
@@ -15,7 +15,7 @@ export default function Page() {
                 editarlo o eliminarlo. Para crear una nuevo Alumnos, usa el botón
                 Nuevo Alumnos.
             </p>
-            <TablaAlumnos />
+            <AlumnosCRUD />
         </main>
     );
 }

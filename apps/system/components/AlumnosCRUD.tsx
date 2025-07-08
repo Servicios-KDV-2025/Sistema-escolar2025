@@ -11,7 +11,7 @@ import { Plus } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
 
-export function TablaAlumnos() {
+export function AlumnosCRUD() {
   const router = useRouter()
   const escuela = useEscuela((s) => s.escuela)
   const alumnos = useQuery(api.alumnos.obtenerAlumnos, {escuelaId: escuela?._id as Id<"escuelas">})

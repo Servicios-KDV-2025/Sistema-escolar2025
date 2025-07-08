@@ -7,24 +7,26 @@ import { Id } from "@/convex/_generated/dataModel"
 import { Button } from "@repo/ui/components/shadcn/button"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableRow } from "@repo/ui/components/shadcn/table"
 import { useMutation, useQuery } from "convex/react"
-import { Edit, Eye, Plus, Trash2 } from "lucide-react"
+import { Edit, Eye, Pencil, Plus, Trash2 } from "lucide-react"
 import { useEffect } from "react"
 import { CrudDialog, useCrudDialog } from "./ui/crud-dialog"
 import { PersonalFormValues, personalSchema } from "@/app/shemas/personal"
 import { toast } from "sonner"
 import { PersonalForm } from "./PersonalForm"
 import { UseFormReturn } from "react-hook-form"
+import { Badge } from "@repo/ui/components/shadcn/badge"
+
+type PersonalConId = PersonalFormValues & {
+  _id: Id<'personal'>
+}
  
 export function PersonalCRUD() {
-  // const router = useRouter()
   const routerSchool = useEscuela((s) => s.escuela)
   const personal = useQuery(api.personal.obtenerPersonal, routerSchool ? {escuelaId: routerSchool?._id as Id<"escuelas">} : 'skip')
   const crearPersonal = useMutation(api.personal.crearPersonal)
   const actualizarPersonal = useMutation(api.personal.upadatePersonal)
   const eliminarPersonal = useMutation(api.personal.deletePersonal)
   const setItems = useBreadcrumbStore(state => state.setItems)
-  // const params = useParams()
-  // const slug = typeof params?.slug === "string" ? params.slug : ""
  
   useEffect(() => {
     if (routerSchool){
@@ -148,12 +150,12 @@ export function PersonalCRUD() {
           operation === 'edit'
           ? `Editar empleado: ${data?.nombre}`
           : operation === 'view'
-          ? `Detalle: ${data?.nombre}`
+          ? `Detalle: ${(data as PersonalConId)?.nombre}`
           : 'Nuevo empleado'
         }
         description={
           operation === 'view'
-          ? `Información de ${data?.nombre}`
+          ? `Información de ${(data as PersonalConId)?.nombre}`
           : undefined
         }
         schema={personalSchema}
@@ -161,7 +163,106 @@ export function PersonalCRUD() {
         onSubmit={handleSubmit}
         onDelete={operation === 'delete' ? handleDelete : undefined}
       >
-        {(form => <PersonalForm form={form as unknown as UseFormReturn<PersonalFormValues>}/>)}
+        {(form) => (
+          <>
+            {
+              operation == 'view' && data ? (
+                <div className="space-y-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-semibold text-blue-900 mb-2">Información del Personal</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">ID Departamento</span>
+                        <div className="font-medium">{(data as PersonalConId).departamentoId}</div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Nombre</span>
+                        <div className="font-medium">{(data as PersonalConId).nombre}</div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Apellidos</span>
+                        <div className="font-medium">{(data as PersonalConId).apellidos}</div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Email</span>
+                        <div className="font-medium">{(data as PersonalConId).email}</div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Telefono</span>
+                        <div className="font-medium">{(data as PersonalConId).telefono}</div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Maestos</span>
+                        <div className="font-medium">
+                          <Badge
+                            variant='secondary'
+                            className={
+                              (data as PersonalConId).maestro
+                              // Cambiar colores
+                              ? 'bg-black text-white'
+                              : 'bg-black text-white'
+                            }
+                          >
+                            {(data as PersonalConId).maestro}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Fecha de ingreso</span>
+                        <div className="font-medium">{(data as PersonalConId).fechaIngreso}</div>
+                      </div>
+                      <div>
+                        <span className="text-blue-600 text-sm font-medium">Estado</span>
+                        <div className="font-medium">
+                          <Badge
+                            variant='secondary'
+                            className={
+                              (data as PersonalConId).activo
+                              ? 'bg-green-800 text-white'
+                              : 'bg-red-500 text-white'
+                            }
+                          >
+                            {(data as PersonalConId).activo ? 'Activo' : 'Inactivo'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Botonoes para las acciones */}
+                    <div className="flex gap-2 pt-4 border-t">
+                      <Button
+                        variant='outline'
+                        onClick={() => {
+                          close()
+                          setTimeout(() => {
+                            openEdit(data as PersonalConId)
+                          }, 100)
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 mr-2"/>
+                        Editar
+                      </Button>
+                      <Button
+                        variant='destructive'
+                        onClick={() => {
+                          close()
+                          setTimeout(() => {
+                            openDelete(data as PersonalConId)
+                          }, 100)
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2"/>
+                        Eliminar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <PersonalForm form={form as unknown as UseFormReturn<PersonalFormValues>}/>
+              )
+            }
+          </>
+        )
+        }
       </CrudDialog>
     </>
   )
