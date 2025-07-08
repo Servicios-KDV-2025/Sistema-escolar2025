@@ -5,59 +5,16 @@ import {
 } from "@repo/ui/components/shadcn/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Input } from "@repo/ui/components/shadcn/input";
-import { Id } from "@/convex/_generated/dataModel";
+import { Ciclosescolares, Grupos, Materias, Personal, Salones } from "@/types/convex-zod-types";
 
 interface FormularioCatalogoDeClasesProps {
     form: UseFormReturn<Record<string, unknown>>;
     operation: "create" | "edit" | "view" | "delete";
-    materias: {
-        _id: Id<"materias">;
-        _creationTime: number;
-        descripcion?: string | undefined;
-        creditos?: number | undefined;
-        nombre: string;
-        activa: boolean;
-        escuelaId: Id<"escuelas">;
-    }[] | undefined;
-    grupos: {
-        _creationTime: number;
-        activo: boolean;
-        nombre: string;
-        escuelaId: Id<"escuelas">;
-        grado: string;
-        id: Id<"grupos">;
-    }[] | undefined;
-    ciclosEscolares: {
-        _id: Id<"ciclosEscolares">;
-        _creationTime: number;
-        activo: boolean;
-        nombre: string;
-        escuelaId: Id<"escuelas">;
-        fechaInicio: number;
-        fechaFin: number;
-    }[] | undefined;
-    salones: {
-        _id: Id<"salones">;
-        _creationTime: number;
-        ubicacion?: string | undefined;
-        activo: boolean;
-        nombre: string;
-        escuelaId: Id<"escuelas">;
-        capacidad: number;
-    }[] | undefined;
-    maestros: {
-        _id: Id<"personal">;
-        _creationTime: number;
-        escuelaId: Id<"escuelas">;
-        departamentoId: Id<"departamento">;
-        nombre: string;
-        apellidos: string;
-        email?: string | null;
-        telefono?: string | null;
-        maestro: boolean,
-        fechaIngreso: number,
-        activo: boolean,
-    }[] | undefined;
+    materias: Materias[] | undefined;
+    grupos: Grupos[] | undefined;
+    ciclosEscolares: Ciclosescolares[] | undefined;
+    salones: Salones[] | undefined;
+    maestros: Personal[] | undefined;
 }
 
 export function FormularioCatalogoDeClases({
