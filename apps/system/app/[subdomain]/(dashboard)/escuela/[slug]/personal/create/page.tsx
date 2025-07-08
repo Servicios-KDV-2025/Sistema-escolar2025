@@ -58,7 +58,7 @@ export default function CrearPersonalPage () {
         apellidos: values.apellidos,
         email: values.email,
         telefono: values.telefono,
-        fechaIngreso: new Date(values.fechaIngreso).getTime(),
+        fechaIngreso: values.fechaIngreso,
         maestro: values.maestro,
         activo: values.activo
       })
