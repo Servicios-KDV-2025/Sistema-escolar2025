@@ -6,15 +6,13 @@ import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/sh
 import { useEscuela } from '../../../store/useEscuelaStore'
 import { CrudDialog, useCrudDialog } from '../../../../components/ui/crud-dialog'
 import { grupoSchema } from '../../../../app/shemas/grupo'
-import { useMutation, useQuery } from 'convex/react'
-import { api } from '@/convex/_generated/api'
-import { Id } from '@/convex/_generated/dataModel'
 import { toast } from 'sonner'
 import { Button } from '@repo/ui/components/shadcn/button'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
 import { Input } from '@repo/ui/components/shadcn/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+import { useGrupo } from '../../../store/useGrupoStore'
 
 //import { useEscuela } from '@/app/store/useEscuela' --- este es lo que tiene emilio
 
@@ -29,23 +27,20 @@ export default function Home() {
     clearErrors 
   } = useEscuela() 
 
-  console.log('=== DEBUG INFO ===')
-  console.log('user:', user)
-  console.log('userEmail:', userEmail)
-  console.log('escuela:', escuela)
-  console.log('escuela?._id:', escuela?._id)
-  console.log('isLoading:', isLoading)
-  console.log('error:', error)
-  console.log('==================')
-
   // Ejemplo de CRUD para grupos
-  const crearGrupo = useMutation(api.grupos.crearGrupo)
-  const actualizarGrupo = useMutation(api.grupos.actualizarGrupo)
-  const eliminarGrupo = useMutation(api.grupos.eliminarGrupo)
-  const grupos = useQuery(
-    api.grupos.verTodosLosGrupos,
-    escuela?._id ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
-  )
+  const {
+    grupos,
+    isCreating: isCreatingGrupo,
+    isUpdating: isUpdatingGrupo,
+    isDeleting: isDeletingGrupo,
+    createError: createGrupoError,
+    updateError: updateGrupoError,
+    deleteError: deleteGrupoError,
+    crearGrupo,
+    actualizarGrupo,
+    eliminarGrupo,
+    clearErrors: clearGrupoErrors,
+  } = useGrupo(escuela?._id)
 
   const {
     isOpen,
@@ -68,37 +63,29 @@ export default function Home() {
       return
     }
 
-    console.log('handleSubmit - operation:', operation)
-    console.log('handleSubmit - values:', values)
-    console.log('handleSubmit - data:', data)
-
     try {
       if (operation === 'create') {
-        console.log('Creando grupo...')
         await crearGrupo({
-          escuelaId: escuela._id as Id<"escuelas">,
+          escuelaId: escuela._id,
           grado: values.grado as string,
           nombre: values.nombre as string,
           activo: values.activo as boolean
         })
-        console.log('Grupo creado exitosamente')
       } else if (operation === 'edit' && data?._id) {
-        console.log('Editando grupo con ID:', data._id)
         await actualizarGrupo({
-          id: data._id as Id<"grupos">,
-          escuelaId: escuela._id as Id<"escuelas">,
+          id: data._id,
+          escuelaId: escuela._id,
           grado: values.grado as string,
           nombre: values.nombre as string,
           activo: values.activo as boolean
         })
-        console.log('Grupo editado exitosamente')
       } else {
-        console.error('Operación no válida o datos faltantes:', { operation, data })
         throw new Error('Operación no válida o datos faltantes')
       }
     } catch (error) {
-      console.error('Error en operación CRUD:', error)
-      throw error // Re-lanzar para que el CrudDialog maneje el toast
+      // El error ya es manejado por el store, pero puedes mostrar un toast si quieres
+      toast.error('Error en operación CRUD', { description: (error as Error).message })
+      throw error
     }
   }
 
@@ -107,19 +94,11 @@ export default function Home() {
       toast.error('Error', { description: 'No se pudo identificar la escuela' })
       return
     }
-    
-    console.log('handleDelete - id:', id)
-    console.log('handleDelete - escuelaId:', escuela._id)
-    
     try {
-      await eliminarGrupo({ 
-        id: id as Id<"grupos">,
-        escuelaId: escuela._id as Id<"escuelas">
-      })
-      console.log('Grupo eliminado exitosamente')
+      await eliminarGrupo(id, escuela._id)
     } catch (error) {
-      console.error('Error al eliminar grupo:', error)
-      throw error // Re-lanzar para que el CrudDialog maneje el toast
+      toast.error('Error al eliminar grupo', { description: (error as Error).message })
+      throw error
     }
   }
 
@@ -216,16 +195,25 @@ export default function Home() {
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle>Gestión de Grupos (Ejemplo CRUD)</CardTitle>
-                <Button onClick={openCreate}>
+                <Button onClick={openCreate} disabled={isCreatingGrupo}>
                   <Plus className="h-4 w-4 mr-2" />
                   Nuevo Grupo
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
+              {/* Mostrar errores del store de grupos */}
+              {(createGrupoError || updateGrupoError || deleteGrupoError) && (
+                <div className="mb-2 text-sm text-red-500">
+                  {createGrupoError && <div>Error al crear grupo: {createGrupoError}</div>}
+                  {updateGrupoError && <div>Error al actualizar grupo: {updateGrupoError}</div>}
+                  {deleteGrupoError && <div>Error al eliminar grupo: {deleteGrupoError}</div>}
+                  <button onClick={clearGrupoErrors} className="text-xs text-blue-500 underline">Limpiar errores</button>
+                </div>
+              )}
               <div className="grid gap-4">
                 {grupos?.map((grupo) => (
-                  <div key={grupo.id} className="flex justify-between items-center p-3 border rounded-lg">
+                  <div key={grupo._id} className="flex justify-between items-center p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{grupo.nombre} - {grupo.grado}</p>
                       <p className="text-sm text-muted-foreground">
@@ -233,13 +221,13 @@ export default function Home() {
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openView({ ...grupo, _id: grupo.id })}>
+                      <Button variant="outline" size="sm" onClick={() => openView(grupo)} disabled={isUpdatingGrupo}>
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => openEdit({ ...grupo, _id: grupo.id })}>
+                      <Button variant="outline" size="sm" onClick={() => openEdit(grupo)} disabled={isUpdatingGrupo}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button variant="destructive" size="sm" onClick={() => openDelete({ ...grupo, _id: grupo.id })}>
+                      <Button variant="destructive" size="sm" onClick={() => openDelete(grupo)} disabled={isDeletingGrupo}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

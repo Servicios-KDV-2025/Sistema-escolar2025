@@ -93,7 +93,7 @@ const applicationTables = {
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
  
-  // Periodos (horarios)
+  //* Periodos (horarios)
   periodos: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1ra hora", "2da hora"
