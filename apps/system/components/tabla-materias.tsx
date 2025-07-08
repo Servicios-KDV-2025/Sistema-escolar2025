@@ -4,7 +4,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -158,9 +157,6 @@ export function TablaMaterias() {
       )}
 
       <Table>
-        <TableCaption>
-          Lista de materias registradas para {escuela.nombre}
-        </TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Nombre</TableHead>
