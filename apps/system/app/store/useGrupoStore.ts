@@ -89,6 +89,14 @@ export const useGrupoStore = create<GrupoStore>((set) => ({
   reset: () => set(initialState),
 }));
 
+type GrupoQueryResult = {
+  id: string;
+  escuelaId: string;
+  nombre: string;
+  grado: string;
+  activo: boolean;
+};
+
 export const useGrupo = (escuelaId?: string) => {
   const {
     grupos,
@@ -103,11 +111,11 @@ export const useGrupo = (escuelaId?: string) => {
     deleteError,
     setGrupos,
     setGrupoSeleccionado,
-    setLoading,
+
     setCreating,
     setUpdating,
     setDeleting,
-    setError,
+
     setCreateError,
     setUpdateError,
     setDeleteError,
@@ -185,9 +193,8 @@ export const useGrupo = (escuelaId?: string) => {
   // Refrescar grupos cuando cambie la query
   useEffect(() => {
     if (gruposQuery) {
-      // Mapear id a _id para cumplir con el tipo Grupo
       setGrupos(
-        gruposQuery.map((g: any) => ({
+        (gruposQuery as GrupoQueryResult[]).map((g) => ({
           _id: g.id,
           escuelaId: g.escuelaId,
           nombre: g.nombre,
