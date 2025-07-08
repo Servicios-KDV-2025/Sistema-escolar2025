@@ -3,9 +3,7 @@
 import { SignIn, SignOutButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/shadcn/card'
-//import { useEscuelaLalo } from '../../../../app/store/useEscuelaLalo'
-import { useEscuelaLalo } from '@/app/store/useEscuelaStore'
-import { useEffect, useRef } from 'react'
+import { useEscuela } from '../../../store/useEscuelaStore'
 import { CrudDialog, useCrudDialog } from '../../../../components/ui/crud-dialog'
 import { grupoSchema } from '../../../../app/shemas/grupo'
 import { useMutation, useQuery } from 'convex/react'
@@ -24,25 +22,30 @@ export default function Home() {
   const { user } = useUser()
   
   const { 
-    escuela, 
-    subdomain,
+    escuela,
     userEmail,
     isLoading,
     error,
-    detectSubdomain, 
-    setEmail,
-    clearError 
-  } = useEscuelaLalo()
+    clearErrors 
+  } = useEscuela() 
 
-  //const { escuela } = useEscuela() este lo agregué con Alex
+  console.log('=== DEBUG INFO ===')
+  console.log('user:', user)
+  console.log('userEmail:', userEmail)
+  console.log('escuela:', escuela)
+  console.log('escuela?._id:', escuela?._id)
+  console.log('isLoading:', isLoading)
+  console.log('error:', error)
+  console.log('==================')
 
   // Ejemplo de CRUD para grupos
   const crearGrupo = useMutation(api.grupos.crearGrupo)
   const actualizarGrupo = useMutation(api.grupos.actualizarGrupo)
   const eliminarGrupo = useMutation(api.grupos.eliminarGrupo)
-  //const grupos = useQuery(api.grupos.verTodosLosGrupos, { escuelaId: escuela?._id as Id<"escuelas"> })
-
-  const grupos = useQuery(api.grupos.verTodosLosGrupos, escuela?._id ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip")
+  const grupos = useQuery(
+    api.grupos.verTodosLosGrupos,
+    escuela?._id ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
+  )
 
   const {
     isOpen,
@@ -120,30 +123,6 @@ export default function Home() {
     }
   }
 
-  // Usar useRef para evitar múltiples llamadas
-  const hasLoaded = useRef(false);
-
-  useEffect(() => {
-    // Solo cargar una vez al montar el componente
-    if (!hasLoaded.current) {
-      if (user?.emailAddresses?.[0]?.emailAddress) {
-        // Si hay usuario autenticado, cargar por email
-        setEmail(user.emailAddresses[0].emailAddress);
-      } else {
-        // Si no hay usuario, cargar por subdomain
-        detectSubdomain();
-      }
-      hasLoaded.current = true;
-    }
-  }, [user, detectSubdomain, setEmail])
-
-  // Cargar escuela cuando el usuario se autentique
-  useEffect(() => {
-    if (user?.emailAddresses?.[0]?.emailAddress && !escuela) {
-      setEmail(user.emailAddresses[0].emailAddress);
-    }
-  }, [user, escuela, setEmail])
-
   if (!user) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <SignIn />
@@ -173,11 +152,6 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">
                   Escuela: {escuela.nombre}
                 </p>
-                {subdomain && (
-                  <p className="text-xs text-muted-foreground">
-                    Subdominio: {subdomain}
-                  </p>
-                )}
                 {userEmail && (
                   <p className="text-xs text-muted-foreground">
                     Email del usuario: {userEmail}
@@ -218,17 +192,19 @@ export default function Home() {
                 </p>
                 <button 
                   onClick={() => {
-                    clearError();
-                    if (user?.emailAddresses?.[0]?.emailAddress) {
-                      setEmail(user.emailAddresses[0].emailAddress);
-                    } else {
-                      detectSubdomain();
-                    }
+                    clearErrors();
                   }}
                   className="text-xs text-blue-500 underline"
                 >
                   Reintentar
                 </button>
+              </div>
+            )}
+            {!escuela && (
+              <div className="pt-4 border-t">
+                <p className="text-sm text-red-500">
+                  No tienes una escuela asociada a tu cuenta. Por favor, contacta al administrador.
+                </p>
               </div>
             )}
           </CardContent>

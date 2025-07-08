@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
@@ -87,20 +87,10 @@ export default function PeriodosPage() {
    const { 
     escuela, 
     isLoading, 
-    error, 
-    detectSubdomain, 
-    setEmail, 
-    clearError 
+    error,
+    clearErrors
   } = useEscuela();
   
-  const hasLoaded = useRef(false);
-  useEffect(() => {
-    if (!hasLoaded.current) {
-      detectSubdomain();
-      hasLoaded.current = true;
-    }
-  }, [detectSubdomain, setEmail]);
-
   // Mutations y queries
   const escuelaId = escuela?._id as import("@/convex/_generated/dataModel").Id<"escuelas"> | undefined;
   const periodos = useQuery(api.periodos.obtenerPeriodosPorEscuela, escuelaId ? { escuelaId } : "skip");
@@ -183,15 +173,16 @@ export default function PeriodosPage() {
       <div className="text-center py-10 text-red-500">
         Error: {error}
         <br />
-        <button
-          onClick={() => {
-            clearError();
-            detectSubdomain();
-          }}
-          className="text-xs text-blue-500 underline mt-2"
-        >
-          Reintentar
-        </button>
+        {clearErrors && (
+          <button
+            onClick={() => {
+              clearErrors();
+            }}
+            className="text-xs text-blue-500 underline mt-2"
+          >
+            Reintentar
+          </button>
+        )}
       </div>
     );
   }
