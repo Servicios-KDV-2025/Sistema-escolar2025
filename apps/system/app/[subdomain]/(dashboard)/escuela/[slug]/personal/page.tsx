@@ -1,6 +1,6 @@
 'use client'
 
-import { TablaPersonal } from "../../../../../../components/tabla-personal"
+import { PersonalCRUD } from "../../../../../../components/PersonalCRUD"
 
 export default function Page() {
   return(
@@ -11,7 +11,7 @@ export default function Page() {
           editarlo o eliminarlo. Para crear una nuevo Empleado, usa el botón
           Nuevo Empleado.
         </p>
-        <TablaPersonal />
+        <PersonalCRUD />
     </main>
   )
 }

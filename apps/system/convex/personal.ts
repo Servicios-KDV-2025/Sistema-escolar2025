@@ -11,7 +11,7 @@ export const crearPersonal = mutation({
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
-    fechaIngreso: v.number(),
+    fechaIngreso: v.string(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -52,21 +52,25 @@ export const PersonalById = query({
 export const upadatePersonal = mutation({
   args: {
     id: v.id("personal"),
-    escuelaId: v.id("escuelas"),
     nombre: v.string(),
     apellidos: v.string(),
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
-    fechaIngreso: v.number(),
+    fechaIngreso: v.string(),
     activo: v.boolean()
   },
-  handler: async (ctx, args) => {
-    const personal = await ctx.db.get(args.id)
-    if (!personal || personal.escuelaId !== args.escuelaId) throw new Error("Acceso denegado")
-
-    const { id, ...data } = args
-    await ctx.db.patch(id, data)
+  handler: async (ctx, {id, nombre, apellidos, email, telefono, maestro, fechaIngreso, activo}) => {
+    const personalActualizado = await ctx.db.patch(id, {
+      nombre,
+      apellidos,
+      email,
+      telefono,
+      maestro,
+      fechaIngreso,
+      activo,
+    });
+    return personalActualizado;
   }
 })
 
@@ -74,13 +78,11 @@ export const upadatePersonal = mutation({
 export const deletePersonal = mutation({
   args: {
     id: v.id("personal"),
-    escuelaId: v.id("escuelas")
   },
-  handler: async (ctx, args) => {
-    const personal = await ctx.db.get(args.id)
-    if (!personal || personal.escuelaId !== args.escuelaId) throw new Error("Acceso denegado")
+  handler: async (ctx, {id}) => {
+    const personalEliminado = await ctx.db.delete(id)
 
-    await ctx.db.delete(args.id)
+    return personalEliminado
   }
 })
 
