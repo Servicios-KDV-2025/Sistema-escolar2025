@@ -61,7 +61,7 @@ const applicationTables = {
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
-    fechaIngreso: v.number(),
+    fechaIngreso: v.string(),
     activo: v.boolean(),
   })
     .index("by_escuela", ["escuelaId"])

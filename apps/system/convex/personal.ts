@@ -11,7 +11,7 @@ export const crearPersonal = mutation({
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
-    fechaIngreso: v.number(),
+    fechaIngreso: v.string(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -57,7 +57,7 @@ export const upadatePersonal = mutation({
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
-    fechaIngreso: v.number(),
+    fechaIngreso: v.string(),
     activo: v.boolean()
   },
   handler: async (ctx, {id, nombre, apellidos, email, telefono, maestro, fechaIngreso, activo}) => {

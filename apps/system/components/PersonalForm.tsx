@@ -29,12 +29,12 @@ export function PersonalForm ({form}: PersonalFormProps) {
         name="departamentoId"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Padres/Tutor</FormLabel>
+            <FormLabel>Departamento</FormLabel>
             <FormControl>
               <Select
                 {...field}
               >
-                <option value="">Seleccionar Padres o Tutor</option>
+                <option value="">Seleccionar departamento</option>
                 {departamentos?.map((departamento) => (
                   <option key={departamento._id} value={departamento._id}>
                     {departamento.nombre}

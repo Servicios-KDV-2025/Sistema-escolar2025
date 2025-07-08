@@ -38,7 +38,7 @@ export function PersonalCRUD() {
   
 
   const {isOpen, operation, data, openCreate, openEdit, openView, openDelete, close} =
-    useCrudDialog(personalSchema, {departamento: '', nombre: '', apellidos: '', email: '', telefono: '', maestro: true, fechaIngreso: 0, activo: true})
+    useCrudDialog(personalSchema, {departamento: '', nombre: '', apellidos: '', email: '', telefono: '', maestro: true, fechaIngreso: '', activo: true})
   
   const handleSubmit = async (values: Record<string, unknown>) => {
     if (!routerSchool?._id) {
