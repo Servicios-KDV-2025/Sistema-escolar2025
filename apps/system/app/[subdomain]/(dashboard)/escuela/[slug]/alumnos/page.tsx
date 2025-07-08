@@ -1,10 +1,10 @@
 'use client';
 
-import { useEscuelaEmilio } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuela";
 import { TablaAlumnos } from "../../../../../../components/tabla-alumnos";
 
 export default function Page() {
-    const escuela = useEscuelaEmilio();
+    const escuela = useEscuela();
     console.log(escuela);
 
     return (

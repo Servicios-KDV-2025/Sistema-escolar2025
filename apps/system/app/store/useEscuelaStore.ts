@@ -65,7 +65,7 @@ export const useEscuelaStore = create<EscuelaStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-export const useEscuela = () => {
+export const useEscuelaLalo = () => {
   const { 
     escuela, 
     subdomain,

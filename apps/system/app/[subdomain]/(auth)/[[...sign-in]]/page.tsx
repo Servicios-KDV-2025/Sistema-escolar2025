@@ -3,7 +3,8 @@
 import { SignIn, SignOutButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/shadcn/card'
-import { useEscuela } from '../../../store/useEscuelaStore'
+//import { useEscuelaLalo } from '../../../../app/store/useEscuelaLalo'
+import { useEscuelaLalo } from '@/app/store/useEscuelaStore'
 import { useEffect, useRef } from 'react'
 import { CrudDialog, useCrudDialog } from '../../../../components/ui/crud-dialog'
 import { grupoSchema } from '../../../../app/shemas/grupo'
@@ -16,13 +17,14 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/
 import { Input } from '@repo/ui/components/shadcn/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
-import { useEscuelaEmilio } from '@/app/store/useEscuela'
+
+//import { useEscuela } from '@/app/store/useEscuela' --- este es lo que tiene emilio
 
 export default function Home() {
   const { user } = useUser()
   
   const { 
-    //escuela, 
+    escuela, 
     subdomain,
     userEmail,
     isLoading,
@@ -30,9 +32,9 @@ export default function Home() {
     detectSubdomain, 
     setEmail,
     clearError 
-  } = useEscuela()
+  } = useEscuelaLalo()
 
-  const { escuela } = useEscuelaEmilio()
+  //const { escuela } = useEscuela() este lo agregué con Alex
 
   // Ejemplo de CRUD para grupos
   const crearGrupo = useMutation(api.grupos.crearGrupo)

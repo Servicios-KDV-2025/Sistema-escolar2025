@@ -19,7 +19,7 @@ type EscuelaStore = {
   resetEscuela: () => void;
 };
 
-export const useEscuelaEmilio = create<EscuelaStore>((set) => ({
+export const useEscuela = create<EscuelaStore>((set) => ({
   escuela: null,
   setEscuela: (e) => set({ escuela: e }),
   resetEscuela: () => set({ escuela: null }),

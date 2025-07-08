@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { ArrowLeft } from "lucide-react";
-import { useEscuelaEmilio } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuela";
 
 
 export default function CreatePadrePage() {
@@ -19,7 +19,7 @@ export default function CreatePadrePage() {
   const urlEscuelaId = searchParams.get("escuelaId") as Id<"escuelas"> | null;
   const router = useRouter();
 
-  const { escuela: zustandEscuela } = useEscuelaEmilio();
+  const { escuela: zustandEscuela } = useEscuela();
 
   const fetchedEscuela = useQuery(
     api.escuelas.obtenerEscuelaPorId,
