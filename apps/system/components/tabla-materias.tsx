@@ -24,12 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@repo/ui/components/shadcn/form";
-// import {
-//   Card,
-//   CardContent,
-//   CardHeader,
-//   CardTitle,
-// } from "@repo/ui/components/shadcn/card";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { Input } from "@repo/ui/components/shadcn/input";
 import {
@@ -44,11 +38,8 @@ import { materiaSchema } from "@/app/shemas/materia";
 export function TablaMaterias() {
   const { user } = useUser();
 
-  const { 
-    escuela,
-  } = useEscuela() 
+  const { escuela } = useEscuela();
 
-  // Ejemplo de CRUD para materias
   const crearMateria = useMutation(api.materias.crearMateriaConEscuela);
   const actualizarMateria = useMutation(
     api.materias.actualizarMateriaConEscuela
@@ -118,7 +109,7 @@ export function TablaMaterias() {
       }
     } catch (error) {
       console.error("Error en operación CRUD:", error);
-      throw error; // Re-lanzar para que el CrudDialog maneje el toast
+      throw error;
     }
   };
 
@@ -141,7 +132,7 @@ export function TablaMaterias() {
       console.log("Grupo eliminado exitosamente");
     } catch (error) {
       console.error("Error al eliminar materia:", error);
-      throw error; // Re-lanzar para que el CrudDialog maneje el toast
+      throw error;
     }
   };
 
@@ -202,39 +193,6 @@ export function TablaMaterias() {
                 <TableCell>{materia.creditos || "N/A"}</TableCell>
                 <TableCell>{materia.activa ? "Activa" : "Inactiva"}</TableCell>
                 <TableCell className="text-right whitespace-nowrap">
-                  {/* <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleVerDetallesMateria(materia.id);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditarMateria(materia.id);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteMateria(materia.id, materia.nombre);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div> */}
-
                   <div className="flex justify-end gap-2">
                     <Button
                       variant="outline"
@@ -253,7 +211,9 @@ export function TablaMaterias() {
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => openDelete({ ...materia, _id: materia.id })}
+                      onClick={() =>
+                        openDelete({ ...materia, _id: materia.id })
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -264,80 +224,6 @@ export function TablaMaterias() {
           )}
         </TableBody>
       </Table>
-
-      {/* Ejemplo de CRUD para materias */}
-      {/* {escuela && (
-        <Card className="w-full">
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Gestión de Materias</CardTitle>
-              <Button onClick={openCreate}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nueva Materia
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              {materias?.map((materia) => (
-                <div
-                  key={materia.id}
-                  className="flex justify-between items-center p-3 border rounded-lg"
-                >
-                  <div>
-                    <p className="font-medium">{materia.nombre}</p>
-                    {materia.creditos !== undefined && (
-                      <p className="text-sm text-muted-foreground">
-                        Créditos: {materia.creditos}
-                      </p>
-                    )}
-                    {materia.descripcion && (
-                      <p className="text-sm text-muted-foreground">
-                        Descripción: {materia.descripcion}
-                      </p>
-                    )}
-                    <p className="text-sm text-muted-foreground">
-                      Estado: {materia.activa ? "Activa" : "Inactiva"}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openView({ ...materia, _id: materia.id })}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEdit({ ...materia, _id: materia.id })}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() =>
-                        openDelete({ ...materia, _id: materia.id })
-                      }
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-              {materias?.length === 0 && (
-                <p className="text-center text-muted-foreground py-8">
-                  No hay materias creadas. Crea la primera materia usando el
-                  botón &quot;Nueva Materia&quot;.
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )} */}
-
       {/* CrudDialog para Materias */}
       <CrudDialog
         operation={operation}
@@ -368,10 +254,7 @@ export function TablaMaterias() {
         onSubmit={handleSubmit}
         onDelete={handleDelete}
       >
-        {(
-          form,
-          currentOperation // Renombrado 'operation' a 'currentOperation' para evitar conflicto
-        ) => (
+        {(form, currentOperation) => (
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
