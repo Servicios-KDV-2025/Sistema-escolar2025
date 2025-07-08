@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { z } from "zod";
 import { useQuery, useMutation } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
@@ -54,28 +54,6 @@ const formatoHora12 = (hora24: string): string => {
 };
 
 // Custom hooks
-const useEscuelaData = () => {
-  const { 
-    escuela, 
-    isLoading, 
-    error, 
-    detectSubdomain, 
-    setEmail, 
-    clearError 
-  } = useEscuela();
-
-  const hasLoaded = useRef(false);
-  
-  useEffect(() => {
-    if (!hasLoaded.current) {
-      detectSubdomain();
-      hasLoaded.current = true;
-    }
-  }, [detectSubdomain, setEmail]);
-
-  return { escuela, isLoading, error, detectSubdomain, clearError };
-};
-
 const useDataQueries = (escuelaId: string | undefined) => {
   const catalogosClases = useQuery(
     api.catalogosDeClases.verTodosLosCatalogosDeClases, 
@@ -256,7 +234,7 @@ const PeriodosList = ({
 
 // Main component
 export default function PeriodosClasePage() {
-  const { escuela, isLoading, error, detectSubdomain, clearError } = useEscuelaData();
+  const { escuela, isLoading, error, clearErrors } = useEscuela();
   const escuelaId = escuela?._id;
   
   const { catalogosClases, periodos, materias, maestros } = useDataQueries(escuelaId);
@@ -392,9 +370,8 @@ export default function PeriodosClasePage() {
   }, [openDelete]);
 
   const handleRetry = useCallback(() => {
-    clearError();
-    detectSubdomain();
-  }, [clearError, detectSubdomain]);
+    if (clearErrors) clearErrors();
+  }, [clearErrors]);
 
   // Render conditions
   if (isLoading) return <LoadingSpinner />;
