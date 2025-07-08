@@ -5,25 +5,21 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useEscuela } from "../../store/useEscuela";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import {Card, CardContent, CardFooter, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { ArrowLeft } from "lucide-react";
+import { useEscuelaEmilio } from "@/app/store/useEscuela";
+
 
 export default function CreatePadrePage() {
   const searchParams = useSearchParams();
   const urlEscuelaId = searchParams.get("escuelaId") as Id<"escuelas"> | null;
   const router = useRouter();
 
-  const { escuela: zustandEscuela } = useEscuela();
+  const { escuela: zustandEscuela } = useEscuelaEmilio();
 
   const fetchedEscuela = useQuery(
     api.escuelas.obtenerEscuelaPorId,
@@ -60,7 +56,7 @@ export default function CreatePadrePage() {
 
     try {
       await crearPadre({
-        escuelaId: escuelaEnUso._id,
+        escuelaId: escuelaEnUso._id as Id<"escuelas"> ,
         nombre: formData.nombre,
         apellidos: formData.apellidos,
         email: formData.email || undefined,

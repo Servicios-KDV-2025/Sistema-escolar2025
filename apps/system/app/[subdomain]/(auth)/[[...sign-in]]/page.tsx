@@ -16,12 +16,13 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/
 import { Input } from '@repo/ui/components/shadcn/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+import { useEscuelaEmilio } from '@/app/store/useEscuela'
 
 export default function Home() {
   const { user } = useUser()
   
   const { 
-    escuela, 
+    //escuela, 
     subdomain,
     userEmail,
     isLoading,
@@ -29,15 +30,17 @@ export default function Home() {
     detectSubdomain, 
     setEmail,
     clearError 
-  } = useEscuela() 
+  } = useEscuela()
+
+  const { escuela } = useEscuelaEmilio()
 
   // Ejemplo de CRUD para grupos
   const crearGrupo = useMutation(api.grupos.crearGrupo)
   const actualizarGrupo = useMutation(api.grupos.actualizarGrupo)
   const eliminarGrupo = useMutation(api.grupos.eliminarGrupo)
-  const grupos = useQuery(api.grupos.verTodosLosGrupos, { 
-    escuelaId: escuela?._id as Id<"escuelas"> 
-  })
+  //const grupos = useQuery(api.grupos.verTodosLosGrupos, { escuelaId: escuela?._id as Id<"escuelas"> })
+
+  const grupos = useQuery(api.grupos.verTodosLosGrupos, escuela?._id ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip")
 
   const {
     isOpen,

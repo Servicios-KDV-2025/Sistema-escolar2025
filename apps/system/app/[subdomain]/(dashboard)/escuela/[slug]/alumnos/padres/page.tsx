@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { useEscuela } from '@/app/store/useEscuela';
+import { useEscuelaEmilio } from '@/app/store/useEscuela';
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/shadcn/table'; //originalmente tenía: '@/components/ui/table'
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,7 @@ export default function PadresPage() {
 
   const escuela = zustandEscuela || fetchedEscuela;*/
 
-  const escuela = useEscuela((s) => s.escuela);
+  const escuela = useEscuelaEmilio((s) => s.escuela);
   const params = useParams();
   const slug = typeof params?.slug === "string" ? params.slug : "";  
 

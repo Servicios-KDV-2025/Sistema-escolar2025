@@ -12,7 +12,7 @@ import { Button } from "@repo/ui/components/shadcn/button";
 import { Plus, School } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useEscuela } from "../app/store/useEscuela";
+import { useEscuelaEmilio } from "../app/store/useEscuela";
 import CrearEscuela from "./crear-escuelas";
 import { Escuela } from "@/types/escuelas";
 
@@ -22,7 +22,7 @@ export default function MostrarEscuelas() {
   const escuelas = useQuery(api.escuelas.obtenerEscuelas);
   const [mostrarCrearEscuela, setMostrarCrearEscuela] = React.useState(false);
   const router = useRouter();
-  const setEscuela = useEscuela((state) => state.setEscuela);
+  const setEscuela = useEscuelaEmilio((state) => state.setEscuela);
 
   // Función para manejar la selección de escuela
   const handleSeleccionarEscuela = (escuela: Escuela) => {

@@ -3,27 +3,6 @@ import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
 
-// Consulta para obtener todos los padres de una escuela especifica
-/*export const obtenerPadres = query({
-  args: {
-    escuelaId: v.id("escuelas")
-  },
-
-  handler: async (ctx, args) => {
-    if (args.escuelaId) {
-      //usamos el indice "by_escuela" 
-      return await ctx.db
-        .query("padres")
-        .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
-        .collect();
-    } else {
-      //si no se proporciona un ID de escuela, devolvemos un array vacío
-      return [];
-    }
-  },
-});*/
-
-
 // 1. Obtener Padres por una escuela específica
 export const obtenerPadresPorEscuela = query({
   args: {
@@ -43,7 +22,7 @@ export const obtenerPadresPorEscuela = query({
   },
 });
 
-//consulta para obtener un padre por su ID
+//2. Obtener un solo padre por su ID 
 export const obtenerPadrePorId = query({
   args: {id: v.id("padres")},
   handler: async (ctx, args) => {
@@ -53,7 +32,9 @@ export const obtenerPadrePorId = query({
 
 
 // Mutations: creación, actualizacion y eliminación de padres
-export const crearPadre = mutation({
+
+//3. Crear un nuevo padre DENTRO de una escuela específica
+export const crearPadreConEscuela = mutation({
   args: {
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
@@ -66,10 +47,10 @@ export const crearPadre = mutation({
 
   handler: async (ctx, args) => {
     const { escuelaId, nombre, apellidos, email, telefono, direccion, activo} = args;
-    // verificamos que la escuela exista
+    // verificamos que la escuela exista antes de crear el padre
     const escuela = await ctx.db.get(escuelaId);
     if (!escuela) {
-      throw new Error("Escuela no encontrada.")
+      throw new Error("No se puede crear el padre: La escuela especificada no existe.")
     }
 
     //verificamos que no haya otro padre con el mismo email (si se proporcionó)
@@ -85,20 +66,12 @@ export const crearPadre = mutation({
     }
 
     //se agrega el nuevo padre en la base de datos 
-    return await ctx.db.insert("padres", {
-      escuelaId,
-      nombre,
-      apellidos,
-      email: email || undefined, // si no se proporciona, se guarda como undefined
-      telefono: telefono || undefined,
-      direccion: direccion || undefined,
-      activo,
-    });
+    return await ctx.db.insert("padres", args);
   },
 });
 
 
-//mutación para actualizar un padre existente
+//4. mutación para actualizar un padre existente
 export const actualizarPadre = mutation({
   args: {
     id: v.id("padres"),
