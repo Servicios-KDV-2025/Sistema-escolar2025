@@ -4,7 +4,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -15,7 +14,7 @@ import { Plus, Trash2, Edit, Eye } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useMateria } from "@/app/store/useMateriaStore";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { materiaSchema } from "@/app/shemas/materia";
@@ -26,7 +25,7 @@ import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
 
 export function TablaMaterias() {
-  const escuela = useEscuela((s) => s.escuela);
+  const {escuela} = useEscuela();
 
   // Hook para obtener las materias usando el store
   const {
@@ -158,9 +157,6 @@ export function TablaMaterias() {
       )}
 
       <Table>
-        <TableCaption>
-          Lista de materias registradas para {escuela.nombre}
-        </TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Nombre</TableHead>
