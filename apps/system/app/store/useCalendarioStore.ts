@@ -132,16 +132,7 @@ export const useCalendario = (escuelaId?: string, cicloEscolarId?: string) => {
     escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
   );
 
-  // Query para obtener eventos de un ciclo escolar específico
-  const calendarioCicloEscolarQuery = useQuery(
-    api.calendario.obtenerCalendarioCicloEscolar,
-    escuelaId && cicloEscolarId 
-      ? { 
-          escuelaId: escuelaId as Id<"escuelas">, 
-          cicloEscolarId: cicloEscolarId as Id<"ciclosEscolares"> 
-        } 
-      : "skip"
-  );
+
 
   // Mutations
   const crearEventoCalendarioMutation = useMutation(api.calendario.crearEventoCalendario);

@@ -108,20 +108,7 @@ export const useAlumnoStore = create<AlumnoStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-type AlumnoQueryResult = {
-  _id: string;
-  escuelaId: string;
-  padreId: string;
-  grupoId: string;
-  matricula: string;
-  nombre: string;
-  apellidos: string;
-  fechaNacimiento: string;
-  email?: string;
-  telefono?: number;
-  direccion?: string;
-  activo: boolean;
-};
+
 
 export const useAlumno = (escuelaId?: string) => {
   const {
@@ -225,7 +212,20 @@ export const useAlumno = (escuelaId?: string) => {
   useEffect(() => {
     if (alumnosQuery) {
       setAlumnos(
-        (alumnosQuery as any[]).map((a) => ({
+        (alumnosQuery as unknown as Array<{
+          _id: string;
+          escuelaId: string;
+          padreId: string;
+          grupoId: string;
+          matricula: string;
+          nombre: string;
+          apellidos: string;
+          fechaNacimiento: string;
+          email?: string;
+          telefono?: number;
+          direccion?: string;
+          activo: boolean;
+        }>).map((a) => ({
           _id: a._id,
           escuelaId: a.escuelaId,
           padreId: a.padreId,

@@ -92,16 +92,9 @@ export const usePeriodoPorClaseStore = create<PeriodoPorClaseStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-type PeriodoPorClaseQueryData = {
-  _id: string;
-  escuelaId: string;
-  catalogoClaseId: string;
-  periodoId: string;
-  diaSemana: number;
-  activo: boolean;
-};
 
-export const usePeriodoPorClase = (escuelaId?: string, catalogoClaseId?: string) => {
+
+export const usePeriodoPorClase = (escuelaId?: string) => {
   const {
     periodosPorClase,
     periodoPorClaseSeleccionado,
@@ -130,11 +123,7 @@ export const usePeriodoPorClase = (escuelaId?: string, catalogoClaseId?: string)
     escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
   );
 
-  // Query para obtener periodos por clase específica
-  const periodosPorCatalogoQuery = useQuery(
-    api.periodoporClase.obtenerPeriodosPorClasePorCatalogo,
-    catalogoClaseId ? { catalogoClaseId: catalogoClaseId as Id<"catalogosDeClases"> } : "skip"
-  );
+
 
   // Mutations
   const crearPeriodoPorClaseMutation = useMutation(api.periodoporClase.crearPeriodoPorClase);
@@ -205,7 +194,14 @@ export const usePeriodoPorClase = (escuelaId?: string, catalogoClaseId?: string)
   useEffect(() => {
     if (periodosPorClaseQuery) {
       setPeriodosPorClase(
-        (periodosPorClaseQuery as any[]).map((p) => ({
+        (periodosPorClaseQuery as unknown as Array<{
+          _id: string;
+          escuelaId: string;
+          catalogoClaseId: string;
+          periodoId: string;
+          diaSemana: number;
+          activo: boolean;
+        }>).map((p) => ({
           _id: p._id,
           escuelaId: p.escuelaId,
           catalogoClaseId: p.catalogoClaseId,
