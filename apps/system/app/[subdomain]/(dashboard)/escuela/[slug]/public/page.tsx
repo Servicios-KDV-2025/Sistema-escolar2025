@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useEffect, useState } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import {
@@ -26,27 +26,20 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 import Link from "next/link";
 
-import Header from "@/components/header";
-import SchoolMap from "@/components/mapa";
-import Footer from "@/components/footer";
+import Header from "@/components/public/header";
+import SchoolMap from "@/components/public/mapa";
+import Footer from "@/components/public/footer";
 
 export default function EscuelaHome() {
   const [currentSlide, setCurrentSlide] = useState(0); //estado ca
-  const escuelaZ = useEscuela((s) => s.escuela);
-  const escuela = useQuery(
-    api.escuelas.obtenerEscuelaPorId,
-    escuelaZ ? { id: escuelaZ._id as Id<"escuelas"> } : "skip"
-  );
+  const { escuela } = useEscuela();
   const setItems = useBreadcrumbStore((state) => state.setItems);
 
   useEffect(() => {
     if (escuela) {
-      setItems([{ label: `${escuela?.nombre}` }]);
+      setItems([{ label: `${(escuela?.nombre).toLocaleUpperCase()}` }]);
     }
   }, [escuela, setItems]);
 
@@ -67,7 +60,7 @@ export default function EscuelaHome() {
       id: "event-1",
       title: "Gran Inauguración del Laboratorio de Robótica",
       description: "Explora nuestras nuevas instalaciones de vanguardia.",
-      image: "/images/robotics-lab.jpg",
+      image: "/photo.jpeg",
       date: "25 de Julio, 2025",
       link: "/eventos/robotica-lab-inauguracion", // Enlace a la página del evento
     },
@@ -75,7 +68,7 @@ export default function EscuelaHome() {
       id: "event-14",
       title: "Gran Inauguración del Laboratorio de Robótica",
       description: "Explora nuestras nuevas instalaciones de vanguardia.",
-      image: "/images/robotics-lab.jpg",
+      image: "/photo2.jpg",
       date: "25 de Julio, 2025",
       link: "/eventos/robotica-lab-inauguracion", // Enlace a la página del evento
     },
@@ -83,7 +76,7 @@ export default function EscuelaHome() {
       id: "event-13",
       title: "Gran Inauguración del Laboratorio de Robótica",
       description: "Explora nuestras nuevas instalaciones de vanguardia.",
-      image: "/images/robotics-lab.jpg",
+      image: "/photo.jpeg",
       date: "25 de Julio, 2025",
       link: "/eventos/robotica-lab-inauguracion", // Enlace a la página del evento
     },
@@ -91,7 +84,7 @@ export default function EscuelaHome() {
       id: "event-12",
       title: "Gran Inauguración del Laboratorio de Robótica",
       description: "Explora nuestras nuevas instalaciones de vanguardia.",
-      image: "/images/robotics-lab.jpg",
+      image: "/photo2.jpg",
       date: "25 de Julio, 2025",
       link: "/eventos/robotica-lab-inauguracion", // Enlace a la página del evento
     },
@@ -99,7 +92,7 @@ export default function EscuelaHome() {
       id: "event-2",
       title: "Feria de Ciencias Anual: Innovación y Descubrimiento",
       description: "Proyectos increíbles creados por nuestros estudiantes.",
-      image: "/images/science-fair.jpg",
+      image: "/photo.jpeg",
       date: "10 de Agosto, 2025",
       link: "/eventos/feria-ciencias-anual",
     },
@@ -107,7 +100,7 @@ export default function EscuelaHome() {
       id: "event-3",
       title: "Jornada de Orientación Universitaria",
       description: "Prepárate para tu futuro académico y profesional.",
-      image: "/images/university-guidance.jpg",
+      image: "/photo2.jpg",
       date: "1 de Septiembre, 2025",
       link: "/eventos/orientacion-universitaria",
     },
@@ -115,7 +108,7 @@ export default function EscuelaHome() {
       id: "event-4",
       title: "Copa Deportiva Interescolar",
       description: "Competición amistosa entre las mejores escuelas.",
-      image: "/images/sports-cup.jpg",
+      image: "/photo.jpeg",
       date: "15 de Septiembre, 2025",
       link: "/eventos/copa-deportiva",
     },
@@ -123,7 +116,7 @@ export default function EscuelaHome() {
       id: "event-5",
       title: "Copa Deportiva Interescolar",
       description: "Competición amistosa entre las mejores escuelas.",
-      image: "/images/sports-cup.jpg",
+      image: "/photo2.jpg",
       date: "15 de Septiembre, 2025",
       link: "/eventos/copa-deportiva",
     },
@@ -172,7 +165,7 @@ export default function EscuelaHome() {
                     }`}
                   >
                     <Image
-                      src={slide.image || "/placeholder.svg"}
+                      src={slide.image || "/photo2.jpg"}
                       alt={slide.title}
                       fill
                       className="object-cover"
@@ -184,7 +177,7 @@ export default function EscuelaHome() {
                     <div className="absolute inset-2 flex items-center justify-center">
                       <div className="max-w-7xl mx-auto px-4 w-full">
                         <div className="flex justify-end">
-                          <Card className="bg-white text-black max-w-md ">
+                          <Card className="bg-white/80 text-black max-w-md ">
                             {" "}
                             {/* bg-background/23 */}
                             <CardContent className="p-4">
@@ -299,51 +292,85 @@ export default function EscuelaHome() {
             />
           </div>
 
-          {/* Información de Contacto */}
-          <div className=" flex-col items-center gap-2">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold tracking-tight flex items-center gap-4">
-                  <Phone className="h-6 w-6 text-primary" />
-                  Contáctanos
-                </h2>
-                <p className="text-muted-foreground">
-                  Estamos aquí para ayudarte
-                </p>
-              </div>
-              <Button variant="outline" className="gap-2" asChild>
+
+
+          {/* Sección de Información de Contacto */}
+          <section className="py-0 px-4 flex flex-col items-center bg-white">
+            <h4 className="text-4xl font-semibold tracking-tight flex items-center gap-4">
+              <Phone className="h-6 w-6 text-primary" />
+              Contáctanos
+            </h4>
+            <p className="text-muted-foreground py-3">
+              Estamos aquí para ayudarte
+            </p>
+
+            <div className="py-3 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-7xl">
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in-up text-center p-6">
+                <CardHeader className="flex flex-col items-center p-0 mb-4">
+                  <Phone className="h-10 w-10 text-primary mb-3" />
+                  <CardTitle className="text-2xl font-semibold">
+                    Teléfono
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <p className="text-lg text-muted-foreground font-semibold">
+                    {escuela.telefono || "(618) 123-4567"}
+                  </p>
+                  <Button variant="link" asChild className="mt-2 text-primary">
+                    <Link href={`tel:${escuela.telefono || "+526181234567"}`}>
+                      Llamar ahora
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in-up text-center p-6">
+                <CardHeader className="flex flex-col items-center p-0 mb-4">
+                  <Mail className="h-10 w-10 text-primary mb-3" />
+                  <CardTitle className="text-2xl font-semibold">
+                    Correo Electrónico
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <p className="text-lg text-muted-foreground font-semibold">
+                    {escuela.email || "info@pato-cheman.edu.mx"}
+                  </p>
+                  <Button variant="link" asChild className="mt-2 text-primary">
+                    <Link
+                      href={`mailto:${escuela.email || "info@pato-cheman.edu.mx"}`}
+                    >
+                      Enviar email
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in-up text-center p-6">
+                <CardHeader className="flex flex-col items-center p-0 mb-4">
+                  <Clock className="h-10 w-10 text-primary mb-3" />
+                  <CardTitle className="text-2xl font-semibold">
+                    Horario de Atención
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <p className="text-lg text-muted-foreground font-semibold">
+                    Lunes a Viernes
+                  </p>
+                  <p className="text-lg text-muted-foreground font-semibold">
+                    8:00 AM - 5:00 PM
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+
+          </section>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" className=" justify-end" asChild>
                 <Link href="/contacto">
                   Formulario de Contacto <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
             </div>
-
-            <Card className="h-full flex flex-col justify-between">
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-3 text-lg">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <span>Teléfono:</span>{" "}
-                  <span className="font-semibold">
-                    {escuela.telefono || " (618) 123-4567"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-lg">
-                  <Mail className="h-5 w-5 text-primary" />
-                  <span>Email:</span>{" "}
-                  <span className="font-semibold">
-                    {escuela.email || " info@pato-cheman.edu.mx"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-lg">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <span>Horario:</span>{" "}
-                  <span className="font-semibold">
-                    Lunes a Viernes, 8:00 AM - 5:00 PM
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
       </main>
       <Footer />

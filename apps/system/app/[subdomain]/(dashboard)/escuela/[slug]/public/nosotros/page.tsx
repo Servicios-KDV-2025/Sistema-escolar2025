@@ -1,7 +1,8 @@
 "use client";
 
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useEffect } from "react";
+import Image from "next/image";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import {
   Card,
@@ -18,27 +19,20 @@ import {
   Target,
   Phone,
   Handshake,
-  ImageIcon,
   Mail,
   Clock,
   Eye,
   Heart,
   Users,
 } from "lucide-react";
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
 
-import Header from "@/components/header";
-import SchoolMap from "@/components/mapa";
-import Footer from "@/components/footer";
+
+import Header from "@/components/public/header";
+import SchoolMap from "@/components/public/mapa";
+import Footer from "@/components/public/footer";
 
 export default function EscuelaHome() {
-  const escuelaZ = useEscuela((s) => s.escuela);
-  const escuela = useQuery(
-    api.escuelas.obtenerEscuelaPorId,
-    escuelaZ ? { id: escuelaZ._id as Id<"escuelas"> } : "skip"
-  );
+  const {escuela} = useEscuela();
   const setItems = useBreadcrumbStore((state) => state.setItems);
 
   const alliancesAndCertifications = [
@@ -81,29 +75,7 @@ export default function EscuelaHome() {
       <main className="flex min-h-[calc(7vh-5rem)] flex-col items-center justify-center">
         <div className="">
           {/* Sección Hero */}
-          <section
-            id="hero"
-            className="relative flex items-center justify-center min-h-[60vh] px-4 py-16 text-center overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-white-500/10 opacity-70 [mask-image:radial-gradient(ellipse_at_center,black_10%,transparent_80%)]" />
-            <Card className="w-full max-w-3xl bg-white/80 backdrop-blur-sm shadow-xl border-white-100 animate-fade-in-up">
-              <CardHeader>
-                <div className="flex justify-center mb-4">
-                  {/* Placeholder para el logo principal */}
-                  <div className="h-32 w-32 bg-white-600 rounded-full flex items-center justify-center text-black text-5xl font-extrabold shadow-lg border-4 border-white-300 transform transition-transform duration-500 hover:scale-105">
-                    LP
-                  </div>{" "}
-                  {/* Una "I" grande como inicial */}
-                </div>
-                <CardTitle className="text-4xl md:text-5xl font-extrabold text-foreground leading-tight">
-                  {escuela.nombre.toUpperCase()}
-                </CardTitle>
-                <CardDescription className="text-xl text-muted-foreground mt-2">
-                  {escuela.direccion}
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </section>
+          
 
           {/* Sección Sobre Nosotros - Historia/Mensaje */}
           <section id="about" className="py-16 px-4 flex flex-col items-center">
@@ -224,7 +196,14 @@ export default function EscuelaHome() {
                       key={index}
                       className="aspect-video w-full overflow-hidden rounded-lg shadow-md border border-white-100 group relative bg-gray-200 flex items-center justify-center"
                     >
-                      <ImageIcon className="h-16 w-16 text-gray-500 opacity-60 group-hover:opacity-100 transition-opacity duration-300" />
+                      <Image
+                        src={"/photo2.jpg"}
+                        alt={"Espacio" + (index + 1)}
+                        fill
+                        className="object-cover"
+                        priority={index === 0}
+                      />
+
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
                         <p className="text-white text-sm font-semibold">
                           Espacio {index + 1}
@@ -312,7 +291,7 @@ export default function EscuelaHome() {
               </CardHeader>
             </Card>
           </section>
-          
+
           <div className="">
             <SchoolMap
               direccion={escuela.direccion}
