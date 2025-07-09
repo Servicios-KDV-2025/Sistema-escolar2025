@@ -11,7 +11,7 @@ import { Badge } from "@repo/ui/components/shadcn/badge";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Checkbox } from "@repo/ui/components/shadcn/checkbox";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 
 // Constants

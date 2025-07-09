@@ -3,8 +3,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { api } from "@/convex/_generated/api";
-import { useMutation, useQuery } from "convex/react";
+// import { api } from "@/convex/_generated/api";
+// import { useMutation, useQuery } from "convex/react";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
@@ -15,6 +15,7 @@ import { Switch } from "@repo/ui/components/shadcn/switch";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
+import { usePeriodo } from "@/app/store/usePeriodoStore";
 
 // Schema de validación para periodos
 const periodoSchema = z.object({
@@ -32,13 +33,13 @@ function to24h(hora: string, ampm: string) {
   if (!/^\d{1,2}:\d{2}$/.test(hora)) {
     return hora;
   }
-  
+
   const [h, m] = hora.split(":").map(Number);
-  
+
   if (h < 1 || h > 12 || m < 0 || m > 59) {
     return hora;
   }
-  
+
   let h24 = h;
   if (ampm === "PM" && h !== 12) h24 += 12;
   if (ampm === "AM" && h === 12) h24 = 0;
@@ -69,34 +70,35 @@ function validarHora12(hora: string) {
   if (!/^\d{1,2}:\d{2}$/.test(hora)) {
     return "Formato inválido. Use H:MM o HH:MM";
   }
-  
+
   const [h, m] = hora.split(":").map(Number);
-  
+
   if (h < 1 || h > 12) {
     return "La hora debe estar entre 1 y 12";
   }
-  
+
   if (m < 0 || m > 59) {
     return "Los minutos deben estar entre 00 y 59";
   }
-  
+
   return null;
 }
 
 export default function PeriodosPage() {
-   const { 
-    escuela, 
-    isLoading, 
+  const {
+    escuela,
+    isLoading,
     error,
     clearErrors
   } = useEscuela();
-  
+
   // Mutations y queries
   const escuelaId = escuela?._id as import("@/convex/_generated/dataModel").Id<"escuelas"> | undefined;
-  const periodos = useQuery(api.periodos.obtenerPeriodosPorEscuela, escuelaId ? { escuelaId } : "skip");
-  const crearPeriodo = useMutation(api.periodos.crearPeriodo);
-  const actualizarPeriodo = useMutation(api.periodos.actualizarPeriodo);
-  const eliminarPeriodo = useMutation(api.periodos.eliminarPeriodo);
+  const { periodos, crearPeriodo, actualizarPeriodo, eliminarPeriodo } = usePeriodo(escuelaId);
+  // const periodos = useQuery(api.periodos.obtenerPeriodosPorEscuela, escuelaId ? { escuelaId } : "skip");
+  // const crearPeriodo = useMutation(api.periodos.crearPeriodo);
+  // const actualizarPeriodo = useMutation(api.periodos.actualizarPeriodo);
+  // const eliminarPeriodo = useMutation(api.periodos.eliminarPeriodo);
 
   // Hook del CrudDialog
   const {
@@ -132,7 +134,7 @@ export default function PeriodosPage() {
         });
       } else if (operation === 'edit' && data?._id) {
         await actualizarPeriodo({
-          id: data._id as import("@/convex/_generated/dataModel").Id<"periodos">,
+          _id: data._id as import("@/convex/_generated/dataModel").Id<"periodos">,
           escuelaId,
           nombre: values.nombre as string,
           horaInicio: values.horaInicio as string,
@@ -151,12 +153,9 @@ export default function PeriodosPage() {
       toast.error('Error: Escuela no seleccionada');
       return;
     }
-    
+
     try {
-      await eliminarPeriodo({
-        id: id as import("@/convex/_generated/dataModel").Id<"periodos">,
-        escuelaId: escuelaId as import("@/convex/_generated/dataModel").Id<"escuelas">
-      });
+      await eliminarPeriodo(id, escuelaId);
     } catch (error) {
       console.error('Error al eliminar periodo:', error);
       throw error;
@@ -243,10 +242,10 @@ export default function PeriodosPage() {
       {/* CrudDialog */}
       <CrudDialog
         operation={operation}
-        title={operation === 'create' ? 'Crear Nuevo Periodo' : 
-              operation === 'edit' ? 'Editar Periodo' : 'Ver Periodo'}
+        title={operation === 'create' ? 'Crear Nuevo Periodo' :
+          operation === 'edit' ? 'Editar Periodo' : 'Ver Periodo'}
         description={operation === 'create' ? 'Completa la información del nuevo periodo' :
-                    operation === 'edit' ? 'Modifica la información del periodo' : 'Información del periodo'}
+          operation === 'edit' ? 'Modifica la información del periodo' : 'Información del periodo'}
         schema={periodoSchema}
         defaultValues={{
           nombre: "",
@@ -279,7 +278,7 @@ function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, u
   React.useEffect(() => {
     const horaInicio = form.watch('horaInicio') as string;
     const horaFin = form.watch('horaFin') as string;
-    
+
     if (horaInicio) {
       const inicioData = from24h(horaInicio);
       setInicio(inicioData);
@@ -288,16 +287,16 @@ function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, u
       const finData = from24h(horaFin);
       setFin(finData);
     }
-  }, [form.watch('horaInicio'), form.watch('horaFin')]);
+  }, [form]);
 
   // Sincronizar selectores con formulario
   React.useEffect(() => {
     const errorIni = validarHora12(inicio.hora);
     const errorFinVal = validarHora12(fin.hora);
-    
+
     setErrorInicio(errorIni);
     setErrorFin(errorFinVal);
-    
+
     if (!errorIni && !errorFinVal) {
       const horaInicio = to24h(inicio.hora, inicio.ampm);
       const horaFin = to24h(fin.hora, fin.ampm);
@@ -315,10 +314,10 @@ function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, u
           <FormItem>
             <FormLabel>Nombre</FormLabel>
             <FormControl>
-              <Input 
-                {...field} 
+              <Input
+                {...field}
                 value={field.value as string}
-                placeholder="Nombre del periodo" 
+                placeholder="Nombre del periodo"
                 disabled={operation === 'view'}
               />
             </FormControl>
@@ -339,8 +338,8 @@ function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, u
               className={`w-20 ${errorInicio ? 'border-red-500' : ''}`}
               disabled={operation === 'view'}
             />
-            <Select 
-              value={inicio.ampm} 
+            <Select
+              value={inicio.ampm}
               onValueChange={ampm => setInicio(i => ({ ...i, ampm }))}
               disabled={operation === 'view'}
             >
@@ -368,8 +367,8 @@ function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, u
               className={`w-20 ${errorFin ? 'border-red-500' : ''}`}
               disabled={operation === 'view'}
             />
-            <Select 
-              value={fin.ampm} 
+            <Select
+              value={fin.ampm}
               onValueChange={ampm => setFin(f => ({ ...f, ampm }))}
               disabled={operation === 'view'}
             >
