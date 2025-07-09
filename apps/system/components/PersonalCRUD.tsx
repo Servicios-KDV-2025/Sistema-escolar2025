@@ -1,50 +1,62 @@
 'use client'
  
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
-import { useEscuela } from "@/app/store/useEscuela"
-import { api } from "@/convex/_generated/api"
+import { useEscuela } from "@/app/store/useEscuelaStore"
 import { Id } from "@/convex/_generated/dataModel"
 import { Button } from "@repo/ui/components/shadcn/button"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableRow } from "@repo/ui/components/shadcn/table"
-import { useMutation, useQuery } from "convex/react"
-import { Edit, Eye, Pencil, Plus, Trash2 } from "lucide-react"
+import { Edit, Eye, Plus, Trash2 } from "lucide-react"
 import { useEffect } from "react"
 import { CrudDialog, useCrudDialog } from "./ui/crud-dialog"
 import { PersonalFormValues, personalSchema } from "@/app/shemas/personal"
 import { toast } from "sonner"
-import { PersonalForm } from "./PersonalForm"
-import { UseFormReturn } from "react-hook-form"
-import { Badge } from "@repo/ui/components/shadcn/badge"
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
+import { useParams } from "next/navigation"
+import { usePersonal } from "@/app/store/usePersonalStore"
+import { FormControl, FormField, FormItem, FormLabel } from "@repo/ui/components/shadcn/form";
+import { Select } from "@repo/ui/components/shadcn/select"
+import { Input } from "@repo/ui/components/shadcn/input"
+import { Switch } from "@repo/ui/components/shadcn/switch"
 
-type PersonalConId = PersonalFormValues & {
-  _id: Id<'personal'>
-}
- 
 export function PersonalCRUD() {
-  const routerSchool = useEscuela((s) => s.escuela)
-  const personal = useQuery(api.personal.obtenerPersonal, routerSchool ? {escuelaId: routerSchool?._id as Id<"escuelas">} : 'skip')
-  const crearPersonal = useMutation(api.personal.crearPersonal)
-  const actualizarPersonal = useMutation(api.personal.upadatePersonal)
-  const eliminarPersonal = useMutation(api.personal.deletePersonal)
-  const setItems = useBreadcrumbStore(state => state.setItems)
- 
-  useEffect(() => {
-    if (routerSchool){
-      setItems([
-        { label: routerSchool.nombre, href: `/escuela/${encodeURIComponent(routerSchool.nombre)}` },
-        { label: 'Personal', isCurrentPage: true }
-      ])
-    }
-  }, [routerSchool, setItems])
- 
-  
 
   const {isOpen, operation, data, openCreate, openEdit, openView, openDelete, close} =
     useCrudDialog(personalSchema, {departamento: '', nombre: '', apellidos: '', email: '', telefono: '', maestro: true, fechaIngreso: '', activo: true})
   
+  const { escuela } = useEscuela()
+  const departamentos = useQuery(api.departamento.obtenerDepartamentos, escuela ? {escuelaId: escuela._id as Id<'escuelas'>} : 'skip')
+
+  const {
+    personal,
+    isCreating: isCreatingPersonal,
+    isUpdating: isUpdatingPersonal,
+    isDeleting: isDeletingPersonal,
+    createError: createPersonalError,
+    updateError: updatePersonalError,
+    deleteError: deletePersonalError,
+    crearPersonal,
+    actualizarPersonal,
+    eliminarPersonal,
+    clearErrors: clearPersonalErrors
+  } = usePersonal(escuela?._id)
+  
+  const setItems = useBreadcrumbStore(state => state.setItems)
+  const params = useParams()
+  const slug = typeof params.slug === 'string' ? params.slug : ''
+
+  useEffect(() => {
+    if (escuela){
+      setItems([
+        { label: escuela.nombre, href: `/escuela/${slug}` },
+        { label: 'Personal', isCurrentPage: true }
+      ])
+    }
+  }, [escuela, setItems, slug])
+ 
   const handleSubmit = async (values: Record<string, unknown>) => {
-    if (!routerSchool?._id) {
-      toast.error('Selecciona una escuela antes de continuar')
+    if (!escuela?._id) {
+      toast.error('Error', { description: 'No se ha seleccionado una escuela' })
       return
     }
 
@@ -52,14 +64,37 @@ export function PersonalCRUD() {
 
     try {
       if (operation === 'create') {
-        await crearPersonal({ escuelaId: routerSchool._id as Id<'escuelas'>, ...validatedValues, departamentoId: validatedValues.departamentoId as Id<"departamento">})
+        await crearPersonal({
+          escuelaId: escuela._id as Id<'escuelas'>,
+          departamentoId: validatedValues.departamentoId as Id<"departamento">,
+          nombre: validatedValues.nombre as string,
+          apellidos: validatedValues.apellidos as string,
+          email: validatedValues.email as string | undefined,
+          telefono: validatedValues.telefono as string | undefined,
+          maestro: validatedValues.maestro as boolean,
+          fechaIngreso: validatedValues.fechaIngreso as string,
+          activo: validatedValues.activo as boolean,
+        })
         toast.success('Departamento creado')
       } else if (operation === 'edit' && data?._id) {
-        await actualizarPersonal({id: data._id as Id<'personal'>, ...validatedValues})
+        await actualizarPersonal({
+          id: data._id,
+          escuelaId: escuela._id,
+          departamentoId: validatedValues.departamentoId as Id<'departamento'>,
+          nombre: validatedValues.nombre as string,
+          apellidos: validatedValues.apellidos as string,
+          email: validatedValues.email as string | undefined,
+          telefono: validatedValues.telefono as string | undefined,
+          maestro: validatedValues.maestro as boolean,
+          fechaIngreso: validatedValues.fechaIngreso as string,
+          activo: validatedValues.activo as boolean,
+        })
         toast.success('Departamento actualizado')
+      } else {
+        throw new Error('Operación no válida')
       }
       close()
-    } catch (err: unknown) {
+    } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error en la operación'
       toast.error(msg)
     }
@@ -67,7 +102,7 @@ export function PersonalCRUD() {
   
   const handleDelete = async (id: string) => {
     try {
-      await eliminarPersonal({id: id as Id<'personal'>})
+      await eliminarPersonal(id)
       toast.success('Departamento eliminado')
       close()
     } catch (err: unknown) {
@@ -77,7 +112,15 @@ export function PersonalCRUD() {
   }
 
   if (personal === undefined) {
-    return <div>Cargando el Personal...</div>
+    return <div className="text-center text-gray-600 py-8">Cargando el Personal...</div>
+  }
+
+  if (!escuela) {
+    return (
+      <div className="text-center text-red-500 py-8">
+        Por favor, selecciona una escuela para ver el personal.
+      </div>
+    )
   }
 
   return(
@@ -89,8 +132,17 @@ export function PersonalCRUD() {
           Nuevo Empleado
         </Button>
       </div>
+
+      {(createPersonalError || updatePersonalError || deletePersonalError) && (
+        <div className="text-sm text-red-600">
+          {createPersonalError && <div>Error al crear materia: {createPersonalError}</div>}
+          {updatePersonalError && <div>Error al actualizar materia: {updatePersonalError}</div>}
+          {deletePersonalError && <div>Error al eliminar materia: {deletePersonalError}</div>}
+        </div>
+      )}
+
       <Table>
-        <TableCaption>Lista de personal registrado en {routerSchool?.nombre}</TableCaption>
+        <TableCaption>Lista de personal registrado en {escuela?.nombre}</TableCaption>
         <TableHead>
           <TableRow>
             <TableHead>ID Departamento</TableHead>
@@ -114,26 +166,46 @@ export function PersonalCRUD() {
           )}
           {personal.map((empleado) => (
             <TableRow
-              key={empleado.id._id} className="cursor-pointer hover:bg-muted/50"
+              key={empleado._id} className="cursor-pointer hover:bg-muted/50"
               // onClick={() => handleVerEmpleado(empleado.id._id)}
             >
-              <TableCell className="font-medium">{empleado.id.departamentoId}</TableCell>
-              <TableCell>{empleado.id.nombre}</TableCell>
-              <TableCell>{empleado.id.apellidos}</TableCell>
-              <TableCell>{empleado.id.email}</TableCell>
-              <TableCell>{empleado.id.telefono}</TableCell>
-              <TableCell>{empleado.id.maestro ? 'Si': 'No'}</TableCell>
-              <TableCell>{empleado.id.fechaIngreso}</TableCell>
-              <TableCell>{empleado.id.activo ? 'Activo' : 'Inactivo'}</TableCell>
+              <TableCell className="font-medium">{empleado.departamentoId}</TableCell>
+              <TableCell>{empleado.nombre}</TableCell>
+              <TableCell>{empleado.apellidos}</TableCell>
+              <TableCell>{empleado.email}</TableCell>
+              <TableCell>{empleado.telefono}</TableCell>
+              <TableCell>{empleado.maestro ? 'Si': 'No'}</TableCell>
+              <TableCell>{empleado.fechaIngreso}</TableCell>
+              <TableCell>{empleado.activo ? 'Activo' : 'Inactivo'}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
-                  <Button size='icon' variant='outline' onClick={() => openView(empleado)}>
+                  <Button 
+                    size='icon' variant='outline' 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openView(empleado)
+                    }}
+                    disabled={isUpdatingPersonal || isDeletingPersonal}
+                  >
                     <Eye className="h-4 w-4"/>
                   </Button>
-                  <Button size='icon' variant='outline' onClick={() => openEdit(empleado)}>
+                  <Button 
+                    size='icon' variant='outline' 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openEdit(empleado)
+                    }}
+                    disabled={isUpdatingPersonal || isDeletingPersonal}
+                  >
                     <Edit className="h-4 w-4"/>
                   </Button>
-                  <Button size='icon' variant='outline' onClick={() => openDelete(empleado)}>
+                  <Button 
+                    size='icon' variant='outline' 
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      openDelete(empleado)
+                    }}
+                  >
                     <Trash2 className="h-4 w-4"/>
                   </Button>
                 </div>
@@ -147,119 +219,172 @@ export function PersonalCRUD() {
         isOpen={isOpen}
         operation={operation}
         title={
-          operation === 'edit'
-          ? `Editar empleado: ${data?.nombre}`
-          : operation === 'view'
-          ? `Detalle: ${(data as PersonalConId)?.nombre}`
-          : 'Nuevo empleado'
+          operation === 'create'
+          ? 'Crear nuevo empleado'
+          : operation === 'edit'
+          ? 'Editar empleado'
+          : 'Ver empleado'
         }
         description={
-          operation === 'view'
-          ? `Información de ${(data as PersonalConId)?.nombre}`
-          : undefined
+          operation === 'create'
+          ? 'Completa la información del nuevo empleado'
+          : operation === 'edit'
+          ? 'Edita la información del empleado'
+          : 'Información del empleado seleccionado'
         }
         schema={personalSchema}
+        defaultValues={{
+          departamentoId: data?.departamentoId || '',
+          nombre: data?.nombre || '',
+          apellidos: data?.apellidos || '',
+          email: data?.email || '',
+          telefono: data?.telefono || '',
+          maestro: data?.maestro ?? true,
+          fechaIngreso: data?.fechaIngreso || '',
+          activo: data?.activo ?? true,
+        }}
         data={data}
+        onOpenChange={close}
         onSubmit={handleSubmit}
-        onDelete={operation === 'delete' ? handleDelete : undefined}
+        onDelete={handleDelete}
+        isSubmitting={isCreatingPersonal || isUpdatingPersonal}
+        isDeleting={isDeletingPersonal}
       >
-        {(form) => (
+        {(form, operation) => (
           <>
-            {
-              operation == 'view' && data ? (
-                <div className="space-y-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-semibold text-blue-900 mb-2">Información del Personal</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">ID Departamento</span>
-                        <div className="font-medium">{(data as PersonalConId).departamentoId}</div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Nombre</span>
-                        <div className="font-medium">{(data as PersonalConId).nombre}</div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Apellidos</span>
-                        <div className="font-medium">{(data as PersonalConId).apellidos}</div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Email</span>
-                        <div className="font-medium">{(data as PersonalConId).email}</div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Telefono</span>
-                        <div className="font-medium">{(data as PersonalConId).telefono}</div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Maestos</span>
-                        <div className="font-medium">
-                          <Badge
-                            variant='secondary'
-                            className={
-                              (data as PersonalConId).maestro
-                              // Cambiar colores
-                              ? 'bg-black text-white'
-                              : 'bg-black text-white'
-                            }
-                          >
-                            {(data as PersonalConId).maestro}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Fecha de ingreso</span>
-                        <div className="font-medium">{(data as PersonalConId).fechaIngreso}</div>
-                      </div>
-                      <div>
-                        <span className="text-blue-600 text-sm font-medium">Estado</span>
-                        <div className="font-medium">
-                          <Badge
-                            variant='secondary'
-                            className={
-                              (data as PersonalConId).activo
-                              ? 'bg-green-800 text-white'
-                              : 'bg-red-500 text-white'
-                            }
-                          >
-                            {(data as PersonalConId).activo ? 'Activo' : 'Inactivo'}
-                          </Badge>
-                        </div>
+            {/* <PersonalForm form={form as unknown as UseFormReturn<PersonalFormValues>}/> */}
+            <div className="space-y-6">
+              <FormField
+                control={form.control}
+                name="departamentoId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Departamento</FormLabel>
+                    <FormControl>
+                      <Select
+                        {...field}
+                        value={field.value as string}
+                        disabled={operation === 'view'}
+                        onValueChange={field.onChange}
+                      >
+                        <option value="">Seleccionar departamento</option>
+                        {departamentos?.map((departamento) => (
+                          <option key={departamento._id} value={departamento._id}>
+                            {departamento.nombre}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="nombre"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
+                    <FormControl>
+                      <Input type="text" {...field} placeholder="Nombre" value={field.value as string} disabled={operation === 'view'} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="apellidos"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Apellidos</FormLabel>
+                    <FormControl>
+                      <Input type="text" {...field} placeholder="Apellidos" value={field.value as string} disabled={operation === 'view'}/>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Correo electrónico</FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} placeholder="Correo electrónico" value={field.value as string} disabled={operation === 'view'}/>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="telefono"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Numero de telefono</FormLabel>
+                    <FormControl>
+                      <Input type='number' {...field} placeholder="Telefono" value={field.value as string} disabled={operation === 'view'}/>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="maestro"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value as boolean}
+                        onChange={field.onChange}
+                        disabled={operation === 'view'}
+                        className="mt-1 h-4 w-4"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium">
+                        ¿Es maestro?
+                      </FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Marca si este empleado será maestro.
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              /> 
+              <FormField
+                control={form.control}
+                name="fechaIngreso"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha de ingreso</FormLabel>
+                    <FormControl>
+                      <Input type='date' {...field} value={field.value as string} disabled={operation === 'view'}/>
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="activo"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Estado Activo</FormLabel>
+                      <div className="text-sm text-muted-foreground">
+                        Determina si el empleado está activo o inactivo
                       </div>
                     </div>
-                    {/* Botonoes para las acciones */}
-                    <div className="flex gap-2 pt-4 border-t">
-                      <Button
-                        variant='outline'
-                        onClick={() => {
-                          close()
-                          setTimeout(() => {
-                            openEdit(data as PersonalConId)
-                          }, 100)
-                        }}
-                      >
-                        <Pencil className="h-4 w-4 mr-2"/>
-                        Editar
-                      </Button>
-                      <Button
-                        variant='destructive'
-                        onClick={() => {
-                          close()
-                          setTimeout(() => {
-                            openDelete(data as PersonalConId)
-                          }, 100)
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2"/>
-                        Eliminar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <PersonalForm form={form as unknown as UseFormReturn<PersonalFormValues>}/>
-              )
-            }
+                    <FormControl>
+                      <Switch
+                        checked={field.value as boolean}
+                        onCheckedChange={(val) => field.onChange(val)}
+                        disabled={operation === 'view'}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
           </>
         )
         }

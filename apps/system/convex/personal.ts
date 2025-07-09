@@ -19,7 +19,7 @@ export const crearPersonal = mutation({
   }
 })
 
-// Obtener todos los alumnos
+// Obtener todo el personal de una escuela 
 export const obtenerPersonal = query({
   args: { escuelaId: v.id("escuelas") },
   handler: async (ctx, args) => {
@@ -27,6 +27,9 @@ export const obtenerPersonal = query({
       .query("personal")
       .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
       .collect()
+    if (!perosnal) {
+      throw new Error("La escuela especificada no existe.")
+    }
 
     return perosnal.map((_id, ...rest) => ({
       id: _id,
