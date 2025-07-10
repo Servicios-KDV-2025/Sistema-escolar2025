@@ -30,7 +30,7 @@ export type CrearCatalogoDeClaseData = {
 };
 
 export type ActualizarCatalogoDeClaseData = {
-  id: string;
+  _id: string;
   escuelaId: string;
   cicloEscolarId: string;
   materiaId: string;
@@ -102,7 +102,7 @@ export const useCatalogoDeClaseStore = create<CatalogoDeClaseStore>((set) => ({
 }));
 
 type CatalogoDeClaseQueryResult = {
-  id: string;
+  _id: string;
   escuelaId: string;
   cicloEscolarId: string;
   materiaId: string;
@@ -176,7 +176,7 @@ export const useCatalogoDeClase = (escuelaId?: string) => {
     setUpdateError(null);
     try {
       await actualizarCatalogoDeClaseMutation({
-        id: data.id as Id<"catalogosDeClases">,
+        _id: data._id as Id<"catalogosDeClases">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         cicloEscolarId: data.cicloEscolarId as Id<"ciclosEscolares">,
         materiaId: data.materiaId as Id<"materias">,
@@ -201,7 +201,7 @@ export const useCatalogoDeClase = (escuelaId?: string) => {
     setDeleteError(null);
     try {
       await eliminarCatalogoDeClaseMutation({
-        id: id as Id<"catalogosDeClases">,
+        _id: id as Id<"catalogosDeClases">,
         escuelaId: escuelaId as Id<"escuelas">,
       });
     } catch (error) {
@@ -218,7 +218,7 @@ export const useCatalogoDeClase = (escuelaId?: string) => {
     if (catalogosDeClasesQuery) {
       setCatalogosDeClases(
         (catalogosDeClasesQuery as CatalogoDeClaseQueryResult[]).map((c) => ({
-          _id: c.id,
+          _id: c._id,
           escuelaId: c.escuelaId,
           cicloEscolarId: c.cicloEscolarId,
           materiaId: c.materiaId,
