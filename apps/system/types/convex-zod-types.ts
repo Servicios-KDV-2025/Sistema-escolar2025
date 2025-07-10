@@ -107,7 +107,7 @@ export const gruposSchema = z.object({
 
 export type Grupos = z.infer<typeof gruposSchema>;
 
-export const periodosSchema = z.object({
+export const periodoSchema = z.object({
   _id: z.custom<Id<'periodos'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
@@ -116,7 +116,7 @@ export const periodosSchema = z.object({
   activo: z.boolean(),
 });
 
-export type Periodos = z.infer<typeof periodosSchema>;
+export type Periodo = z.infer<typeof periodoSchema>;
 
 export const catalogosDeClasesSchema = z.object({
   id: z.custom<Id<'catalogosDeClases'>>(),
