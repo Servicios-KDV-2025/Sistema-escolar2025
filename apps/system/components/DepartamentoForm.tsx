@@ -1,25 +1,26 @@
 // file: apps/system/components/DepartamentoForm.tsx
-import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
-import { DepartamentoFormValues } from '@/app/shemas/departamento';
+import React from 'react'
+import { UseFormReturn } from 'react-hook-form'
+import { DepartamentoFormValues } from '@/app/shemas/departamento'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@repo/ui/components/shadcn/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@repo/ui/components/shadcn/textarea';
-import { Switch } from '@repo/ui/components/shadcn/switch';
+} from '@repo/ui/components/shadcn/form'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@repo/ui/components/shadcn/textarea'
+import { Switch } from '@repo/ui/components/shadcn/switch'
 
 interface DepartamentoFormProps {
-  form: UseFormReturn<DepartamentoFormValues>;
+  form: UseFormReturn<DepartamentoFormValues>
 }
 
 export function DepartamentoForm({ form }: DepartamentoFormProps) {
   return (
     <div className="space-y-6">
+      {/* Nombre */}
       <FormField
         control={form.control}
         name="nombre"
@@ -27,13 +28,19 @@ export function DepartamentoForm({ form }: DepartamentoFormProps) {
           <FormItem>
             <FormLabel>Nombre del Departamento</FormLabel>
             <FormControl>
-              <Input placeholder="Ingresa el nombre del departamento" {...field} />
+              <Input
+                placeholder="Ingresa el nombre del departamento"
+                {...field}
+                // <-- nunca undefined
+                value={field.value ?? ''}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
 
+      {/* Descripción */}
       <FormField
         control={form.control}
         name="descripcion"
@@ -45,6 +52,8 @@ export function DepartamentoForm({ form }: DepartamentoFormProps) {
                 placeholder="Describe el departamento (opcional)"
                 className="resize-none"
                 {...field}
+                // <-- nunca undefined
+                value={field.value ?? ''}
               />
             </FormControl>
             <FormMessage />
@@ -52,6 +61,7 @@ export function DepartamentoForm({ form }: DepartamentoFormProps) {
         )}
       />
 
+      {/* Activo */}
       <FormField
         control={form.control}
         name="activo"
@@ -65,7 +75,8 @@ export function DepartamentoForm({ form }: DepartamentoFormProps) {
             </div>
             <FormControl>
               <Switch
-                checked={field.value as boolean}
+                // <-- nunca undefined
+                checked={field.value ?? false}
                 onCheckedChange={(val) => field.onChange(val)}
               />
             </FormControl>
@@ -73,5 +84,5 @@ export function DepartamentoForm({ form }: DepartamentoFormProps) {
         )}
       />
     </div>
-  );
+  )
 }
