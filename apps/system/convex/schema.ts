@@ -92,7 +92,7 @@ const applicationTables = {
     grado: v.string(),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
-
+ 
   //* Periodos (horarios)
   periodos: defineTable({
     escuelaId: v.id("escuelas"),
@@ -177,28 +177,42 @@ const applicationTables = {
   calificaciones: defineTable({
     escuelaId: v.id("escuelas"),
     clasePorAlumnoId: v.id("clasesPorAlumno"),
-    periodo: v.string(), // "1er Parcial", "2do Parcial", etc.
-    calificacion: v.number(),
+    cicloEscolarId: v.id("ciclosEscolares"),
+    periodo: v.string(), // "1er Parcial", "Final", etc.
+    calificacion: v.number(), // 0–10 o escala que manejes
+    esFinal: v.optional(v.boolean()),
     comentarios: v.optional(v.string()),
-    fechaRegistro: v.number(),
+    registradoPorId: v.id("personal"),
+    fechaRegistro: v.number(), // timestamp
+
+    createdBy: v.id("personal"),
+    updatedBy: v.optional(v.id("personal")),
+    updatedAt: v.optional(v.number()),
+
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"]),
-
+ 
   // Asistencia
   asistencia: defineTable({
     escuelaId: v.id("escuelas"),
     clasePorAlumnoId: v.id("clasesPorAlumno"),
-    fecha: v.number(), // timestamp del día
+    cicloEscolarId: v.id("ciclosEscolares"), // 🔹 para agrupar por ciclo
+    fecha: v.number(), // timestamp de la fecha
     presente: v.boolean(),
     justificada: v.optional(v.boolean()),
     comentarios: v.optional(v.string()),
     fechaRegistro: v.number(),
+
+    createdBy: v.id("personal"),
+    updatedBy: v.optional(v.id("personal")),
+    updatedAt: v.optional(v.number()),
+
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"])
     .index("by_fecha", ["fecha"]),
-
+ 
   // Eventos escolares
   eventosEscolares: defineTable({
     escuelaId: v.id("escuelas"),
