@@ -4,7 +4,7 @@ import { Id } from "./_generated/dataModel";
 
 
 // 1. Obtener Padres por una escuela específica
-export const obtenerPadresPorEscuela = query({
+export const obtenerPadres = query({
   args: {
     escuelaId: v.id("escuelas"), // ID de la escuela es OBLIGATORIO
   },
@@ -34,7 +34,7 @@ export const obtenerPadrePorId = query({
 // Mutations: creación, actualizacion y eliminación de padres
 
 //3. Crear un nuevo padre DENTRO de una escuela específica
-export const crearPadreConEscuela = mutation({
+export const crearPadre = mutation({
   args: {
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
@@ -120,7 +120,7 @@ export const actualizarPadre = mutation({
 
 
 // 5. Eliminar un Padre, asegurándose de que pertenezca a la escuela
-export const eliminarPadreConEscuela = mutation({
+export const eliminarPadre = mutation({
   args: {
     id: v.id("padres"), // ID del padre a eliminar
     escuelaId: v.id("escuelas"), // ID de la escuela a la que pertenece el padre (para validación)

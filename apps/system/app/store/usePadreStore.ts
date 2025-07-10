@@ -6,8 +6,8 @@ import { Id } from "@/convex/_generated/dataModel";
 
 // Tipo de Padre basado en tu schema de Convex
 export type Padre = {
-  _id: string;
-  escuelaId: string;
+  _id: Id<"padres">;
+  escuelaId: Id<"escuelas">;
   nombre: string;
   apellidos: string;
   email?: string;
@@ -192,6 +192,7 @@ export const usePadre = (escuelaId?: string) => {
     try {
       await eliminarPadreMutation({
         id: id as Id<"padres">,
+        escuelaId: escuelaId as Id<"escuelas">
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar padre';
@@ -207,8 +208,8 @@ export const usePadre = (escuelaId?: string) => {
     if (padresQuery) {
       setPadres(
         (padresQuery as PadreQueryResult[]).map((p) => ({
-          _id: p._id,
-          escuelaId: p.escuelaId,
+          _id: p._id as Id<"padres">,
+          escuelaId: p.escuelaId as Id<"escuelas">,
           nombre: p.nombre,
           apellidos: p.apellidos,
           email: p.email,
