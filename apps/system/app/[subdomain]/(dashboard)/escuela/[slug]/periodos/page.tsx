@@ -134,7 +134,7 @@ export default function PeriodosPage() {
         });
       } else if (operation === 'edit' && data?._id) {
         await actualizarPeriodo({
-          _id: data._id as import("@/convex/_generated/dataModel").Id<"periodos">,
+          id: data._id as import("@/convex/_generated/dataModel").Id<"periodos">,
           escuelaId,
           nombre: values.nombre as string,
           horaInicio: values.horaInicio as string,
