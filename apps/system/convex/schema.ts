@@ -251,7 +251,7 @@ const applicationTables = {
     .index("by_calendario", ["calendarioId"])
     .index("by_ciclo", ["cicloEscolarId"])
     .index("by_evento", ["eventoEscolarId"]),
- 
+
   // Tipos de Eventos
   tiposDeEventos: defineTable({
     escuelaId: v.id("escuelas"),
@@ -262,7 +262,7 @@ const applicationTables = {
     icono: v.optional(v.string()),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
+
 };
  
 export default defineSchema({

@@ -1,12 +1,13 @@
 import { Id } from "@/convex/_generated/dataModel";
 import { GenericId } from "convex/values";
 
-export interface Calendario {
-  _id: GenericId<"calendario">
+export interface TiposDeEventos {
+  _id: GenericId<"tiposDeEventos">
   escuelaId: Id<"escuelas">
-  cicloEscolarId: Id<"ciclosEscolares">
-  fecha: number
-  tipoEventoId: Id<"tiposDeEventos">
+  nombre: string
+  clave: string
   descripcion?: string
+  color?: string
+  icono?: string
   activo: boolean
 }

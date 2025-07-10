@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
- 
+
 export const crearTipoEvento = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -17,7 +17,7 @@ export const crearTipoEvento = mutation({
     });
   },
 });
- 
+
 export const editarTipoEvento = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -32,7 +32,7 @@ export const editarTipoEvento = mutation({
     const evento = await ctx.db.get(args.tipoEventoId);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("No autorizado o no encontrado");
     await ctx.db.patch(args.tipoEventoId, {
-      nombre: args.nombre,
+      nombre: args.nombre, 
       clave: args.clave,
       descripcion: args.descripcion,
       color: args.color,
@@ -40,7 +40,7 @@ export const editarTipoEvento = mutation({
     });
   },
 });
- 
+
 export const obtenerTiposDeEventos= query({
   args: {
     escuelaId: v.id("escuelas"),
@@ -53,8 +53,8 @@ export const obtenerTiposDeEventos= query({
       .collect();
   },
 });
- 
- 
+
+
 export const obtenerTiposDeEventosPorId = query({
   args: {
     escuelaId: v.id("escuelas"),
@@ -68,7 +68,7 @@ export const obtenerTiposDeEventosPorId = query({
     return evento;
   },
 });
- 
+
 export const eliminarTipoEvento = mutation({
   args: {
     escuelaId: v.id("escuelas"),

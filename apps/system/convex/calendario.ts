@@ -5,7 +5,7 @@ export const crearEventoCalendario = mutation({
   args: {
     cicloEscolarId: v.id("ciclosEscolares"),
     fecha: v.number(),
-    tipo: v.id("tiposDeEventos"),
+    tipoEventoId: v.id("tiposDeEventos"),
     descripcion: v.optional(v.string()),
     escuelaId: v.id("escuelas"),
   },
@@ -14,7 +14,7 @@ export const crearEventoCalendario = mutation({
       cicloEscolarId: args.cicloEscolarId,
       escuelaId: args.escuelaId,
       fecha: args.fecha,
-      tipoEventoId: args.tipo,
+      tipoEventoId: args.tipoEventoId,
       descripcion: args.descripcion,
       activo: true,
     });
@@ -61,8 +61,9 @@ export const actualizarEventoCalendario = mutation({
     eventoId: v.id("calendario"),
     escuelaId: v.id("escuelas"),
     fecha: v.number(),
-    tipo: v.id("tiposDeEventos"),
+    tipoEventoId: v.id("tiposDeEventos"),
     descripcion: v.optional(v.string()),
+    cicloEscolarId: v.id("ciclosEscolares"),
     activo: v.optional(v.boolean())
   },
   handler: async (ctx, args) => {
@@ -70,8 +71,9 @@ export const actualizarEventoCalendario = mutation({
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("No autorizado o no encontrado");
     return await ctx.db.patch(args.eventoId, {
       fecha: args.fecha,
-      tipoEventoId: args.tipo,
+      tipoEventoId: args.tipoEventoId,
       descripcion: args.descripcion,
+      cicloEscolarId: args.cicloEscolarId,
       activo: args.activo
     });
   },
