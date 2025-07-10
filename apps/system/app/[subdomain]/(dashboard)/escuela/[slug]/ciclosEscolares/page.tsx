@@ -1,6 +1,7 @@
 "use client";
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -11,24 +12,16 @@ import { Input } from "@/components/ui/input";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
-import { calendarioSchema } from "@/app/shemas/calendario";
+import { cicloEscolarSchema } from "@/app/shemas/cicloEscolar";
 import { toast } from "sonner";
-import { useUser } from "@clerk/nextjs";
 
 export default function CiclosEscolaresPage() {
   const router = useRouter();
-  //const escuela = useEscuela((s) => s.escuela);
-  // const ciclosEscolares = useQuery(
-  //   api.ciclosEscolares.obtenerCiclosEscolares,
-  //   escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
-  // );
   const params = useParams();
   const slug = typeof params?.slug === "string" ? params.slug : "";
   const setItems = useBreadcrumbStore(state => state.setItems)
-  const { user } = useUser()
-  const {
-    escuela
-  } = useEscuela()
+  const { escuela } = useEscuela()
+
   useEffect(() => {
     if (escuela) {
       setItems([
@@ -38,11 +31,6 @@ export default function CiclosEscolaresPage() {
     }
   }, [escuela, setItems, slug])
 
-
-
-
-
-  // Ejemplo de CRUD para ciclos escolares
   const {
     ciclosEscolares,
     isCreating,
@@ -54,7 +42,7 @@ export default function CiclosEscolaresPage() {
     crearCicloEscolar,
     actualizarCicloEscolar,
     eliminarCicloEscolar,
-    clearErrors: clearErrors,
+    clearErrors,
   } = useCicloEscolar(escuela?._id)
 
   const {
@@ -63,10 +51,10 @@ export default function CiclosEscolaresPage() {
     data,
     openCreate,
     openEdit,
-    openView,
     openDelete,
     close
-  } = useCrudDialog(calendarioSchema, {
+  } = useCrudDialog(cicloEscolarSchema, {
+    _id: '',
     nombre: "",
     fechaInicio: "",
     fechaFin: "",
@@ -74,29 +62,26 @@ export default function CiclosEscolaresPage() {
   })
 
   const handleSubmit = async (values: Record<string, unknown>) => {
-    console.log("Entro1")
     if (!escuela?._id) {
       toast.error('Error', { description: 'No se pudo identificar la escuela' })
       return
     }
-    console.log("Entro")
+    
     try {
       if (operation === 'create') {
-        console.log("crear")
         await crearCicloEscolar({
           escuelaId: escuela._id,
           nombre: values.nombre as string,
-          fechaInicio: new Date(values.fechaInicio as number).getTime(),
-          fechaFin: new Date(values.fechaFin as number).getTime()
+          fechaInicio: new Date(values.fechaInicio as string).getTime(),
+          fechaFin: new Date(values.fechaFin as string).getTime()
         })
       } else if (operation === 'edit' && data?._id) {
-        console.log("editar")
         await actualizarCicloEscolar({
           id: data._id,
           escuelaId: escuela._id,
           nombre: values.nombre as string,
-          fechaInicio: new Date(values.fechaInicio as number).getTime(),
-          fechaFin: new Date(values.fechaFin as number).getTime(),
+          fechaInicio: new Date(values.fechaInicio as string).getTime(),
+          fechaFin: new Date(values.fechaFin as string).getTime(),
           activo: values.activo as boolean
         })
       } else {
@@ -182,24 +167,21 @@ export default function CiclosEscolaresPage() {
                     </div>
                   )}
                   <div className="flex gap-4">
-                    {ciclosEscolares?.map((cicloEscolar) => (
-                      <div key={cicloEscolar._id} >
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handleVerCicloEscolar(cicloEscolar._id)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm" onClick={(e) => {
-                        e.stopPropagation();
-                        openEdit(cicloEscolar);
-                      }} disabled={isUpdating}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={() => openDelete(cicloEscolar)} disabled={isDeleting}>
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                    <div key={cicloEscolar._id} >
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => handleVerCicloEscolar(cicloEscolar._id)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation();
+                          openEdit(cicloEscolar); }} disabled={isUpdating}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => openDelete(cicloEscolar)} disabled={isDeleting}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                    ))}
+                    </div>
+
                     {ciclosEscolares?.length === 0 && (
                       <p className="text-center text-muted-foreground py-8">
                         No hay ciclos escolares creados. Crea el primer ciclo escolar usando el botón &quot;Nuevo &quot;.
@@ -218,7 +200,7 @@ export default function CiclosEscolaresPage() {
           operation === 'edit' ? 'Editar Ciclo Escolar' : 'Ver Ciclo Escolar'}
         description={operation === 'create' ? 'Completa la información del nuevo ciclo escolar' :
           operation === 'edit' ? 'Modifica la información del ciclo escolar' : 'Información del ciclo escolar'}
-        schema={calendarioSchema}
+        schema={cicloEscolarSchema}
         defaultValues={{
           nombre: "",
           fechaInicio: "",
@@ -254,13 +236,18 @@ export default function CiclosEscolaresPage() {
                 <FormItem>
                   <FormLabel>Fecha de Inicio</FormLabel>
                   <FormControl>
-                    <Input type="date" disabled={operation === 'view'} {...field}
+                    <Input 
+                      type="date" 
+                      disabled={operation === 'view'} 
                       value={
                         field.value
-                          ? new Date(field.value as string).toISOString().split("T")[0]
+                          ? (typeof field.value === 'number' 
+                              ? new Date(field.value).toISOString().split("T")[0]
+                              : new Date(field.value as string).toISOString().split("T")[0])
                           : ''
                       }
-                      onChange={(e) => field.onChange(new Date(e.target.value))} />
+                      onChange={(e) => field.onChange(e.target.value)} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -274,18 +261,51 @@ export default function CiclosEscolaresPage() {
                 <FormItem>
                   <FormLabel>Fecha Final</FormLabel>
                   <FormControl>
-                    <Input type="date" disabled={operation === 'view'} {...field}
+                    <Input 
+                      type="date" 
+                      disabled={operation === 'view'} 
                       value={
                         field.value
-                          ? new Date(field.value as string).toISOString().split("T")[0]
+                          ? (typeof field.value === 'number' 
+                              ? new Date(field.value).toISOString().split("T")[0]
+                              : new Date(field.value as string).toISOString().split("T")[0])
                           : ''
                       }
-                      onChange={(e) => field.onChange(new Date(e.target.value))} />
+                      onChange={(e) => field.onChange(e.target.value)} 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {operation == 'edit' ?
+              <FormField
+                control={form.control}
+                name="activo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Estado</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={value => field.onChange(value === "true")}
+                        value={field.value ? "true" : "false"}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona el estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Activo</SelectItem>
+                          <SelectItem value="false">Inactivo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              : ""}
+
 
           </div>
         )}

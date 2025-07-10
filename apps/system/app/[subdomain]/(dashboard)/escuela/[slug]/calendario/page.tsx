@@ -596,7 +596,7 @@ export default function CalendarioEscolar() {
                     setModoDialogoT(null);
                     setModalAbiertoT(true)
                   }}
-                  className="bg-amber-600 shadow-lg rounded-lg px-4 py-2 flex items-center justify-center transition-transform duration-150 hover:scale-105 "
+                  className="bg-amber-600 hover:bg-amber-700 shadow-lg rounded-lg px-4 py-2 flex items-center justify-center transition-transform duration-150 hover:scale-105 "
                   aria-label="Agregar tipo de evento"
                   title="Agregar tipo de evento">
                   Crear nuevo tipo de evento
