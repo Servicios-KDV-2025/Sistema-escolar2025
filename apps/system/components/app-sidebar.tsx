@@ -77,12 +77,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/salones`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Salones",
-          url: `/escuela/${slug}/salones`,
-        },
-      ],
     },
     {
       title: "Materias",
@@ -123,14 +117,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/periodos`,
       icon: SquareTerminal,
       isActive: true,
-      
     },
     {
       title: "Periodos por Clase",
       url: `/escuela/${slug}/periodosPorClase`,
       icon: SquareTerminal,
       isActive: true,
-    
     },
     {
       title: "Alumnos",
