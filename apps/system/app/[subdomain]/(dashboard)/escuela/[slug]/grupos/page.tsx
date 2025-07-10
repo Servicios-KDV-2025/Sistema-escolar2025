@@ -1,8 +1,6 @@
 'use client';
 
 import { useEscuela } from "@/app/store/useEscuelaStore";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { grupoSchema } from "@/app/shemas/grupo";
@@ -13,16 +11,19 @@ import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Input } from "@/components/ui/input";
+import { useGrupo } from "@/app/store/useGrupoStore";
 
 export default function Page() {
     const { escuela } = useEscuela();
 
-    const crearGrupo = useMutation(api.grupos.crearGrupo)
-    const actualizarGrupo = useMutation(api.grupos.actualizarGrupo)
-    const eliminarGrupo = useMutation(api.grupos.eliminarGrupo)
-    const grupos = useQuery(api.grupos.verTodosLosGrupos, {
-        escuelaId: escuela?._id as Id<"escuelas">
-    });
+    const { crearGrupo, actualizarGrupo, eliminarGrupo, grupos } = useGrupo(escuela?._id);
+
+    // const crearGrupo = useMutation(api.grupos.crearGrupo)
+    // const actualizarGrupo = useMutation(api.grupos.actualizarGrupo)
+    // const eliminarGrupo = useMutation(api.grupos.eliminarGrupo)
+    // const grupos = useQuery(api.grupos.verTodosLosGrupos, {
+    //     escuelaId: escuela?._id as Id<"escuelas">
+    // });
 
     const {
         isOpen,
@@ -78,10 +79,7 @@ export default function Page() {
         }
 
         try {
-            await eliminarGrupo({
-                id: id as Id<"grupos">,
-                escuelaId: escuela._id as Id<"escuelas">
-            })
+            await eliminarGrupo(id, escuela?._id)            
         } catch (error) {
             console.error('Error al eliminar grupo:', error)
             throw error
@@ -111,7 +109,7 @@ export default function Page() {
                     <CardContent>
                         <div className="grid gap-4">
                             {grupos?.map((grupo) => (
-                                <div key={grupo.id} className="flex justify-between items-center p-3 border rounded-lg">
+                                <div key={grupo._id} className="flex justify-between items-center p-3 border rounded-lg">
                                     <div>
                                         <p className="font-medium">{grupo.grado} - {grupo.nombre}</p>
                                         <p className="text-sm text-muted-foreground">
@@ -119,13 +117,13 @@ export default function Page() {
                                         </p>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" onClick={() => openView({ ...grupo, _id: grupo.id })}>
+                                        <Button variant="outline" size="sm" onClick={() => openView({ ...grupo, _id: grupo._id })}>
                                             <Eye className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="outline" size="sm" onClick={() => openEdit({ ...grupo, _id: grupo.id })}>
+                                        <Button variant="outline" size="sm" onClick={() => openEdit({ ...grupo, _id: grupo._id })}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
-                                        <Button variant="destructive" size="sm" onClick={() => openDelete({ ...grupo, _id: grupo.id })}>
+                                        <Button variant="destructive" size="sm" onClick={() => openDelete({ ...grupo, _id: grupo._id })}>
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
