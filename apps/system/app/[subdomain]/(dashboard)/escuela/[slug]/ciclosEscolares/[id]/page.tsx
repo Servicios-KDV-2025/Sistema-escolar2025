@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@repo/ui/components/shadcn/dialog";
-import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuela";
 import { toast } from "sonner";
+import EventoDialog from "@/components/dialog/eventoDialog";
+import { Calendario } from "@/app/types/calendario";
 
 export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -30,20 +32,21 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
         escuela?._id && idCicloEscolar
             ? { escuelaId: escuela?._id as Id<"escuelas">, cicloId: idCicloEscolar }
             : "skip");
-
-    //Calendario
-    const calendarios = useQuery(api.calendario.obtenerCalendarioCicloEscolar,
+    const calendario = useQuery(api.calendario.obtenerCalendarioCicloEscolar,
         escuela?._id && idCicloEscolar
             ? { escuelaId: escuela?._id as Id<"escuelas">, cicloEscolarId: idCicloEscolar }
             : "skip"
     );
-    const handleVerCicloEscolar = (id: string) => {
-        router.push(`/escuela/${slug}/ciclosEscolares/${cicloEscolar?._id}/calendario/` + `${id}`);
-    };
+    const tiposDeEventos = useQuery(
+        api.tiposDeEventos.obtenerTiposDeEventos,
+        escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
+    )
 
-    const handleCrear = () => {
-        router.push(`/escuela/${slug}/ciclosEscolares/${cicloEscolar?._id}/calendario/create`);
-    };
+    // Calendarios
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [eventoEditar, setEventoEditar] = useState<Calendario | null>(null);
+    type ModoEvento = "editar" | "ver" | "eliminar" | null;
+    const [modoDialogo, setModoDialogo] = useState<ModoEvento>();
 
     useEffect(() => {
         if (cicloEscolar && escuela) {
@@ -96,116 +99,143 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                 </Button>
                 <h1 className="text-3xl font-bold">Detalle del Ciclo Escolar</h1>
             </div>
-
-            <Card className="max-w-2xl mx-auto">
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="text-2xl">
-                            Perido: {cicloEscolar?.nombre}
-                        </CardTitle>
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={handleEditar}
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setModalEliminar(true)}
-                                className="text-destructive"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+            <div className="flex flex-col lg:flex-row gap-4">
+                <Card className="flex flex-1">
+                    <CardHeader>
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="text-2xl">
+                                Perido: {cicloEscolar?.nombre}
+                            </CardTitle>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={handleEditar}
+                                >
+                                    <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setModalEliminar(true)}
+                                    className="text-destructive"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Nombre</h3>
-                        <div className="p-2 bg-muted rounded-md">{cicloEscolar.nombre}</div>
-                    </div>
-
-                    <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Fecha de Inicio</h3>
-                        <div className="p-2 bg-muted rounded-md">
-                            {new Date(cicloEscolar.fechaInicio).toISOString().split("T")[0]}
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div>
+                            <h3 className="font-medium text-sm text-muted-foreground mb-1">Nombre</h3>
+                            <div className="p-2 bg-muted rounded-md">{cicloEscolar.nombre}</div>
                         </div>
-                    </div>
 
-                    <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Fecha Final</h3>
-                        <div className="p-2 bg-muted rounded-md">
-                            {new Date(cicloEscolar.fechaFin).toISOString().split("T")[0]}
+                        <div>
+                            <h3 className="font-medium text-sm text-muted-foreground mb-1">Fecha de Inicio</h3>
+                            <div className="p-2 bg-muted rounded-md">
+                                {new Date(cicloEscolar.fechaInicio).toISOString().split("T")[0]}
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <h3 className="font-medium text-sm text-muted-foreground mb-1">Estado</h3>
-                        <div className="p-2 bg-muted rounded-md">
-                            {cicloEscolar.activo ? "Activo" : "Inactivo"}
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
 
-            <Card className="max-w-2xl mx-auto mt-6">
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <CardTitle className="text-2xl">
-                            Calendario
-                        </CardTitle>
-
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={handleCrear}
-                            >
-                                <Plus className="h-4 w-4" />
-                            </Button>
+                        <div>
+                            <h3 className="font-medium text-sm text-muted-foreground mb-1">Fecha Final</h3>
+                            <div className="p-2 bg-muted rounded-md">
+                                {new Date(cicloEscolar.fechaFin).toISOString().split("T")[0]}
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <Table>
-                        <TableCaption>Lista de calendarios registrados</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">Fecha</TableHead>
-                                <TableHead>Tipo</TableHead>
-                                <TableHead>Descripción</TableHead>
-                                <TableHead>Estado</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {!calendarios || calendarios.length === 0 ? (
+                        <div>
+                            <h3 className="font-medium text-sm text-muted-foreground mb-1">Estado</h3>
+                            <div className="p-2 bg-muted rounded-md">
+                                {cicloEscolar.activo ? "Activo" : "Inactivo"}
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="flex flex-2">
+                    <CardHeader>
+                        <div className="flex justify-between items-center">
+                            <CardTitle className="text-2xl">
+                                Calendario
+                            </CardTitle>
+                            <div className="flex gap-2">
+                                <Button variant="outline" size="icon" onClick={() => {
+                                    setEventoEditar(null)
+                                    setModoDialogo(null);
+                                    setModalAbierto(true)
+                                }}>
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Table>
+                            <TableCaption>Lista de fechas registradas</TableCaption>
+                            <TableHeader>
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center">
-                                        No hay calendarios registrados
-                                    </TableCell>
+                                    <TableHead className="w-[100px]">Fecha</TableHead>
+                                    <TableHead>Tipo</TableHead>
+                                    <TableHead>Descripción</TableHead>
+                                    <TableHead>Estado</TableHead>
+                                    <TableHead>Acciones</TableHead>
                                 </TableRow>
-                            ) : (
-                                calendarios.map((calendario) => (
-                                    <TableRow
-                                        key={calendario._id}
-                                        className="cursor-pointer hover:bg-muted/50"
-                                        onClick={() => handleVerCicloEscolar(calendario._id)}
-                                    >
-                                        <TableCell className="font-medium">
-                                            {new Date(calendario.fecha).toISOString().split("T")[0]}
+                            </TableHeader>
+                            <TableBody>
+                                {!calendario || calendario.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="text-center">
+                                            No hay calendarios registrados
                                         </TableCell>
-                                        <TableCell>{calendario.tipo}</TableCell>
-                                        <TableCell>{calendario.descripcion}</TableCell>
-                                        <TableCell>{calendario.activo ? "Activo" : "Inactivo"}</TableCell>
                                     </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+                                ) : (
+                                    calendario.map((calendario_p) => (
+                                        <TableRow
+                                            key={calendario_p._id}
+                                            className="cursor-pointer hover:bg-muted/50"
+                                        >
+                                            <TableCell className="font-medium">
+                                                {new Date(calendario_p.fecha).toISOString().split("T")[0]}
+                                            </TableCell>
+                                            <TableCell className="max-w-[80px] truncate">{tiposDeEventos?.find(t => t._id === calendario_p.tipoEventoId)?.nombre ??
+                                                "Cargando..."}</TableCell>
+                                            <TableCell className="max-w-[100px] truncate">{calendario_p.descripcion}</TableCell>
+                                            <TableCell>{calendario_p.activo ? "Activo" : "Inactivo"}</TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-2">
+                                                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => {
+                                                        setEventoEditar(calendario_p as Calendario)
+                                                        setModoDialogo("ver");
+                                                        setModalAbierto(true)
+                                                    }}>
+                                                        <Eye className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEventoEditar(calendario_p as Calendario)
+                                                        setModoDialogo("editar")
+                                                        setModalAbierto(true)
+                                                    }}>
+                                                        <Pencil className="h-4 w-4" />
+                                                    </Button>
+                                                    <Button variant="destructive" size="sm" className="cursor-pointer" onClick={() => {
+                                                        setEventoEditar(calendario_p as Calendario)
+                                                        setModoDialogo("eliminar");
+                                                        setModalAbierto(true)
+                                                    }}>
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+            </div>
 
             <Dialog open={modalEliminar} onOpenChange={setModalEliminar}>
                 <DialogContent>
@@ -234,6 +264,18 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+            <EventoDialog
+                isOpen={modalAbierto}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setEventoEditar(null);
+                    }
+                    setModalAbierto(open);
+                }}
+                modo={modoDialogo}
+                escuelaId={escuela?._id as Id<"escuelas">}
+                eventoEditar={eventoEditar ?? undefined}
+            />
         </div>
     );
 }
