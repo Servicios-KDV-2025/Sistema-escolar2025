@@ -32,6 +32,7 @@ import type * as personal from "../personal.js";
 import type * as prospectos from "../prospectos.js";
 import type * as salones from "../salones.js";
 import type * as subdomains from "../subdomains.js";
+import type * as tiposDeEventos from "../tiposDeEventos.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -61,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   prospectos: typeof prospectos;
   salones: typeof salones;
   subdomains: typeof subdomains;
+  tiposDeEventos: typeof tiposDeEventos;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

@@ -92,8 +92,8 @@ const applicationTables = {
     grado: v.string(),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
-
-  // Periodos (horarios)
+ 
+  //* Periodos (horarios)
   periodos: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1ra hora", "2da hora"
@@ -191,10 +191,8 @@ const applicationTables = {
 
   })
     .index("by_escuela", ["escuelaId"])
-    .index("by_clase_alumno", ["clasePorAlumnoId"])
-    .index("by_ciclo", ["cicloEscolarId"])
-    .index("by_docente", ["registradoPorId"]),
-
+    .index("by_clase_alumno", ["clasePorAlumnoId"]),
+ 
   // Asistencia
   asistencia: defineTable({
     escuelaId: v.id("escuelas"),
@@ -213,9 +211,8 @@ const applicationTables = {
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"])
-    .index("by_fecha", ["fecha"])
-    .index("by_ciclo", ["cicloEscolarId"]),
-
+    .index("by_fecha", ["fecha"]),
+ 
   // Eventos escolares
   eventosEscolares: defineTable({
     escuelaId: v.id("escuelas"),
@@ -229,8 +226,8 @@ const applicationTables = {
   calendario: defineTable({
     cicloEscolarId: v.id("ciclosEscolares"),
     escuelaId: v.id("escuelas"),
-    fecha: v.number(), // timestamp
-    tipo: v.string(), // "clase", "feriado", "examen", etc.
+    fecha: v.number(),
+    tipoEventoId: v.id("tiposDeEventos"),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   })
@@ -254,6 +251,18 @@ const applicationTables = {
     .index("by_calendario", ["calendarioId"])
     .index("by_ciclo", ["cicloEscolarId"])
     .index("by_evento", ["eventoEscolarId"]),
+
+  // Tipos de Eventos
+  tiposDeEventos: defineTable({
+    escuelaId: v.id("escuelas"),
+    nombre: v.string(),
+    clave: v.string(),
+    descripcion: v.optional(v.string()),
+    color: v.optional(v.string()),
+    icono: v.optional(v.string()),
+    activo: v.boolean(),
+  }).index("by_escuela", ["escuelaId"]),
+
 };
 
 export default defineSchema({
