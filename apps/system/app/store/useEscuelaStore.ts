@@ -141,13 +141,6 @@ export const useEscuela = () => {
   
   const todasLasEscuelasQuery = useQuery(api.escuelas.obtenerEscuelas);
   
-  // Debug logs
-  console.log('=== STORE DEBUG ===')
-  console.log('user email:', user?.emailAddresses?.[0]?.emailAddress)
-  console.log('escuelaQuery:', escuelaQuery)
-  console.log('escuela (store):', escuela)
-  console.log('escuelaActual:', escuelaQuery || escuela)
-  console.log('==================')
   
   // ✅ Mutations
   const crearEscuelaMutation = useMutation(api.escuelas.crearEscuela);
