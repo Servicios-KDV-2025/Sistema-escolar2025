@@ -14,7 +14,9 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as alumnos from "../alumnos.js";
+import type * as asistencias from "../asistencias.js";
 import type * as calendario from "../calendario.js";
+import type * as calificaciones from "../calificaciones.js";
 import type * as catalogosDeClases from "../catalogosDeClases.js";
 import type * as ciclosEscolares from "../ciclosEscolares.js";
 import type * as departamento from "../departamento.js";
@@ -41,7 +43,9 @@ import type * as subdomains from "../subdomains.js";
  */
 declare const fullApi: ApiFromModules<{
   alumnos: typeof alumnos;
+  asistencias: typeof asistencias;
   calendario: typeof calendario;
+  calificaciones: typeof calificaciones;
   catalogosDeClases: typeof catalogosDeClases;
   ciclosEscolares: typeof ciclosEscolares;
   departamento: typeof departamento;

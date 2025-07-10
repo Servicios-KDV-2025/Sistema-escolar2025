@@ -30,7 +30,7 @@ export type CrearEventoPorClaseData = {
 };
 
 export type ActualizarEventoPorClaseData = {
-  id: string;
+  _id: string;
   escuelaId: string;
   catalogoClaseId: string;
   calendarioId: string;
@@ -102,7 +102,7 @@ export const useEventoPorClaseStore = create<EventoPorClaseStore>((set) => ({
 }));
 
 type EventoPorClaseQueryResult = {
-  id: string;
+  _id: string;
   escuelaId: string;
   catalogoClaseId: string;
   calendarioId: string;
@@ -175,7 +175,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
     setUpdateError(null);
     try {
       await actualizarEventoPorClaseMutation({
-        id: data.id as Id<"eventoPorClases">,
+        _id: data._id as Id<"eventoPorClases">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
         calendarioId: data.calendarioId as Id<"calendario">,
@@ -200,7 +200,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
     setDeleteError(null);
     try {
       await eliminarEventoPorClaseMutation({
-        id: id as Id<"eventoPorClases">,
+        _id: id as Id<"eventoPorClases">,
         escuelaId: escuelaId as Id<"escuelas">,
       });
     } catch (error) {
@@ -217,7 +217,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
     if (eventosPorClaseQuery) {
       setEventosPorClase(
         (eventosPorClaseQuery as EventoPorClaseQueryResult[]).map((e) => ({
-          _id: e.id,
+          _id: e._id,
           escuelaId: e.escuelaId,
           catalogoClaseId: e.catalogoClaseId,
           calendarioId: e.calendarioId,
