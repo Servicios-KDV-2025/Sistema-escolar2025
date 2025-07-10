@@ -5,7 +5,7 @@ import { api } from "@/convex/_generated/api";
 import { Calendar } from "@repo/ui/components/shadcn/calendar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Id } from "@/convex/_generated/dataModel";
 import { BookOpen, AlertTriangle, Bell, TrendingUp, School, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
@@ -42,7 +42,7 @@ interface TipoEventoConfig {
 export default function CalendarioEscolar() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [currentMonth, setCurrentMonth] = useState(new Date())
-  const escuela = useEscuela((s) => s.escuela)
+  const {escuela } = useEscuela()
   const setItems = useBreadcrumbStore(state => state.setItems)
   const params = useParams()
   const slug = typeof params?.slug === "string" ? params.slug : ""

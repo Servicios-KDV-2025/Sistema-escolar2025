@@ -7,7 +7,7 @@ import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Input } from "@/components/ui/input";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";

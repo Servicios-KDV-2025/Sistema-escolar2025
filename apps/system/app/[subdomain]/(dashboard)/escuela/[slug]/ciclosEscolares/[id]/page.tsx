@@ -11,7 +11,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { ArrowLeft, Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { toast } from "sonner";
 import EventoDialog from "@/components/dialog/eventoDialog";
 import { Calendario } from "@/app/types/calendario";
