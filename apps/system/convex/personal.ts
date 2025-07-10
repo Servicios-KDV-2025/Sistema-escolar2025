@@ -31,10 +31,7 @@ export const obtenerPersonal = query({
       throw new Error("La escuela especificada no existe.")
     }
 
-    return perosnal.map((_id, ...rest) => ({
-      id: _id,
-      ...rest
-    }))
+    return perosnal
   }
 })
 

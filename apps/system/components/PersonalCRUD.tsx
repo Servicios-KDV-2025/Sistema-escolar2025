@@ -1,10 +1,18 @@
 'use client'
  
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore"
-import { useEscuela } from "@/app/store/useEscuelaStore"
+import { useEscuela } from "@/app/store/useEscuela"
 import { Id } from "@/convex/_generated/dataModel"
 import { Button } from "@repo/ui/components/shadcn/button"
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableRow } from "@repo/ui/components/shadcn/table"
+import { 
+  Table, 
+  TableBody, 
+  TableCaption, 
+  TableCell, 
+  TableHead, 
+  TableHeader,
+  TableRow 
+} from "@repo/ui/components/shadcn/table"
 import { Edit, Eye, Plus, Trash2 } from "lucide-react"
 import { useEffect } from "react"
 import { CrudDialog, useCrudDialog } from "./ui/crud-dialog"
@@ -15,18 +23,17 @@ import { api } from "@/convex/_generated/api"
 import { useParams } from "next/navigation"
 import { usePersonal } from "@/app/store/usePersonalStore"
 import { FormControl, FormField, FormItem, FormLabel } from "@repo/ui/components/shadcn/form";
-import { Select } from "@repo/ui/components/shadcn/select"
+import { Select, SelectTrigger, SelectItem, SelectContent, SelectValue } from "@repo/ui/components/shadcn/select"
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Switch } from "@repo/ui/components/shadcn/switch"
 
 export function PersonalCRUD() {
-
+  const { escuela } = useEscuela()
+  const departamentos = useQuery(api.departamento.obtenerDepartamentos, escuela ? {escuelaId: escuela._id as Id<'escuelas'>} : 'skip')
+  
   const {isOpen, operation, data, openCreate, openEdit, openView, openDelete, close} =
     useCrudDialog(personalSchema, {departamento: '', nombre: '', apellidos: '', email: '', telefono: '', maestro: true, fechaIngreso: '', activo: true})
   
-  const { escuela } = useEscuela()
-  const departamentos = useQuery(api.departamento.obtenerDepartamentos, escuela ? {escuelaId: escuela._id as Id<'escuelas'>} : 'skip')
-
   const {
     personal,
     isCreating: isCreatingPersonal,
@@ -79,8 +86,6 @@ export function PersonalCRUD() {
       } else if (operation === 'edit' && data?._id) {
         await actualizarPersonal({
           id: data._id,
-          escuelaId: escuela._id,
-          departamentoId: validatedValues.departamentoId as Id<'departamento'>,
           nombre: validatedValues.nombre as string,
           apellidos: validatedValues.apellidos as string,
           email: validatedValues.email as string | undefined,
@@ -134,16 +139,24 @@ export function PersonalCRUD() {
       </div>
 
       {(createPersonalError || updatePersonalError || deletePersonalError) && (
-        <div className="text-sm text-red-600">
-          {createPersonalError && <div>Error al crear materia: {createPersonalError}</div>}
-          {updatePersonalError && <div>Error al actualizar materia: {updatePersonalError}</div>}
-          {deletePersonalError && <div>Error al eliminar materia: {deletePersonalError}</div>}
+        <div>
+          <div className="text-sm text-red-600">
+            {createPersonalError && <div>Error al crear materia: {createPersonalError}</div>}
+            {updatePersonalError && <div>Error al actualizar materia: {updatePersonalError}</div>}
+            {deletePersonalError && <div>Error al eliminar materia: {deletePersonalError}</div>}
+          </div>
+          <Button
+            onClick={clearPersonalErrors}
+            className="text-xs text-blue-500 underline mt-1"
+          >
+            Limpiar errores
+          </Button>
         </div>
       )}
 
       <Table>
         <TableCaption>Lista de personal registrado en {escuela?.nombre}</TableCaption>
-        <TableHead>
+        <TableHeader>
           <TableRow>
             <TableHead>ID Departamento</TableHead>
             <TableHead>Nombre</TableHead>
@@ -155,11 +168,11 @@ export function PersonalCRUD() {
             <TableHead>Estado</TableHead>
             <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
-        </TableHead>
+        </TableHeader>
         <TableBody>
           {personal.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} className="text-center">
+              <TableCell colSpan={9} className="text-center">
                 No hay Personal registrados
               </TableCell>
             </TableRow>
@@ -167,9 +180,8 @@ export function PersonalCRUD() {
           {personal.map((empleado) => (
             <TableRow
               key={empleado._id} className="cursor-pointer hover:bg-muted/50"
-              // onClick={() => handleVerEmpleado(empleado.id._id)}
             >
-              <TableCell className="font-medium">{empleado.departamentoId}</TableCell>
+              <TableCell className="">{empleado.departamentoId}</TableCell>
               <TableCell>{empleado.nombre}</TableCell>
               <TableCell>{empleado.apellidos}</TableCell>
               <TableCell>{empleado.email}</TableCell>
@@ -205,6 +217,7 @@ export function PersonalCRUD() {
                       e.stopPropagation()
                       openDelete(empleado)
                     }}
+                    className="text-white bg-red-500"
                   >
                     <Trash2 className="h-4 w-4"/>
                   </Button>
@@ -267,12 +280,16 @@ export function PersonalCRUD() {
                         disabled={operation === 'view'}
                         onValueChange={field.onChange}
                       >
-                        <option value="">Seleccionar departamento</option>
-                        {departamentos?.map((departamento) => (
-                          <option key={departamento._id} value={departamento._id}>
-                            {departamento.nombre}
-                          </option>
-                        ))}
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Seleccionar departamento" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {departamentos?.map((departamento) => (
+                            <SelectItem key={departamento._id} value={departamento._id}>
+                              {departamento.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                     </FormControl>
                   </FormItem>

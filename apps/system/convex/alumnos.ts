@@ -30,10 +30,7 @@ export const obtenerAlumnos = query({
       .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
       .collect()
 
-    return alumnos.map(( _id, ...rest) => ({
-      id: _id,
-      ...rest
-    }))
+    return alumnos
   }
 })
 
