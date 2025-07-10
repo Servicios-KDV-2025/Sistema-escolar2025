@@ -1,4 +1,4 @@
-import { z } from "zod"; 
+import { z } from "zod";
 
 const ubicacionesPermitidas = [
   "Planta baja",
@@ -8,17 +8,10 @@ const ubicacionesPermitidas = [
 ] as const;
 
 export const salonSchema = z.object({
-  nombre: z
-    .string()
-    .min(1, { message: "El nombre es requerido" }),
-  capacidad: z.coerce
-    .number({
-      invalid_type_error: "La capacidad debe ser un número",
-    })
-    .min(1, { message: "Mínimo 1 alumno" })
-    .max(30, { message: "Máximo 30 alumnos" }),
+  nombre: z.string().min(1, { message: "El nombre es requerido" }),
+  capacidad: z.coerce.number().min(1).max(30),
   ubicacion: z.enum(ubicacionesPermitidas, {
-    errorMap: () => ({ message: "Selecciona una ubicación válida" }),
+    errorMap: () => ({ message: "Ubicación inválida" }),
   }),
 });
 
