@@ -98,7 +98,7 @@ export const salonesSchema = z.object({
 export type Salones = z.infer<typeof salonesSchema>;
 
 export const gruposSchema = z.object({
-  id: z.custom<Id<'grupos'>>(),
+  _id: z.custom<Id<'grupos'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
   grado: z.string(),
@@ -119,7 +119,7 @@ export const periodoSchema = z.object({
 export type Periodo = z.infer<typeof periodoSchema>;
 
 export const catalogosDeClasesSchema = z.object({
-  id: z.custom<Id<'catalogosDeClases'>>(),
+  _id: z.custom<Id<'catalogosDeClases'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   cicloEscolarId: z.custom<Id<'ciclosEscolares'>>(),
   materiaId: z.custom<Id<'materias'>>(),
@@ -233,7 +233,7 @@ export const calendarioSchema = z.object({
 export type Calendario = z.infer<typeof calendarioSchema>;
 
 export const eventoPorClasesSchema = z.object({
-  id: z.custom<Id<'eventoPorClases'>>(),
+  _id: z.custom<Id<'eventoPorClases'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   catalogoClaseId: z.custom<Id<'catalogosDeClases'>>(),
   calendarioId: z.custom<Id<'calendario'>>(),
