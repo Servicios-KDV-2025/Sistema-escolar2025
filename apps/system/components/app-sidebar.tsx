@@ -138,10 +138,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: "Crear Alumno",
           url: `/escuela/${slug}/alumnos/create?escuelaId=${slug}`,
         },
-        {
-          title: "Padres",
-          url: `/escuela/${slug}/alumnos/padres`,
-        }
       ],
     },
     {
@@ -226,6 +222,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
     }, */
+        {
+      title: "Padres",
+      url: `/escuela/${slug}/padres`,
+      icon: SquareTerminal,
+      isActive: true,
+    },
+
   ],
   navSecondary: [
     {

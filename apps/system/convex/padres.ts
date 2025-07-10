@@ -119,24 +119,6 @@ export const actualizarPadre = mutation({
 
 
 
-// Mutación para eliminar un padre de familia
-/*export const eliminarPadre = mutation({
-  args: {
-    id: v.id("padres"),
-  },
-  handler: async (ctx, args) => {
-    // Verificamos si el registro existe antes de eliminarlo
-    const padre = await ctx.db.get(args.id);
-    if (!padre) {
-        throw new Error("No se encontró el padre de familia para eliminar.");
-    }
-
-    // Eliminamos el registro de la tabla `padres`
-    return await ctx.db.delete(args.id);
-  },
-});*/
-
-
 // 5. Eliminar un Padre, asegurándose de que pertenezca a la escuela
 export const eliminarPadreConEscuela = mutation({
   args: {
