@@ -137,7 +137,15 @@ export default function PadresPage() {
   }
 
   return (
+    
     <div>
+      <h1 className="text-3xl font-bold mb-6">Sistema de padres</h1>
+      <p className="text-muted-foreground mb-6">
+        Haz clic en cualquier padre para ver sus detalles completos,
+        editarlo o eliminarlo. Para crear una nuevo padre, usa el botón
+        Nuevo Padre.
+      </p>
+
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Padres</h2>
         <Button onClick={openCreate} disabled={isCreatingPadre} className="flex items-center gap-2">
