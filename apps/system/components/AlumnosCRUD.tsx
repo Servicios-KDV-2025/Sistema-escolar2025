@@ -75,20 +75,20 @@ export function AlumnosCRUD() {
           ) : (
             alumnos.map((alumno) => (
               <TableRow
-                key={alumno.id._id}
+                key={alumno._id}
                 className="cursor-pointer hover:bg-muted/50"
-                onClick={() => handleVerAlumno(alumno.id._id)}
+                onClick={() => handleVerAlumno(alumno._id)}
               >
-                <TableCell className="font-medium">{alumno.id.matricula}</TableCell>
-                <TableCell>{alumno.id.padreId}</TableCell>
-                <TableCell>{alumno.id.grupoId}</TableCell>
-                <TableCell>{alumno.id.nombre}</TableCell>
-                <TableCell>{alumno.id.apellidos}</TableCell>
-                <TableCell>{alumno.id.email}</TableCell>
-                <TableCell>{alumno.id.fechaNacimiento}</TableCell>
-                <TableCell>{alumno.id.telefono}</TableCell>
-                <TableCell>{alumno.id.direccion}</TableCell>
-                <TableCell>{alumno.id.activo}</TableCell>
+                <TableCell className="font-medium">{alumno.matricula}</TableCell>
+                <TableCell>{alumno.padreId}</TableCell>
+                <TableCell>{alumno.grupoId}</TableCell>
+                <TableCell>{alumno.nombre}</TableCell>
+                <TableCell>{alumno.apellidos}</TableCell>
+                <TableCell>{alumno.email}</TableCell>
+                <TableCell>{alumno.fechaNacimiento}</TableCell>
+                <TableCell>{alumno.telefono}</TableCell>
+                <TableCell>{alumno.direccion}</TableCell>
+                <TableCell>{alumno.activo}</TableCell>
               </TableRow>
             ))
           )}
