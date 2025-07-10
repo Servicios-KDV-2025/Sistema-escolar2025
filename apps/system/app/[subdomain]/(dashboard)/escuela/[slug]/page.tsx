@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEscuela } from "../../../../store/useEscuela";
+//import { useEscuela } from "../../../../store/useEscuela";
 import { useEffect } from "react";
 import { useBreadcrumbStore } from "../../../../store/breadcrumbStore";
 
@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Calendar, BarChart3,  Settings, GraduationCap, MapPin, Shield, Clock, Award } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
+import { useEscuela } from "@/app/store/useEscuela";
 
 export default function EscuelaHome() {
   const escuela = useEscuela((s) => s.escuela);
