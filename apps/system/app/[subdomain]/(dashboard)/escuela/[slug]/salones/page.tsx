@@ -1,47 +1,26 @@
 'use client'
 
 import { useEscuela } from '@/app/store/useEscuela'
-import { useQuery, useMutation } from 'convex/react'
-import { api } from '@/convex/_generated/api'
-import { Id } from '@/convex/_generated/dataModel'
-import { toast } from 'sonner'
 import { salonSchema, SalonFormValues } from '@/app/shemas/salon'
 import { CrudDialog, useCrudDialog } from '@/components/ui/crud-dialog'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle
-} from '@repo/ui/components/shadcn/card'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from '@repo/ui/components/shadcn/form'
+import { useSalon } from '@/app/store/useSalonStore'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
 import { Input } from '@repo/ui/components/shadcn/input'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem
-} from '@repo/ui/components/shadcn/select'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@repo/ui/components/shadcn/select'
 import { Button } from '@repo/ui/components/shadcn/button'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/shadcn/table'
+import { toast } from 'sonner'
 
 export default function Page() {
   const escuela = useEscuela((s) => s.escuela)
 
-  const crearSalon = useMutation(api.salones.crearSalon)
-  const actualizarSalon = useMutation(api.salones.actualizarSalon)
-  const eliminarSalon = useMutation(api.salones.eliminarSalon)
-  const salones = useQuery(
-    api.salones.obtenerSalones,
-    escuela ? { escuelaId: escuela._id as Id<'escuelas'> } : 'skip'
-  )
+  const {
+    salones,
+    crearSalon,
+    actualizarSalon,
+    eliminarSalon,
+  } = useSalon(escuela?._id)
 
   const {
     isOpen,
@@ -53,6 +32,7 @@ export default function Page() {
     openDelete,
     close
   } = useCrudDialog(salonSchema, {
+    _id: '',
     nombre: '',
     capacidad: 1,
     ubicacion: 'Planta baja'
@@ -76,24 +56,23 @@ export default function Page() {
     try {
       if (operation === 'create') {
         await crearSalon({
-          escuelaId: escuela._id as Id<'escuelas'>,
+          escuelaId: escuela._id,
           nombre: parsed.nombre,
           capacidad: parsed.capacidad,
           ubicacion: parsed.ubicacion
         })
       } else if (operation === 'edit' && data?._id) {
-        console.log('Actualizando salón', data._id)
         await actualizarSalon({
-          salonId: data._id as Id<'salones'>,
-          escuelaId: escuela._id as Id<'escuelas'>,
+          id: data._id as string,
+          escuelaId: escuela._id as string,
           nombre: parsed.nombre,
           capacidad: parsed.capacidad,
           ubicacion: parsed.ubicacion
         })
       }
     } catch (err) {
+      toast.error("Ocurrió un error al guardar")
       console.error(err)
-      throw err
     }
   }
 
@@ -102,85 +81,69 @@ export default function Page() {
       toast.error('No se pudo identificar la escuela')
       return
     }
-
     try {
-      await eliminarSalon({
-        salonId: id as Id<'salones'>,
-        escuelaId: escuela._id as Id<'escuelas'>
-      })
+      await eliminarSalon(id, escuela._id)
     } catch (err) {
+      toast.error("Ocurrió un error al eliminar")
       console.error(err)
-      throw err
     }
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Gestión de Salones</CardTitle>
-          <Button onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo salón
-          </Button>
-        </CardHeader>
+    <div className="space-y-2">
+      <h1 className="text-3xl font-bold">Gestión de Salones</h1>
+      <p className="text-muted-foreground">
+        Aquí puedes ver y gestionar todos los salones disponibles en la escuela. Haz clic en cualquier salón para ver sus detalles o crear uno nuevo.
+      </p>
+      
+      <div className="flex flex-row items-center justify-between mt-6 mb-2">
+        <h2 className="text-xl font-semibold">Lista de Salones</h2>
+        <Button onClick={openCreate}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nuevo salón
+        </Button>
+      </div>
 
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[120px]">Nombre</TableHead>
-                  <TableHead>Capacidad</TableHead>
-                  <TableHead>Ubicación</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[120px]">Nombre</TableHead>
+              <TableHead>Capacidad</TableHead>
+              <TableHead>Ubicación</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {salones.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                  No hay salones registrados para esta escuela.
+                </TableCell>
+              </TableRow>
+            ) : (
+              salones.map((salon) => (
+                <TableRow key={salon._id}>
+                  <TableCell className="font-medium">{salon.nombre}</TableCell>
+                  <TableCell>{salon.capacidad}</TableCell>
+                  <TableCell>{salon.ubicacion}</TableCell>
+                  <TableCell className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openView({ ...salon })}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => openEdit({ ...salon })}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="destructive" size="sm" onClick={() => openDelete({ ...salon })}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {salones?.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center">
-                      No hay salones registrados.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  salones?.map((salon) => (
-                    <TableRow key={salon._id}>
-                      <TableCell className="font-medium">{salon.nombre}</TableCell>
-                      <TableCell>{salon.capacidad}</TableCell>
-                      <TableCell>{salon.ubicacion}</TableCell>
-                      <TableCell className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openView({ ...salon })}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEdit({ ...salon })}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => openDelete({ ...salon })}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-
-      </Card>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       <CrudDialog
         operation={operation}
