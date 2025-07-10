@@ -12,6 +12,7 @@ export const crearAsistencia = mutation({
         comentarios: v.optional(v.string()),
         registradoPorId: v.id("personal"),
         fechaRegistro: v.number(),
+        createdBy: v.id("personal")
     },
     handler: async (ctx, args) => {
         const existe = await ctx.db
@@ -60,6 +61,8 @@ export const actualizarAsistencia = mutation({
         presente: v.boolean(),
         justificada: v.optional(v.boolean()),
         comentarios: v.optional(v.string()),
+        updatedBy: v.optional(v.id("personal")),
+        updatedAt: v.optional(v.number()),
 
     },
     handler: async (ctx, args) => {
@@ -73,7 +76,9 @@ export const actualizarAsistencia = mutation({
         return ctx.db.patch(args.id, {
             presente: args.presente,
             justificada: args.justificada,
-            comentarios: args.comentarios
+            comentarios: args.comentarios,
+            updatedBy: args.updatedBy,
+            updatedAt: args.updatedAt,
         });
     },
 });

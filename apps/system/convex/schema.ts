@@ -177,13 +177,18 @@ const applicationTables = {
   calificaciones: defineTable({
     escuelaId: v.id("escuelas"),
     clasePorAlumnoId: v.id("clasesPorAlumno"),
-    cicloEscolarId: v.id("ciclosEscolares"), // 🔹 para agrupar calificaciones por ciclo
+    cicloEscolarId: v.id("ciclosEscolares"),
     periodo: v.string(), // "1er Parcial", "Final", etc.
     calificacion: v.number(), // 0–10 o escala que manejes
-    esFinal: v.optional(v.boolean()), // 🔹 para distinguir calificaciones de cierre de ciclo
+    esFinal: v.optional(v.boolean()),
     comentarios: v.optional(v.string()),
-    registradoPorId: v.id("personal"), // 🔹 saber qué maestro la registró
+    registradoPorId: v.id("personal"),
     fechaRegistro: v.number(), // timestamp
+
+    createdBy: v.id("personal"),
+    updatedBy: v.optional(v.id("personal")),
+    updatedAt: v.optional(v.number()),
+
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"])
@@ -199,13 +204,16 @@ const applicationTables = {
     presente: v.boolean(),
     justificada: v.optional(v.boolean()),
     comentarios: v.optional(v.string()),
-    registradoPorId: v.id("personal"), // 🔹 quién registró la asistencia
     fechaRegistro: v.number(),
+
+    createdBy: v.id("personal"),
+    updatedBy: v.optional(v.id("personal")),
+    updatedAt: v.optional(v.number()),
+
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"])
     .index("by_fecha", ["fecha"])
-    .index("by_docente", ["registradoPorId"])
     .index("by_ciclo", ["cicloEscolarId"]),
 
   // Eventos escolares

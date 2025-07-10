@@ -14,6 +14,7 @@ export const crearCalificacion = mutation({
         comentarios: v.optional(v.string()),
         registradoPorId: v.id("personal"),
         fechaRegistro: v.number(),
+        createdBy: v.id("personal"),
     },
     handler: async (ctx, args) => {
         const existe = await ctx.db
@@ -79,16 +80,20 @@ export const editarCalificacion = mutation({
         escuelaId: v.id("escuelas"),
         calificacion: v.number(),
         comentarios: v.optional(v.string()),
+        updatedBy: v.optional(v.id("personal")),
+        updatedAt: v.optional(v.number()),
     },
-    handler: async (ctx, { id, escuelaId, calificacion, comentarios }) => {
-        const calificacionExistente = await ctx.db.get(id);
-        if (!calificacionExistente || calificacionExistente.escuelaId !== escuelaId) {
+    handler: async (ctx, args) => {
+        const calificacionExistente = await ctx.db.get(args.id);
+        if (!calificacionExistente || calificacionExistente.escuelaId !== args.escuelaId) {
             throw new Error("No autorizado para editar esta calificación.");
         }
 
-        await ctx.db.patch(id, {
-            calificacion,
-            comentarios
+        await ctx.db.patch(args.id, {
+            calificacion: args.calificacion,
+            comentarios: args.comentarios,
+            updatedBy: args.updatedBy,
+            updatedAt: args.updatedAt,
         });
     }
 });
