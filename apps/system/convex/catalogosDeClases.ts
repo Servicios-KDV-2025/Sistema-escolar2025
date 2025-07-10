@@ -30,7 +30,7 @@ export const verTodosLosCatalogosDeClases = query({
             .collect();
 
         return catalogos.map(({ _id, ...rest }) => ({
-            id: _id,
+            _id,
             ...rest,
         }));
     },
@@ -39,11 +39,11 @@ export const verTodosLosCatalogosDeClases = query({
 // Read one
 export const verUnCatalogoDeClase = query({
     args: {
-        id: v.id("catalogosDeClases"),
+        _id: v.id("catalogosDeClases"),
         escuelaId: v.id("escuelas"),
     },
     handler: async (ctx, args) => {
-        const catalogo = await ctx.db.get(args.id);
+        const catalogo = await ctx.db.get(args._id);
         if (!catalogo || catalogo.escuelaId !== args.escuelaId) return null;
         return catalogo;
     },
@@ -52,7 +52,7 @@ export const verUnCatalogoDeClase = query({
 // Update
 export const actualizarCatalogoDeClase = mutation({
     args: {
-        id: v.id("catalogosDeClases"),
+        _id: v.id("catalogosDeClases"),
         escuelaId: v.id("escuelas"),
         cicloEscolarId: v.id("ciclosEscolares"),
         materiaId: v.id("materias"),
@@ -63,23 +63,23 @@ export const actualizarCatalogoDeClase = mutation({
         activa: v.boolean(),
     },
     handler: async (ctx, args) => {
-        const catalogo = await ctx.db.get(args.id);
+        const catalogo = await ctx.db.get(args._id);
         if (!catalogo || catalogo.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
 
-        const { id, ...data } = args;
-        await ctx.db.patch(id, data);
+        const { _id, ...data } = args;
+        await ctx.db.patch(_id, data);
     },
 });
 
 // Delete
 export const eliminarCatalogoDeClase = mutation({
   args: {
-    id: v.id("catalogosDeClases"),
+    _id: v.id("catalogosDeClases"),
     escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {
-    const catalogo = await ctx.db.get(args.id);
+    const catalogo = await ctx.db.get(args._id);
     if (!catalogo || catalogo.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
-    await ctx.db.delete(args.id);
+    await ctx.db.delete(args._id);
   },
 });

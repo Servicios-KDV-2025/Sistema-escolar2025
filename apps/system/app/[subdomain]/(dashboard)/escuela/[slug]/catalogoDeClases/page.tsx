@@ -77,7 +77,7 @@ export default function Page() {
                 })
             } else if (operation === 'edit' && data?._id) {
                 await actualizarCatalogo({
-                    id: values.id as Id<"catalogosDeClases">,
+                    _id: values.id as Id<"catalogosDeClases">,
                     escuelaId: escuela?._id as Id<"escuelas">,
                     cicloEscolarId: values?.cicloEscolarId as Id<'ciclosEscolares'>,
                     materiaId: values?.materiaId as Id<'materias'>,
@@ -104,7 +104,7 @@ export default function Page() {
         }
         try {
             await eliminarCatalogo({
-                id: id as Id<"catalogosDeClases">,
+                _id: id as Id<"catalogosDeClases">,
                 escuelaId: escuela._id as Id<"escuelas">
             })
         } catch (error) {
@@ -137,7 +137,7 @@ export default function Page() {
                         <div className="grid gap-4">
                             {verTodosLosCatalogos?.map(evento => (
                                 <div
-                                    key={evento.id}
+                                    key={evento._id}
                                     className="flex justify-between items-center p-3 border rounded-lg"
                                 >
                                     <div className="flex gap-2">
@@ -149,13 +149,13 @@ export default function Page() {
                                         </div>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button variant='outline' size='sm' onClick={() => openView({ ...evento, _id: evento.id })}>
+                                        <Button variant='outline' size='sm' onClick={() => openView({ ...evento, _id: evento._id })}>
                                             <Eye className="h-4 w-4" />
                                         </Button>
-                                        <Button variant='outline' size='sm' onClick={() => openEdit({ ...evento, _id: evento.id })}>
+                                        <Button variant='outline' size='sm' onClick={() => openEdit({ ...evento, _id: evento._id })}>
                                             <Pencil className="h-4 w-4" />
                                         </Button>
-                                        <Button variant='destructive' size='sm' onClick={() => openDelete({ ...evento, _id: evento.id })}>
+                                        <Button variant='destructive' size='sm' onClick={() => openDelete({ ...evento, _id: evento._id })}>
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>

@@ -24,7 +24,7 @@ export const verTodosLosGrupos = query({
       .collect();
 
     return grupos.map(({ _id, ...rest }) => ({
-      id: _id,
+      _id,
       ...rest,
     }));
   },
@@ -33,11 +33,11 @@ export const verTodosLosGrupos = query({
 // Read one
 export const grupoPorId = query({
   args: {
-    id: v.id("grupos"),
+    _id: v.id("grupos"),
     escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {
-    const grupo = await ctx.db.get(args.id);
+    const grupo = await ctx.db.get(args._id);
     if (!grupo || grupo.escuelaId !== args.escuelaId) return null;
     return grupo;
   },
@@ -46,30 +46,30 @@ export const grupoPorId = query({
 // Upadate
 export const actualizarGrupo = mutation({
   args: {
-    id: v.id("grupos"),
+    _id: v.id("grupos"),
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
     grado: v.string(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const grupo = await ctx.db.get(args.id);
+    const grupo = await ctx.db.get(args._id);
     if (!grupo || grupo.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
 
-    const { id, ...data } = args;
-    await ctx.db.patch(id, data);
+    const { _id, ...data } = args;
+    await ctx.db.patch(_id, data);
   },
 });
 
 // Delete
 export const eliminarGrupo = mutation({
   args: {
-    id: v.id("grupos"),
+    _id: v.id("grupos"),
     escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {
-    const grupo = await ctx.db.get(args.id);
+    const grupo = await ctx.db.get(args._id);
     if (!grupo || grupo.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
-    await ctx.db.delete(args.id);
+    await ctx.db.delete(args._id);
   },
 });

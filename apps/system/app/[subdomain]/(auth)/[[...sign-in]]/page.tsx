@@ -89,7 +89,7 @@ export default function Home() {
         });
       } else if (operation === "edit" && data?._id) {
         await actualizarGrupo({
-          id: data._id,
+          _id: data._id,
           escuelaId: escuela._id,
           grado: values.grado as string,
           nombre: values.nombre as string,

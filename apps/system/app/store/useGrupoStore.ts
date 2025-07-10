@@ -22,7 +22,7 @@ export type CrearGrupoData = {
 };
 
 export type ActualizarGrupoData = {
-  id: string;
+  _id: string;
   escuelaId: string;
   nombre: string;
   grado: string;
@@ -90,7 +90,7 @@ export const useGrupoStore = create<GrupoStore>((set) => ({
 }));
 
 type GrupoQueryResult = {
-  id: string;
+  _id: string;
   escuelaId: string;
   nombre: string;
   grado: string;
@@ -157,7 +157,7 @@ export const useGrupo = (escuelaId?: string) => {
     setUpdateError(null);
     try {
       await actualizarGrupoMutation({
-        id: data.id as Id<"grupos">,
+        _id: data._id as Id<"grupos">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         nombre: data.nombre,
         grado: data.grado,
@@ -178,7 +178,7 @@ export const useGrupo = (escuelaId?: string) => {
     setDeleteError(null);
     try {
       await eliminarGrupoMutation({
-        id: id as Id<"grupos">,
+        _id: id as Id<"grupos">,
         escuelaId: escuelaId as Id<"escuelas">,
       });
     } catch (error) {
@@ -195,7 +195,7 @@ export const useGrupo = (escuelaId?: string) => {
     if (gruposQuery) {
       setGrupos(
         (gruposQuery as GrupoQueryResult[]).map((g) => ({
-          _id: g.id,
+          _id: g._id,
           escuelaId: g.escuelaId,
           nombre: g.nombre,
           grado: g.grado,
