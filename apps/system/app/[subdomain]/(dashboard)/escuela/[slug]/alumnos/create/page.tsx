@@ -130,7 +130,7 @@ export default function CrearAlumnoPage () {
                         >
                           <option value="">Seleccionar un Grupo</option>
                           {grupos?.map((grupo) => (
-                            <option key={grupo.id} value={grupo.id}>
+                            <option key={grupo._id} value={grupo._id}>
                               {grupo.nombre} ({grupo.grado})
                             </option>
                           ))}
