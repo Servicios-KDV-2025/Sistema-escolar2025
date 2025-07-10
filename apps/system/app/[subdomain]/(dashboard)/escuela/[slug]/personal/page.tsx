@@ -1,6 +1,5 @@
 'use client'
 
-import { Eye } from "lucide-react"
 import { PersonalCRUD } from "../../../../../../components/PersonalCRUD"
 
 export default function Page() {
