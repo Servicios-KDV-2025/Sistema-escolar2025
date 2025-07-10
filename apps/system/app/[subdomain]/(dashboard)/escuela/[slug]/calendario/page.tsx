@@ -3,134 +3,238 @@
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Calendar } from "@repo/ui/components/shadcn/calendar";
-import { format} from "date-fns";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Id } from "@/convex/_generated/dataModel";
-import { Calendar as CalendarIcon, BookOpen, AlertTriangle, GraduationCap, Filter, Search, Bell, TrendingUp, School, CalendarDays } from "lucide-react";
+import { BookOpen, AlertTriangle, Bell, TrendingUp, School, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
-import { Input } from "@repo/ui/components/shadcn/input";
 import { Separator } from "@repo/ui/components/shadcn/separator";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useParams } from "next/navigation";
+import TipoDeEventoDialog from "@/components/dialog/tipoDeEventoDialog";
+import EventoDialog from "@/components/dialog/eventoDialog";
+import { colorMap, iconMap } from "@/lib/iconMap";
+import { Calendario } from "@/app/types/calendario";
+import { TiposDeEventos } from "@/app/types/tipoDeEventos";
+import { GenericId } from "convex/values";
 
-const tiposEvento = {
-  clase: {
-    label: "Clases",
-    color: "bg-blue-600 text-white border-blue-600",
-    colorHover: "hover:bg-blue-700",
-    bgLight: "bg-blue-50 hover:bg-blue-100",
-    borderColor: "border-l-blue-500",
-    dotColor: "bg-blue-500",
-    icon: BookOpen,
-    description: "Días de clases regulares",
-    gradient: "from-blue-500 to-blue-600"
-  },
-  feriado: {
-    label: "Feriados",
-    color: "bg-red-600 text-white border-red-600",
-    colorHover: "hover:bg-red-700",
-    bgLight: "bg-red-50 hover:bg-red-100",
-    borderColor: "border-l-red-500",
-    dotColor: "bg-red-500",
-    icon: CalendarIcon,
-    description: "Días festivos y vacaciones",
-    gradient: "from-red-500 to-red-600"
-  },
-  examen: {
-    label: "Exámenes",
-    color: "bg-amber-600 text-white border-amber-600",
-    colorHover: "hover:bg-amber-700",
-    bgLight: "bg-amber-50 hover:bg-amber-100",
-    borderColor: "border-l-amber-500",
-    dotColor: "bg-amber-500",
-    icon: GraduationCap,
-    description: "Días de evaluaciones",
-    gradient: "from-amber-500 to-amber-600"
-  },
-};
-
+interface TipoEventoConfig {
+  id: GenericId<"tiposDeEventos">
+  nombre: string
+  clave: string
+  icono: string
+  color: string
+  colorB: string
+  activo: boolean
+  bgLight: string
+  borderColor: string
+  icon: React.ElementType
+  description: string
+  colorBase: string
+  dotColor: string
+}
 export default function CalendarioEscolar() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [filtroTipo, setFiltroTipo] = useState<string>("todos");
-  const [busqueda, setBusqueda] = useState("");
-  const escuela = useEscuela((s) => s.escuela);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const {escuela } = useEscuela()
+  const setItems = useBreadcrumbStore(state => state.setItems)
+  const params = useParams()
+  const slug = typeof params?.slug === "string" ? params.slug : ""
+
   const ciclosEscolares = useQuery(
     api.ciclosEscolares.obtenerCiclosEscolares,
     escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
-  );
-  const [filtroCicloEscolarId, setFiltroCicloEscolarId] = useState<string>();
-  const setItems = useBreadcrumbStore(state => state.setItems)
-  const params = useParams();
-  const slug = typeof params?.slug === "string" ? params.slug : "";
+  )
+  const tiposDeEventos = useQuery(
+    api.tiposDeEventos.obtenerTiposDeEventos,
+    escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
+  )
+
+  const getTipoEventoById = useCallback((tipoEventoId: string) => {
+    return tiposDeEventos?.find(tipo => tipo._id === tipoEventoId || tipo.clave === tipoEventoId);
+  }, [tiposDeEventos]);
+
+  const [filtroCicloEscolarId, setFiltroCicloEscolarId] = useState<string>("")
+
+  // Calendarios
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [eventoEditar, setEventoEditar] = useState<Calendario | null>(null);
+  type ModoEvento = "editar" | "ver" | "eliminar" | null;
+  const [modoDialogo, setModoDialogo] = useState<ModoEvento>();
+
+  // Tipos de eventos
+  const [modalAbiertoT, setModalAbiertoT] = useState(false);
+  const [tipoDeEventoEditar, setTipoDeEventoEditar] = useState<TiposDeEventos | null>(null);
+  type ModoTipoDeEvento = "editar" | "ver" | "eliminar" | null;
+  const [modoDialogoT, setModoDialogoT] = useState<ModoTipoDeEvento>();
 
   useEffect(() => {
-    setFiltroCicloEscolarId(ciclosEscolares?.[ciclosEscolares.length - 1]?._id || "")
+    if (ciclosEscolares && ciclosEscolares.length > 0 && !filtroCicloEscolarId) {
+      setFiltroCicloEscolarId(ciclosEscolares[ciclosEscolares.length - 1]._id)
+    }
+
     if (escuela) {
-        setItems([
-          { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
-          { label: 'Calendario Escolar', isCurrentPage: true },
-        ])
-      }
-  }, [ciclosEscolares, escuela, setItems, slug])
-  const eventos = useQuery(api.calendario.obtenerCalendarioCicloEscolar,
+      setItems([
+        { label: `${escuela.nombre}`, href: `/escuela/${slug}` },
+        { label: 'Calendario Escolar', isCurrentPage: true },
+      ])
+    }
+  }, [ciclosEscolares, escuela, setItems, slug, filtroCicloEscolarId])
+
+  const eventos = useQuery(
+    api.calendario.obtenerCalendarioCicloEscolar,
     escuela?._id && filtroCicloEscolarId
       ? {
-        escuelaId: escuela?._id as Id<"escuelas">,
+        escuelaId: escuela._id as Id<"escuelas">,
         cicloEscolarId: filtroCicloEscolarId as Id<"ciclosEscolares">
-      } : "skip");
+      }
+      : "skip"
+  )
+
+  const convertirColorAClases = useCallback((color: string | undefined) => {
+    if (!color) return {
+      color: "bg-gray-500 text-white",
+      bgLight: "bg-gray-50",
+      borderColor: "border-l-gray-300",
+      dotColor: "before:bg-gray-500"
+    }
+
+    return colorMap[color] || {
+      color: "bg-gray-500 text-white",
+      bgLight: "bg-gray-50",
+      borderColor: "border-l-gray-300",
+      dotColor: "before:bg-gray-500"
+    };
+  }, [])
+
+  const tipoEventoMap = useMemo(() => {
+    if (!tiposDeEventos) return {};
+
+    return tiposDeEventos.reduce((acc, tipo) => {
+      const clases = convertirColorAClases(tipo.color);
+      const extractColorBase = (bgClass: string) => {
+        const match = bgClass.match(/bg-([a-z]+)-\d+/);
+        return match ? match[1] : "gray";
+      };
+
+      acc[tipo.clave] = {
+        id: tipo._id,
+        nombre: tipo.nombre,
+        clave: tipo.clave,
+        icono: tipo.icono || "",
+        activo: tipo.activo,
+        color: clases.color,
+        colorB: tipo.color || "",
+        bgLight: clases.bgLight,
+        borderColor: clases.borderColor,
+        icon: iconMap[tipo.icono || "BookOpen"] || BookOpen,
+        description: tipo.descripcion || "Sin descripción",
+        colorBase: extractColorBase(clases.color),
+        dotColor: clases.dotColor,
+      };
+
+      return acc;
+    }, {} as Record<string, TipoEventoConfig>);
+  }, [tiposDeEventos, convertirColorAClases]);
+
 
   const datosCalendario = useMemo(() => {
-    if (!eventos) return { fechasConEventos: new Map(), contadorEventos: { clase: 0, feriado: 0, examen: 0 }, eventosDelDia: [], eventosFiltrados: [] };
+    if (!eventos) return {
+      fechasConEventos: new Map<string, string>(),
+      contadorEventos: {} as Record<string, number>,
+      eventosDelDia: [],
+      eventosFiltrados: []
+    };
 
     const fechasConEventos = new Map<string, string>();
-    const contadorEventos = { clase: 0, feriado: 0, examen: 0 };
+    const contadorEventos: Record<string, number> = {};
     const eventosDelDia: typeof eventos = [];
 
-    const eventosFiltrados = eventos.filter(evento => {
-      const coincideBusqueda = !busqueda ||
-        evento.descripcion?.toLowerCase().includes(busqueda.toLowerCase()) ||
-        evento.tipo.toLowerCase().includes(busqueda.toLowerCase());
 
-      const coincideTipo = filtroTipo === "todos" || evento.tipo.toLowerCase().trim() === filtroTipo;
-
-      return coincideBusqueda && coincideTipo;
-    });
-
-    eventosFiltrados.forEach((evento) => {
+    eventos.forEach((evento) => {
       const fecha = format(new Date(evento.fecha), "yyyy-MM-dd");
-      const tipo = evento.tipo.toLowerCase().trim();
-      fechasConEventos.set(fecha, tipo);
+      const tipoClave = evento.tipoEventoId.toLowerCase().trim();
+      const tipoEvento = getTipoEventoById(evento.tipoEventoId);
 
-      if (tipo in contadorEventos) {
-        contadorEventos[tipo as keyof typeof contadorEventos]++;
-      }
+      fechasConEventos.set(fecha, tipoEvento?.clave || "");
+      contadorEventos[tipoClave] = (contadorEventos[tipoClave] || 0) + 1;
 
       if (selectedDate && format(selectedDate, "yyyy-MM-dd") === fecha) {
         eventosDelDia.push(evento);
       }
     });
 
-    return { fechasConEventos, contadorEventos, eventosDelDia, eventosFiltrados };
-  }, [eventos, selectedDate, busqueda, filtroTipo]);
+    return { fechasConEventos, contadorEventos, eventosDelDia, eventos };
+  }, [eventos, selectedDate, getTipoEventoById]);
+
+  const normalizarFecha = (fecha: Date | string) => {
+    const f = typeof fecha === "string" ? new Date(fecha) : fecha;
+    return format(f, "yyyy-MM-dd");
+  };
 
   const getTipoEvento = useCallback((date: Date) => {
-    const fechaStr = format(date, "yyyy-MM-dd");
-    return datosCalendario.fechasConEventos.get(fechaStr);
+    const fechaStr = normalizarFecha(date);
+    const tipo = datosCalendario.fechasConEventos.get(fechaStr);
+    return tipo;
   }, [datosCalendario.fechasConEventos]);
 
-  const handleKeyDown = useCallback((event: React.KeyboardEvent, action: () => void) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      action();
+  const generateModifiers = useCallback(() => {
+    const modifiers: Record<string, (date: Date) => boolean> = {};
+
+    for (const tipoClave in tipoEventoMap) {
+      modifiers[tipoClave] = (date: Date) => {
+        const tipo = getTipoEvento(date);
+        return tipo === tipoClave;
+      };
     }
-  }, []);
+
+    return modifiers;
+  }, [tipoEventoMap, getTipoEvento]);
+
+  const generateModifiersClassNames = useCallback(() => {
+    const classNames: Record<string, string> = {};
+    const dotColorMap: Record<string, string> = {
+      blue: 'after:bg-blue-500 after:border-blue-600 hover:ring-blue-300/50',
+      pink: 'after:bg-pink-500 after:border-pink-600 hover:ring-pink-300/50',
+      yellow: 'after:bg-yellow-500 after:border-yellow-600 hover:ring-yellow-300/50',
+      gray: 'after:bg-gray-500 after:border-gray-600 hover:ring-gray-300/50',
+      green: 'after:bg-green-500 after:border-green-600 hover:ring-green-300/50',
+      purple: 'after:bg-purple-500 after:border-purple-600 hover:ring-purple-300/50',
+      cyan: 'after:bg-cyan-500 after:border-cyan-600 hover:ring-cyan-300/50',
+      orange: 'after:bg-orange-500 after:border-orange-600 hover:ring-orange-300/50',
+    };
+
+    for (const tipoClave in tipoEventoMap) {
+      const config = tipoEventoMap[tipoClave];
+      const color = config.colorBase ?? "gray";
+      const dotClasses = dotColorMap[color] ?? dotColorMap.gray;
+
+      classNames[tipoClave] = cn(
+        "hover:scale-110 sm:p-1",
+        "after:content-[''] after:absolute after:top-1.5 after:right-1.5 after:w-1 sm:after:w-1.5 md:after:w-2.5",
+        "after:h-1 sm:after:h-1.5 md:after:h-2.5 after:rounded-full after:shadow-sm",
+        dotClasses
+      );
+    }
+    return classNames;
+  }, [tipoEventoMap]);
+
+  if (!escuela) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <School className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-500">Cargando información de la escuela...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -138,7 +242,7 @@ export default function CalendarioEscolar() {
         <div className="text-center space-y-4">
           <div className="flex mt-2 justify-end">
             <Select value={filtroCicloEscolarId} onValueChange={setFiltroCicloEscolarId}>
-              <SelectTrigger className=" bg-slate-50 border-slate-200 focus:bg-white">
+              <SelectTrigger className="bg-slate-50 border-slate-200 focus:bg-white">
                 <School className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filtrar por ciclo escolar" />
               </SelectTrigger>
@@ -162,130 +266,186 @@ export default function CalendarioEscolar() {
           </p>
         </div>
       </div>
-      <div className="flex flex-col xl:flex-row gap-6 p-4 md:p-6 min-h-screen">
-        <div className="flex-1 space-y-6">
-          <Card className="lg:col-span-1 shadow-xl bg-white/90 backdrop-blur-md ">
-            <CardContent className="p-4">
-              <CardHeader className="flex flex-row justify-between pb-4">
-                <div className="flex items-center gap-3 ">
-                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-md">
-                    <Filter className="w-6 h-6 text-white" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="row-span-3 xl:col-span-1">
+          {selectedDate && (
+            <Card className="shadow-lg bg-white/90 backdrop-blur-md mb-2">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-3 text-lg font-bold text-slate-800">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md">
+                    <CalendarIcon className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <CardTitle className="text-2xl font-bold text-slate-800">
-                      Filtros
-                    </CardTitle>
-                    <p className="text-slate-600 text-sm">
-                      Personaliza tu vista del calendario
+                  <div className="flex-1">
+                    <div className="text-lg font-bold">
+                      {format(selectedDate, "d 'de' MMMM", { locale: es })}
+                    </div>
+                    <div className="text-sm text-slate-600 font-normal">
+                      {format(selectedDate, "yyyy")}
+                    </div>
+                  </div>
+                  {datosCalendario.eventosDelDia.length > 0 && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                      {datosCalendario.eventosDelDia.length}
+                    </Badge>
+                  )}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {datosCalendario.eventosDelDia.length > 0 ? (
+                  <div className="space-y-3 max-h-84 overflow-y-auto">
+                    {datosCalendario.eventosDelDia.map((evento, index) => {
+                      const tipoEvento = getTipoEventoById(evento.tipoEventoId);
+                      const config = tipoEvento ? tipoEventoMap[tipoEvento.clave] : null;
+                      const IconComponent = config?.icon || CalendarIcon;
+                      return (
+                        <div
+                          key={index}
+                          className={cn(
+                            "p-4 rounded-xl border-l-4 mx-2",
+                            config?.bgLight || "bg-gray-50",
+                            config?.borderColor || "border-l-gray-300"
+                          )}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={cn(
+                              "p-2 rounded-lg shadow-sm",
+                              config?.color || "bg-gray-500 text-white"
+                            )}>
+                              <IconComponent className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <span className="font-semibold text-slate-800 capitalize">
+                                {config?.nombre || evento.tipoEventoId}
+                              </span>
+                              <div className="text-xs text-slate-500">
+                                {format(new Date(evento.fecha), "d 'de' MMMM", { locale: es })}
+                              </div>
+                            </div>
+                          </div>
+                          {evento.descripcion && (
+                            <p className="text-sm text-slate-700 ml-11 leading-relaxed">
+                              {evento.descripcion}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <p className="text-slate-500 font-medium">
+                      No hay eventos programados
+                    </p>
+                    <p className="text-slate-400 text-sm mt-1">
+                      para este día
                     </p>
                   </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="shadow-lg bg-white/90 backdrop-blur-md mb-2">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg font-bold text-slate-800">
+                <div className="p-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg shadow-md">
+                  <Bell className="w-5 h-5 text-white" />
                 </div>
-              </CardHeader>
-              <Separator className="bg-black/10" />
-              <div className="flex xl:flex-col flex-row  w-full py-4 gap-4">
-                <div className="relative flex flex-8 py-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    placeholder="Buscar eventos..."
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    className="pl-10 bg-slate-50 border-slate-200 focus:bg-white"
-                  />
-                </div>
-                <div className="relative flex flex- py-1">
-                  <Select value={filtroTipo} onValueChange={setFiltroTipo}>
-                    <SelectTrigger className="w-full bg-slate-50 border-slate-200 focus:bg-white">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Filtrar por tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="todos">Todos</SelectItem>
-                      {Object.entries(tiposEvento).map(([tipo, config]) => (
-                        <SelectItem key={tipo} value={tipo}>
-                          <div className="flex items-center gap-2">
-                            <config.icon className="h-4 w-4" />
-                            {config.label}
+                Próximos eventos
+              </CardTitle>
+              <CardDescription className="text-slate-600 text-sm mt-1 ">
+                Los eventos más cercanos en el calendario escolar
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {datosCalendario.eventos && datosCalendario.eventos?.length > 0 ? (
+                <div className="space-y-3 max-h-84 overflow-y-auto">
+                  {datosCalendario.eventos
+                    ?.filter(evento => new Date(evento.fecha) >= new Date())
+                    .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
+                    .slice(0, 5)
+                    .map((evento, index) => {
+                      const tipoEvento = getTipoEventoById(evento.tipoEventoId);
+                      const config = tipoEvento ? tipoEventoMap[tipoEvento.clave] : null;
+                      const IconComponent = config?.icon || CalendarIcon;
+
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => {
+                            setEventoEditar(evento as Calendario)
+                            setModoDialogo("editar");
+                            setModalAbierto(true)
+                          }}
+                          className={cn(
+                            "p-4 rounded-xl border-l-4 transition-all duration-200 hover:shadow-md cursor-pointer",
+                            config?.bgLight || "bg-gray-50",
+                            config?.borderColor || "border-l-gray-300"
+                          )}
+                          role="button"
+                          tabIndex={0}
+                        >
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className={cn(
+                              "p-2 rounded-lg shadow-sm",
+                              config?.color || "bg-gray-500 text-white"
+                            )}>
+                              <IconComponent className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <span className="font-semibold text-slate-800 capitalize">
+                                {config?.nombre || evento.tipoEventoId}
+                              </span>
+                              <div className="text-xs text-slate-500">
+                                {format(new Date(evento.fecha), "d 'de' MMMM", { locale: es })}
+                              </div>
+                            </div>
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-4 pt-4">
-                <div className="flex items-center gap-3 text-lg font-bold text-slate-800 pb-3">
-                  <div className="p-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg shadow-md">
-                    <AlertTriangle className="w-5 h-5 text-white" />
-                  </div>
-                  Tipos de Eventos
-                </div>
-                {Object.entries(tiposEvento).map(([tipo, config]) => {
-                  const IconComponent = config.icon;
-                  const count = datosCalendario.contadorEventos[tipo as keyof typeof datosCalendario.contadorEventos];
-                  return (
-                    <div
-                      key={tipo}
-                      className={cn(
-                        "p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer",
-                        "hover:shadow-md hover:scale-[1.02] group",
-                        config.bgLight,
-                        config.borderColor.replace('border-l-', 'border-')
-                      )}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => handleKeyDown(e, () => setFiltroTipo(tipo))}
-                      onClick={() => setFiltroTipo(tipo)}
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className={cn(
-                          "p-2 rounded-lg shadow-sm transition-all duration-200",
-                          config.color,
-                          "group-hover:shadow-md"
-                        )}>
-                          <IconComponent className="w-4 h-4" />
+                          {evento.descripcion && (
+                            <p className="text-sm text-slate-700 ml-11 leading-relaxed">
+                              {evento.descripcion}
+                            </p>
+                          )}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="font-bold text-slate-800">{config.label}</h3>
-                          <Badge
-                            variant="secondary"
-                            className="text-xs bg-slate-100 text-slate-600"
-                          >
-                            {count} evento{count !== 1 ? 's' : ''}
-                          </Badge>
-                        </div>
-                        <TrendingUp className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
-                      </div>
-                      <p className="text-sm text-slate-600 ml-11 leading-relaxed">
-                        {config.description}
+                      );
+                    })}
+                  {datosCalendario.eventos?.filter(evento => new Date(evento.fecha) >= new Date()).length === 0 && (
+                    <div className="text-center py-8">
+                      <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p className="text-slate-500 font-medium">
+                        No hay próximos eventos programados
+                      </p>
+                      <p className="text-slate-400 text-sm mt-1">
+                        Revisa el calendario para más información
                       </p>
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex pt-6">
-                <Button
-                  variant="outline"
-                  className="border-blue-500 text-blue-700 hover:bg-blue-50"
-                  onClick={() => {
-                    setFiltroTipo("todos");
-                    setBusqueda("");
-                  }}
-                >
-                  Limpiar filtros
-                </Button>
-              </div>
-
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <p className="text-slate-500 font-medium">
+                    No hay próximos eventos programados
+                  </p>
+                  <p className="text-slate-400 text-sm mt-1">
+                    Revisa el calendario para más información
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        <div className="flex-1 space-y-6">
+        <div className="row-span-2 col-span-2 ">
           <Card className="shadow-lg bg-white/90 backdrop-blur-md">
             <CardContent className="p-6">
-              <CardHeader className="flex flex-col pb-4 gap-4">
+              <CardHeader className="flex flex-col items-center text-center pb-4 justify-center">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center">
                     <div className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-md">
                       <CalendarIcon className="w-6 h-6 text-white" />
                     </div>
@@ -293,13 +453,12 @@ export default function CalendarioEscolar() {
                       <CardTitle className="text-2xl font-bold text-slate-800">
                         Calendario Escolar
                       </CardTitle>
-                      <p className="text-slate-600 text-sm">
+                      <p className="text-slate-600 text-sm pl-7">
                         Gestiona y visualiza el año académico
                       </p>
                     </div>
                   </div>
                 </div>
-
               </CardHeader>
               <Separator className="bg-black/10" />
 
@@ -340,204 +499,139 @@ export default function CalendarioEscolar() {
                   day_range_middle: "aria-selected:bg-blue-50 aria-selected:text-blue-700",
                   day_hidden: "invisible",
                 }}
-                modifiers={{
-                  clase: (date) => getTipoEvento(date) === "clase",
-                  feriado: (date) => getTipoEvento(date) === "feriado",
-                  examen: (date) => getTipoEvento(date) === "examen",
-                }}
-                modifiersClassNames={{
-                  clase: "hover:scale-110 hover:ring-1 hover:ring-blue-300/50 sm:p-1 after:content-[''] after:absolute after:top-1.5 after:right-1.5 after:w-1 sm:after:w-1.5 md:after:w-2.5 after:h-1 sm:after:h-1.5 md:after:h-2.5 after:bg-blue-500 after:rounded-full after:shadow-sm after:border after:border-blue-600",
-                  feriado: "hover:scale-110 hover:ring-1 hover:ring-red-300/50 sm:p-1 after:content-[''] after:absolute after:top-1.5 after:right-1.5 after:w-1 sm:after:w-1.5 md:after:w-2.5 after:h-1 sm:after:h-1.5 md:after:h-2.5 after:bg-red-500 after:rounded-full after:shadow-sm after:border after:border-red-600",
-                  examen: "hover:scale-110 hover:ring-1 hover:ring-amber-300/50 sm:p-1 after:content-[''] after:absolute after:top-1.5 after:right-1.5 after:w-1 sm:after:w-1.5 md:after:w-2.5 after:h-1 sm:after:h-1.5 md:after:h-2.5 after:bg-amber-500 after:rounded-full after:shadow-sm after:border after:border-amber-600",
-                }}
+                modifiers={generateModifiers()}
+                modifiersClassNames={generateModifiersClassNames()}
               />
-
-
-
+              <div className="flex justify-center mt-6 pl-4">
+                <Button
+                  onClick={() => {
+                    setEventoEditar(null)
+                    setModoDialogo(null);
+                    setModalAbierto(true)
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-150 hover:scale-105"
+                >
+                  Crear nuevo evento
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="flex-1 space-y-6">
-          {selectedDate && (
-            <Card className="shadow-lg bg-white/90 backdrop-blur-md">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-lg font-bold text-slate-800">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md">
-                    <CalendarIcon className="w-5 h-5 text-white" />
+        <div className="col-span-2 xl:col-span-1">
+          <Card className="lg:col-span-1 shadow-xl bg-white/90 backdrop-blur-md">
+            <CardContent className="px-4">
+              <CardHeader className="flex flex-row justify-between pb-4">
+
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl shadow-md">
+                    <AlertTriangle className="w-6 h-6 text-white" />
                   </div>
-                  <div className="flex-1">
-                    <div className="text-lg font-bold">
-                      {format(selectedDate, "d 'de' MMMM", { locale: es })}
-                    </div>
-                    <div className="text-sm text-slate-600 font-normal">
-                      {format(selectedDate, "yyyy")}
-                    </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-slate-800">
+                      Tipos de Eventos
+                    </CardTitle>
+                    <p className="text-slate-600 text-sm">
+                      Personaliza tus tipos de eventos
+                    </p>
                   </div>
-                  {datosCalendario.eventosDelDia.length > 0 && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
-                      {datosCalendario.eventosDelDia.length}
-                    </Badge>
-                  )}
-                </CardTitle>
+                </div>
               </CardHeader>
-              <CardContent>
-                {datosCalendario.eventosDelDia.length > 0 ? (
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {datosCalendario.eventosDelDia.map((evento, index) => {
-                      const tipo = evento.tipo.toLowerCase().trim();
-                      const config = tiposEvento[tipo as keyof typeof tiposEvento];
-                      const IconComponent = config?.icon || CalendarIcon;
+              <Separator className="bg-black/10" />
+              <div className="space-y-4 pt-4">
+                {Object.entries(tipoEventoMap).map(([tipo, config]) => {
+                  const IconComponent = config.icon;
+                  const tipoDeEvento: TiposDeEventos = {
+                    _id: config.id,
+                    escuelaId: escuela._id as Id<"escuelas">,
+                    nombre: config.nombre,
+                    clave: config.clave,
+                    descripcion: config.description,
+                    color: config.colorB,
+                    icono: config.icono,
+                    activo: config.activo
 
-                      return (
-                        <div
-                          key={index}
-                          className={cn(
-                            "p-4 rounded-xl border-l-4 ",
-                            "mx-2",
-                            config?.bgLight,
-                            config?.borderColor
-                          )}
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={(e) => handleKeyDown(e, () => { })}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={cn("p-2 rounded-lg shadow-sm", config?.color)}>
-                              <IconComponent className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1">
-                              <span className="font-semibold text-slate-800 capitalize">
-                                {evento.tipo}
-                              </span>
-                              <div className="text-xs text-slate-500">
-                                {format(new Date(evento.fecha), "d 'de' MMMM", { locale: es })}
-                              </div>
-                            </div>
-                          </div>
-                          {evento.descripcion && (
-                            <p className="text-sm text-slate-700 ml-11 leading-relaxed">
-                              {evento.descripcion}
-                            </p>
-                          )}
+                  }
+                  return (
+                    <div
+                      key={tipo}
+                      onClick={() => {
+                        setTipoDeEventoEditar(tipoDeEvento as TiposDeEventos)
+                        setModoDialogoT("editar");
+                        setModalAbiertoT(true)
+
+                      }}
+                      className={cn(
+                        "p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md cursor-pointer",
+                        config.bgLight,
+                        config.borderColor.replace('border-l-', 'border-')
+                      )}
+                      role="button"
+                      tabIndex={0}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className={cn(
+                          "p-2 rounded-lg shadow-sm transition-all duration-200",
+                          config.color,
+                          "group-hover:shadow-md"
+                        )}>
+                          <IconComponent className="w-4 h-4" />
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 font-medium">
-                      No hay eventos programados
-                    </p>
-                    <p className="text-slate-400 text-sm mt-1">
-                      para este día
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-          )}
-
-          <Card className="shadow-lg bg-white/90 backdrop-blur-md">
-            <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-3 text-lg font-bold text-slate-800">
-                <div className="p-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg shadow-md">
-                  <Bell className="w-5 h-5 text-white" />
-                </div>
-                Próximos eventos
-              </CardTitle>
-              <CardDescription className="text-slate-600 text-sm mt-1">
-                Los eventos más cercanos en el calendario escolar
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {datosCalendario.eventosFiltrados.length > 0 ? (
-                <div className="space-y-3 max-h-84 overflow-y-auto">
-                  {datosCalendario.eventosFiltrados
-                    .filter(evento => new Date(evento.fecha) >= new Date())
-                    .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
-                    .slice(0, 5)
-                    .map((evento, index) => {
-                      const tipo = evento.tipo.toLowerCase().trim();
-                      const config = tiposEvento[tipo as keyof typeof tiposEvento];
-                      const IconComponent = config?.icon || CalendarIcon;
-                      return (
-                        <div
-                          key={index}
-                          className={cn(
-                            "p-4 rounded-xl border-l-4 ",
-                            " mx-2 group",
-                            config?.bgLight,
-                            config?.borderColor
-                          )}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={cn("p-2 rounded-lg shadow-sm", config?.color)}>
-                              <IconComponent className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1">
-                              <span className="font-semibold text-slate-800 capitalize">
-                                {evento.tipo}
-                              </span>
-
-                            </div>
-
-                          </div>
-                          <div className="ml-11 flex flex-row ">
-                            <div className="text-xs text-slate-500">
-                              {format(new Date(evento.fecha), "d 'de' MMMM", { locale: es })}
-                            </div>
-                            <Badge
-                              variant="secondary"
-                              className={cn(
-                                "text-xs m-1",
-                                tipo === "clase" && "bg-blue-100 text-blue-700",
-                                tipo === "feriado" && "bg-red-100 text-red-700",
-                                tipo === "examen" && "bg-amber-100 text-amber-700"
-                              )}
-                            >
-                              Próximo
-                            </Badge>
-                          </div>
-                          {evento.descripcion && (
-                            <p className="text-sm text-slate-700 ml-11 leading-relaxed">
-                              {evento.descripcion}
-                            </p>
-                          )}
+                        <div className="flex-1">
+                          <h3 className="font-bold text-slate-800">{config.nombre}</h3>
                         </div>
-                      );
-                    })}
-                  {datosCalendario.eventosFiltrados.filter(evento => new Date(evento.fecha) >= new Date()).length === 0 && (
-                    <div className="text-center py-8">
-                      <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                      <p className="text-slate-500 font-medium">
-                        No hay próximos eventos programados
-                      </p>
-                      <p className="text-slate-400 text-sm mt-1">
-                        Revisa el calendario para más información
+                        <TrendingUp className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                      </div>
+                      <p className="text-sm text-slate-600 ml-11 leading-relaxed">
+                        {config.description}
                       </p>
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p className="text-slate-500 font-medium">
-                    No hay próximos eventos programados
-                  </p>
-                  <p className="text-slate-400 text-sm mt-1">
-                    Revisa el calendario para más información
-                  </p>
-                </div>
-              )}
+                  );
+                })}
+              </div>
+              <div className="flex mt-6 pl-1">
+                <Button
+                  onClick={() => {
+                    setTipoDeEventoEditar(null)
+                    setModoDialogoT(null);
+                    setModalAbiertoT(true)
+                  }}
+                  className="bg-amber-600 hover:bg-amber-700 shadow-lg rounded-lg px-4 py-2 flex items-center justify-center transition-transform duration-150 hover:scale-105 "
+                  aria-label="Agregar tipo de evento"
+                  title="Agregar tipo de evento">
+                  Crear nuevo tipo de evento
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
+
+
       </div>
+      <TipoDeEventoDialog
+        isOpen={modalAbiertoT}
+        onOpenChange={(open) => {
+          if (!open) {
+            setTipoDeEventoEditar(null);
+          }
+          setModalAbiertoT(open);
+        }}
+        modo={modoDialogoT}
+        tipoEventoEditar={tipoDeEventoEditar ?? undefined}
+        escuelaId={escuela?._id as Id<"escuelas">}
+      />
+      <EventoDialog
+        isOpen={modalAbierto}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEventoEditar(null);
+          }
+          setModalAbierto(open);
+        }}
+        modo={modoDialogo}
+        escuelaId={escuela?._id as Id<"escuelas">}
+        eventoEditar={eventoEditar ?? undefined}
+      />
     </div>
 
   );
