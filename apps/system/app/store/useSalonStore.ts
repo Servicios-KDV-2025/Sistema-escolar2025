@@ -3,32 +3,12 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-
-// Tipo de Salon basado en tu schema de Convex
-export type Salon = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  capacidad: number;
-  ubicacion?: string;
-  activo: boolean;
-};
+import { Salon } from "@/types/convex-zod-types";
 
 // Tipos para crear y actualizar salón
-export type CrearSalonData = {
-  escuelaId: string;
-  nombre: string;
-  capacidad: number;
-  ubicacion?: string;
-};
+export type CrearSalonData = Pick<Salon, "escuelaId" | "nombre" | "capacidad" | "ubicacion">
 
-export type ActualizarSalonData = {
-  id: string;
-  escuelaId: string;
-  nombre: string;
-  capacidad: number;
-  ubicacion?: string;
-};
+export type ActualizarSalonData = Pick<Salon, "_id" | "escuelaId" | "nombre" | "capacidad" | "ubicacion">
 
 // Store de Salon con CRUD completo
 export type SalonStore = {
@@ -90,15 +70,6 @@ export const useSalonStore = create<SalonStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-type SalonQueryResult = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  capacidad: number;
-  ubicacion?: string;
-  activo: boolean;
-};
-
 export const useSalon = (escuelaId?: string) => {
   const {
     salones,
@@ -157,7 +128,7 @@ export const useSalon = (escuelaId?: string) => {
     setUpdateError(null);
     try {
       await actualizarSalonMutation({
-        salonId: data.id as Id<"salones">,
+        salonId: data._id as Id<"salones">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         nombre: data.nombre,
         capacidad: data.capacidad,
@@ -194,7 +165,7 @@ export const useSalon = (escuelaId?: string) => {
   useEffect(() => {
     if (salonesQuery) {
       setSalones(
-        (salonesQuery as SalonQueryResult[]).map((s) => ({
+        (salonesQuery as Salon[]).map((s) => ({
           _id: s._id,
           escuelaId: s.escuelaId,
           nombre: s.nombre,
