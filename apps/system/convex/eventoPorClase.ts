@@ -1,7 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-
-
+ 
 // Crear
 export const crearEventoXClase = mutation({
   args: {
@@ -18,9 +17,7 @@ export const crearEventoXClase = mutation({
     await ctx.db.insert("eventoPorClases", { ...args });
   },
 });
-
-
-
+ 
 // Read all
 export const verTodosLosEventosXClases = query({
   args: {
@@ -31,14 +28,14 @@ export const verTodosLosEventosXClases = query({
       .query("eventoPorClases")
       .filter(q => q.eq(q.field("escuelaId"), args.escuelaId))
       .collect();
-
+ 
     return eventos.map(({ _id, ...rest }) => ({
       _id,
       ...rest,
     }));
   },
 });
-
+ 
 // Read one
 export const verUnEventoXClase = query({
   args: {
@@ -51,6 +48,42 @@ export const verUnEventoXClase = query({
     return evento;
   },
 });
+ 
+// Read whit all names
+export const getEventoPorClaseConNombres = query({
+  args: { escuelaId: v.id("escuelas") },
+  handler: async (ctx, { escuelaId }) => {
+    const eventos = await ctx.db
+      .query("eventoPorClases")
+      .withIndex("by_escuela", q => q.eq("escuelaId", escuelaId))
+      .collect();
+    const res = await Promise.all(
+      eventos.map(async evento => {
+        const [catalogoClase, calendario, cicloEscolar, eventoEscolar] = await Promise.all([
+          ctx.db.get(evento.catalogoClaseId),
+          ctx.db.get(evento.calendarioId),
+          ctx.db.get(evento.cicloEscolarId),
+          ctx.db.get(evento.eventoEscolarId),
+        ]);
+ 
+        return {
+          _id: evento._id,
+          catalogoClase: catalogoClase?.nombre ?? 'Sin Catálogo de Clases',
+          calendario: calendario?.fecha ?? 'Sin Fecha',
+          cicloEscolar: cicloEscolar?.nombre ?? 'Sin Ciclo Escolar',
+          eventoEscolar: eventoEscolar?.nombre ?? 'Sin Evento Escolar',
+          fecha: evento.fecha,
+          descripcion: evento.descripcion ?? "",
+          activo: evento.activo,
+        };
+      })
+    );
+ 
+    return res;
+  },
+});
+ 
+
 
 // Update
 export const actualizarEventoXClase = mutation({
@@ -73,7 +106,7 @@ export const actualizarEventoXClase = mutation({
     await ctx.db.patch(_id, data);
   },
 });
-
+ 
 // Delete
 export const eliminarEventoXClase = mutation({
   args: {
