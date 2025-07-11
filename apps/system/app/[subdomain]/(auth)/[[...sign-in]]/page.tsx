@@ -4,45 +4,45 @@ import { SignIn, SignOutButton, useUser } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/shadcn/card'
 import { useEscuela } from '../../../store/useEscuelaStore'
-import { CrudDialog, useCrudDialog } from '../../../../components/ui/crud-dialog'
-import { grupoSchema } from '../../../../app/shemas/grupo'
-import { toast } from 'sonner'
-import { Button } from '@repo/ui/components/shadcn/button'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
-import { Input } from '@repo/ui/components/shadcn/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
-import { useGrupo } from '../../../store/useGrupoStore'
+// import { CrudDialog, useCrudDialog } from '../../../../components/ui/crud-dialog'
+// import { grupoSchema } from '../../../../app/shemas/grupo'
+// import { toast } from 'sonner'
+// import { Button } from '@repo/ui/components/shadcn/button'
+// import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
+// import { Input } from '@repo/ui/components/shadcn/input'
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
+// import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+// import { useGrupo } from '../../../store/useGrupoStore'
 
 //import { useEscuela } from '@/app/store/useEscuela' --- este es lo que tiene emilio
 
 export default function Home() {
   const { user } = useUser()
-  
-  const { 
+
+  const {
     escuela,
     userEmail,
     isLoading,
     error,
-    clearErrors 
-  } = useEscuela() 
+    clearErrors
+  } = useEscuela()
 
   // Ejemplo de CRUD para grupos
-  const {
-    grupos,
-    isCreating: isCreatingGrupo,
-    isUpdating: isUpdatingGrupo,
-    isDeleting: isDeletingGrupo,
-    createError: createGrupoError,
-    updateError: updateGrupoError,
-    deleteError: deleteGrupoError,
-    crearGrupo,
-    actualizarGrupo,
-    eliminarGrupo,
-    clearErrors: clearGrupoErrors,
-  } = useGrupo(escuela?._id)
-
-  const {
+  /*  const {
+     grupos,
+     isCreating: isCreatingGrupo,
+     isUpdating: isUpdatingGrupo,
+     isDeleting: isDeletingGrupo,
+     createError: createGrupoError,
+     updateError: updateGrupoError,
+     deleteError: deleteGrupoError,
+     crearGrupo,
+     actualizarGrupo,
+     eliminarGrupo,
+     clearErrors: clearGrupoErrors,
+   } = useGrupo(escuela?._id)
+  */
+  /* const {
     isOpen,
     operation,
     data,
@@ -55,53 +55,55 @@ export default function Home() {
     grado: "1°",
     nombre: "",
     activo: true
-  })
-
-  const handleSubmit = async (values: Record<string, unknown>) => {
-    if (!escuela?._id) {
-      toast.error('Error', { description: 'No se pudo identificar la escuela' })
-      return
-    }
-
-    try {
-      if (operation === 'create') {
-        await crearGrupo({
-          escuelaId: escuela._id,
-          grado: values.grado as string,
-          nombre: values.nombre as string,
-          activo: values.activo as boolean
-        })
-      } else if (operation === 'edit' && data?._id) {
-        await actualizarGrupo({
-          _id: data._id,
-          escuelaId: escuela._id,
-          grado: values.grado as string,
-          nombre: values.nombre as string,
-          activo: values.activo as boolean
-        })
-      } else {
-        throw new Error('Operación no válida o datos faltantes')
+  }) */
+  /* 
+    const handleSubmit = async (values: Record<string, unknown>) => {
+      if (!escuela?._id) {
+        toast.error('Error', { description: 'No se pudo identificar la escuela' })
+        return
       }
-    } catch (error) {
-      // El error ya es manejado por el store, pero puedes mostrar un toast si quieres
-      toast.error('Error en operación CRUD', { description: (error as Error).message })
-      throw error
+  
+      try {
+        if (operation === 'create') {
+          await crearGrupo({
+            escuelaId: escuela._id,
+            grado: values.grado as string,
+            nombre: values.nombre as string,
+            activo: values.activo as boolean
+          })
+        } else if (operation === 'edit' && data?._id) {
+          await actualizarGrupo({
+            _id: data._id,
+            escuelaId: escuela._id,
+            grado: values.grado as string,
+            nombre: values.nombre as string,
+            activo: values.activo as boolean
+          })
+        } else {
+          throw new Error('Operación no válida o datos faltantes')
+        }
+      } catch (error) {
+        // El error ya es manejado por el store, pero puedes mostrar un toast si quieres
+        toast.error('Error en operación CRUD', { description: (error as Error).message })
+        throw error
+      }
     }
-  }
+   */
 
-  const handleDelete = async (id: string) => {
-    if (!escuela?._id) {
-      toast.error('Error', { description: 'No se pudo identificar la escuela' })
-      return
+  /*   
+    const handleDelete = async (id: string) => {
+      if (!escuela?._id) {
+        toast.error('Error', { description: 'No se pudo identificar la escuela' })
+        return
+      }
+      try {
+        await eliminarGrupo(id, escuela._id)
+      } catch (error) {
+        toast.error('Error al eliminar grupo', { description: (error as Error).message })
+        throw error
+      }
     }
-    try {
-      await eliminarGrupo(id, escuela._id)
-    } catch (error) {
-      toast.error('Error al eliminar grupo', { description: (error as Error).message })
-      throw error
-    }
-  }
-
+   */
   if (!user) return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <SignIn />
@@ -169,7 +171,7 @@ export default function Home() {
                 <p className="text-sm text-red-500">
                   Error: {error}
                 </p>
-                <button 
+                <button
                   onClick={() => {
                     clearErrors();
                   }}
@@ -189,7 +191,8 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* Ejemplo de CRUD para grupos */}
+        {/* 
+   {/*Ejemplo de CRUD para grupos 
         {escuela && (
           <Card className="w-full">
             <CardHeader>
@@ -202,7 +205,7 @@ export default function Home() {
               </div>
             </CardHeader>
             <CardContent>
-              {/* Mostrar errores del store de grupos */}
+              {/* Mostrar errores del store de grupos 
               {(createGrupoError || updateGrupoError || deleteGrupoError) && (
                 <div className="mb-2 text-sm text-red-500">
                   {createGrupoError && <div>Error al crear grupo: {createGrupoError}</div>}
@@ -243,13 +246,13 @@ export default function Home() {
           </Card>
         )}
 
-        {/* CrudDialog */}
+        {/* CrudDialog 
         <CrudDialog
           operation={operation}
-          title={operation === 'create' ? 'Crear Nuevo Grupo' : 
-                operation === 'edit' ? 'Editar Grupo' : 'Ver Grupo'}
+          title={operation === 'create' ? 'Crear Nuevo Grupo' :
+            operation === 'edit' ? 'Editar Grupo' : 'Ver Grupo'}
           description={operation === 'create' ? 'Completa la información del nuevo grupo' :
-                      operation === 'edit' ? 'Modifica la información del grupo' : 'Información del grupo'}
+            operation === 'edit' ? 'Modifica la información del grupo' : 'Información del grupo'}
           schema={grupoSchema}
           defaultValues={{
             grado: "1°",
@@ -271,8 +274,8 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Grado</FormLabel>
                     <FormControl>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         value={field.value as string}
                         disabled={operation === 'view'}
                       >
@@ -304,9 +307,9 @@ export default function Home() {
                     <FormItem>
                       <FormLabel>Nombre</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
-                          placeholder="Nombre del grupo" 
+                        <Input
+                          {...field}
+                          placeholder="Nombre del grupo"
                           value={field.value as string}
                           disabled={operation === 'view'}
                         />
@@ -324,8 +327,8 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
                     <FormControl>
-                      <Select 
-                        onValueChange={(value) => field.onChange(value === 'true')} 
+                      <Select
+                        onValueChange={(value) => field.onChange(value === 'true')}
                         value={field.value ? 'true' : 'false'}
                         disabled={operation === 'view'}
                       >
@@ -342,12 +345,12 @@ export default function Home() {
                   </FormItem>
                 )}
               />
-              
+
             </div>
-            
+
           )}
-          
-        </CrudDialog>
+
+        </CrudDialog> */}
       </div>
     </div>
   )
