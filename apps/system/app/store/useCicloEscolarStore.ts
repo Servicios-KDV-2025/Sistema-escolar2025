@@ -70,15 +70,6 @@ export const useCicloEscolarStore = create<CicloEscolarStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-// type CicloEscolarQueryResult = {
-//   _id: string;
-//   escuelaId: string;
-//   nombre: string;
-//   fechaInicio: number;
-//   fechaFin: number;
-//   activo: boolean;
-// };
-
 export const useCicloEscolar = (escuelaId?: string) => {
   const {
     ciclosEscolares,

@@ -11,6 +11,7 @@ import { Button } from '@repo/ui/components/shadcn/button'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/shadcn/table'
 import { toast } from 'sonner'
+import { Id } from '@/convex/_generated/dataModel'
 
 export default function Page() {
   const escuela = useEscuela((s) => s.escuela)
@@ -56,15 +57,15 @@ export default function Page() {
     try {
       if (operation === 'create') {
         await crearSalon({
-          escuelaId: escuela._id,
+          escuelaId: escuela._id  as Id<"escuelas">,
           nombre: parsed.nombre,
           capacidad: parsed.capacidad,
           ubicacion: parsed.ubicacion
         })
       } else if (operation === 'edit' && data?._id) {
         await actualizarSalon({
-          id: data._id as string,
-          escuelaId: escuela._id as string,
+          _id: data._id  as Id<"salones">,
+          escuelaId: escuela._id as Id<"escuelas">,
           nombre: parsed.nombre,
           capacidad: parsed.capacidad,
           ubicacion: parsed.ubicacion

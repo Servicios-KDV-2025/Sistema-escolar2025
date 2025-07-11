@@ -95,10 +95,6 @@ export default function PeriodosPage() {
   // Mutations y queries
   const escuelaId = escuela?._id as import("@/convex/_generated/dataModel").Id<"escuelas"> | undefined;
   const { periodos, crearPeriodo, actualizarPeriodo, eliminarPeriodo } = usePeriodo(escuelaId);
-  // const periodos = useQuery(api.periodos.obtenerPeriodosPorEscuela, escuelaId ? { escuelaId } : "skip");
-  // const crearPeriodo = useMutation(api.periodos.crearPeriodo);
-  // const actualizarPeriodo = useMutation(api.periodos.actualizarPeriodo);
-  // const eliminarPeriodo = useMutation(api.periodos.eliminarPeriodo);
 
   // Hook del CrudDialog
   const {
