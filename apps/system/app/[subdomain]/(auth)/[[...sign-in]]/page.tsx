@@ -35,6 +35,8 @@ import {
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { useGrupo } from "../../../store/useGrupoStore";
 
+//import { useEscuela } from '@/app/store/useEscuela' --- este es lo que tiene emilio
+
 export default function Home() {
   const { user } = useUser();
   const { organization } = useOrganization();

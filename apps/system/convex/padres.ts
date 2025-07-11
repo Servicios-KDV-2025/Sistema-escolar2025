@@ -3,27 +3,26 @@ import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
 
 
-// Consulta para obtener todos los padres de una escuela especifica
+// 1. Obtener Padres por una escuela específica
 export const obtenerPadres = query({
   args: {
-    escuelaId: v.id("escuelas")
+    escuelaId: v.id("escuelas"), // ID de la escuela es OBLIGATORIO
   },
-
   handler: async (ctx, args) => {
-    if (args.escuelaId) {
-      //usamos el indice "by_escuela" 
-      return await ctx.db
-        .query("padres")
-        .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
-        .collect();
-    } else {
-      //si no se proporciona un ID de escuela, devolvemos un array vacío
-      return [];
+    // Opcional: Validar si la escuela existe antes de buscar sus padres
+    const escuela = await ctx.db.get(args.escuelaId);
+    if (!escuela) {
+      throw new Error("La escuela especificada no existe.");
     }
+
+    return await ctx.db
+      .query("padres")
+      .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
+      .collect();
   },
 });
 
-//consulta para obtener un padre por su ID
+//2. Obtener un solo padre por su ID 
 export const obtenerPadrePorId = query({
   args: {id: v.id("padres")},
   handler: async (ctx, args) => {
@@ -33,6 +32,8 @@ export const obtenerPadrePorId = query({
 
 
 // Mutations: creación, actualizacion y eliminación de padres
+
+//3. Crear un nuevo padre DENTRO de una escuela específica
 export const crearPadre = mutation({
   args: {
     escuelaId: v.id("escuelas"),
@@ -46,10 +47,10 @@ export const crearPadre = mutation({
 
   handler: async (ctx, args) => {
     const { escuelaId, nombre, apellidos, email, telefono, direccion, activo} = args;
-    // verificamos que la escuela exista
+    // verificamos que la escuela exista antes de crear el padre
     const escuela = await ctx.db.get(escuelaId);
     if (!escuela) {
-      throw new Error("Escuela no encontrada.")
+      throw new Error("No se puede crear el padre: La escuela especificada no existe.")
     }
 
     //verificamos que no haya otro padre con el mismo email (si se proporcionó)
@@ -65,20 +66,12 @@ export const crearPadre = mutation({
     }
 
     //se agrega el nuevo padre en la base de datos 
-    return await ctx.db.insert("padres", {
-      escuelaId,
-      nombre,
-      apellidos,
-      email: email || undefined, // si no se proporciona, se guarda como undefined
-      telefono: telefono || undefined,
-      direccion: direccion || undefined,
-      activo,
-    });
+    return await ctx.db.insert("padres", args);
   },
 });
 
 
-//mutación para actualizar un padre existente
+//4. mutación para actualizar un padre existente
 export const actualizarPadre = mutation({
   args: {
     id: v.id("padres"),
@@ -126,20 +119,47 @@ export const actualizarPadre = mutation({
 
 
 
-// Mutación para eliminar un padre de familia
+// 5. Eliminar un Padre, asegurándose de que pertenezca a la escuela
 export const eliminarPadre = mutation({
   args: {
-    id: v.id("padres"),
+    id: v.id("padres"), // ID del padre a eliminar
+    escuelaId: v.id("escuelas"), // ID de la escuela a la que pertenece el padre (para validación)
   },
   handler: async (ctx, args) => {
-    // Verificamos si el registro existe antes de eliminarlo
-    const padre = await ctx.db.get(args.id);
-    if (!padre) {
-        throw new Error("No se encontró el padre de familia para eliminar.");
+    // Verificar que el padre existe y pertenece a la escuela antes de eliminar
+    const padreExistente = await ctx.db.get(args.id);
+    if (!padreExistente || padreExistente.escuelaId !== args.escuelaId) {
+      throw new Error("No se puede eliminar: Padre no encontrado o no pertenece a la escuela especificada.");
     }
 
-    // Eliminamos el registro de la tabla `padres`
-    return await ctx.db.delete(args.id);
+    await ctx.db.delete(args.id);
+    return true;
   },
 });
 
+
+// 4. Actualizar un Padre existente, asegurándose de que pertenezca a la escuela
+export const actualizarPadreConEscuela = mutation({
+  args: {
+    id: v.id("padres"), // ID del padre a actualizar
+    escuelaId: v.id("escuelas"), // ID de la escuela a la que pertenece el padre (para validación)
+    nombre: v.optional(v.string()),
+    apellidos: v.optional(v.string()),
+    email: v.optional(v.string()),
+    telefono: v.optional(v.string()),
+    direccion: v.optional(v.string()),
+    activo: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const { id, escuelaId, ...data } = args;
+
+    // Primero, obtener el padre para verificar que existe y que su escuelaId coincida
+    const padreExistente = await ctx.db.get(id);
+    if (!padreExistente || padreExistente.escuelaId !== escuelaId) {
+      throw new Error("No se puede actualizar: Padre no encontrado o no pertenece a la escuela especificada.");
+    }
+
+    await ctx.db.patch(id, data);
+    return await ctx.db.get(id);
+  },
+});

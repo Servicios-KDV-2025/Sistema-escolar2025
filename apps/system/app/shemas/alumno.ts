@@ -8,7 +8,7 @@ export const alumnoSchema = z.object({
   apellidos: z.string().min(1, { message: "Los apellidos son requeridos" }),
   fechaNacimiento: z.string().min(1, { message: "fecha de nachimineto requerida" }),
   email: z.string().min(1, { message: "El email es requerido" }),
-  telefono: z.number().min(1, { message: "El numero de telefono es rquerido" }),
+  telefono: z.string().min(1, { message: "El numero de telefono es rquerido" }),
   direccion: z.string().min(1, { message: "La dirección es requerida" }),
   activo: z.boolean(),
 })

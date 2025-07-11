@@ -12,7 +12,7 @@ export const crearAlumno = mutation({
     apellidos: v.string(),
     fechaNacimiento: v.string(),
     email: v.optional(v.string()),
-    telefono: v.optional(v.number()),
+    telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
     activo: v.boolean()
   },
@@ -30,10 +30,7 @@ export const obtenerAlumnos = query({
       .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
       .collect()
 
-    return alumnos.map(( _id, ...rest) => ({
-      id: _id,
-      ...rest
-    }))
+    return alumnos
   }
 })
 
@@ -60,7 +57,7 @@ export const upadateAlumno = mutation({
     apellidos: v.string(),
     fechaNacimiento: v.string(),
     email: v.optional(v.string()),
-    telefono: v.optional(v.number()),
+    telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
     activo: v.boolean()
   },
