@@ -1,10 +1,12 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { z } from "zod";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { useEscuela } from "@/app/store/useEscuelaStore";
+import { usePeriodoPorClase } from "@/app/store/usePeriodoPorClaseStore";
+import { usePeriodo } from "@/app/store/usePeriodoStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Badge } from "@repo/ui/components/shadcn/badge";
@@ -13,6 +15,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/
 import { Checkbox } from "@repo/ui/components/shadcn/checkbox";
 import { Switch } from "@repo/ui/components/shadcn/switch";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
 
 // Constants
 const DIAS_SEMANA = [
@@ -59,11 +62,6 @@ const useDataQueries = (escuelaId: string | undefined) => {
     api.catalogosDeClases.verTodosLosCatalogosDeClases, 
     escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
   );
-  
-  const periodos = useQuery(
-    api.periodos.obtenerPeriodosPorEscuela, 
-    escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
-  );
 
   const materias = useQuery(
     api.materias.obtenerMateriasPorEscuela,
@@ -75,21 +73,7 @@ const useDataQueries = (escuelaId: string | undefined) => {
     escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
   );
 
-  return { catalogosClases, periodos, materias, maestros };
-};
-
-const usePeriodosData = (escuelaId: string | undefined, catalogoClaseId: string) => {
-  const periodosPorEscuela = useQuery(
-    api.periodoporClase.obtenerPeriodosPorClasePorEscuela,
-    escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
-  );
-  
-  const periodosPorCatalogo = useQuery(
-    api.periodoporClase.obtenerPeriodosPorClasePorCatalogo,
-    catalogoClaseId ? { catalogoClaseId: catalogoClaseId as Id<"catalogosDeClases"> } : "skip"
-  );
-
-  return { periodosPorEscuela, periodosPorCatalogo };
+  return { catalogosClases, materias, maestros };
 };
 
 // Components
@@ -141,59 +125,7 @@ const ClassFilter = ({
   </div>
 );
 
-const PeriodoCard = ({ 
-  item, 
-  onView,
-  onEdit, 
-  onDelete, 
-  getClaseNombre, 
-  getPeriodoNombreYHorario, 
-  getDiaNombre
-}: {
-  item: PeriodoPorClaseItem;
-  onView: (item: PeriodoPorClaseItem) => void;
-  onEdit: (item: PeriodoPorClaseItem) => void;
-  onDelete: (item: PeriodoPorClaseItem) => void;
-  getClaseNombre: (id: string) => string;
-  getPeriodoNombreYHorario: (id: string) => string;
-  getDiaNombre: (num: number) => string;
-}) => (
-  <li className="border rounded p-3 flex flex-col justify-between items-start bg-white shadow">
-    <div className="w-full">
-      <button
-        onClick={() => onView(item)}
-        className="font-semibold hover:underline text-left w-full  hover:text-blue-800"
-      >
-        {getClaseNombre(item.catalogoClaseId)} - {getPeriodoNombreYHorario(item.periodoId)} ({getDiaNombre(item.diaSemana)})
-      </button>
-      <div className="mt-1">
-        <Badge
-          variant="secondary"
-          className={
-            item.activo
-              ? "bg-green-800 text-white"
-              : "bg-red-500 text-white"
-          }
-        >
-          {item.activo ? "Activo" : "Inactivo"}
-        </Badge>
-      </div>
-    </div>
-    <div className="flex gap-2 mt-2">
-      <Button variant="outline" size="sm" onClick={() => onView(item)}>
-        <Eye className="h-4 w-4" />
-      </Button>
-      <Button variant="outline" size="sm" onClick={() => onEdit(item)}>
-        <Pencil className="h-4 w-4" />
-      </Button>
-      <Button variant="destructive" size="sm" onClick={() => onDelete(item)}>
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    </div>
-  </li>
-);
-
-const PeriodosList = ({ 
+const PeriodosTable = ({ 
   items, 
   title, 
   onView,
@@ -201,7 +133,9 @@ const PeriodosList = ({
   onDelete, 
   getClaseNombre, 
   getPeriodoNombreYHorario, 
-  getDiaNombre
+  getDiaNombre,
+  isUpdating,
+  isDeleting
 }: {
   items: PeriodoPorClaseItem[] | undefined;
   title: string;
@@ -211,24 +145,67 @@ const PeriodosList = ({
   getClaseNombre: (id: string) => string;
   getPeriodoNombreYHorario: (id: string) => string;
   getDiaNombre: (num: number) => string;
+  isUpdating?: boolean;
+  isDeleting?: boolean;
 }) => (
   <div>
-    <h2 className="font-semibold mb-2">{title}</h2>
-    {items?.length === 0 && <p>No hay registros.</p>}
-    <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {items?.map((item) => (
-        <PeriodoCard
-          key={item._id}
-          item={item}
-          onView={onView}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          getClaseNombre={getClaseNombre}
-          getPeriodoNombreYHorario={getPeriodoNombreYHorario}
-          getDiaNombre={getDiaNombre}
-        />
-      ))}
-    </ul>
+    <h2 className="font-semibold mb-4">{title}</h2>
+    {items?.length === 0 && <p className="text-center text-muted-foreground py-8">No hay registros.</p>}
+    
+    {items && items.length > 0 && (
+      <Table>
+        <TableCaption>Lista de horarios registrados</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Clase</TableHead>
+            <TableHead>Periodo</TableHead>
+            <TableHead>Día</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead>Acciones</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {items.map((item) => (
+            <TableRow key={item._id}>
+              <TableCell className="font-medium">
+                {getClaseNombre(item.catalogoClaseId)}
+              </TableCell>
+              <TableCell>
+                {getPeriodoNombreYHorario(item.periodoId)}
+              </TableCell>
+              <TableCell>
+                {getDiaNombre(item.diaSemana)}
+              </TableCell>
+              <TableCell>
+                <Badge
+                  variant="secondary"
+                  className={
+                    item.activo
+                      ? "bg-green-800 text-white"
+                      : "bg-red-500 text-white"
+                  }
+                >
+                  {item.activo ? "Activo" : "Inactivo"}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" onClick={() => onView(item)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onEdit(item)} disabled={isUpdating}>
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => onDelete(item)} disabled={isDeleting}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    )}
   </div>
 );
 
@@ -237,11 +214,28 @@ export default function PeriodosClasePage() {
   const { escuela, isLoading, error, clearErrors } = useEscuela();
   const escuelaId = escuela?._id;
   
-  const { catalogosClases, periodos, materias, maestros } = useDataQueries(escuelaId);
+  const { catalogosClases, materias, maestros } = useDataQueries(escuelaId);
+  
+  // Obtener periodos globales desde el store de periodos (solo para mostrar en selects)
+  const { periodos } = usePeriodo(escuelaId);
   
   const [catalogoClaseId, setCatalogoClaseId] = useState("");
   
-  const { periodosPorEscuela, periodosPorCatalogo } = usePeriodosData(escuelaId, catalogoClaseId);
+  // Store de periodos por clase
+  const {
+    periodosPorClase,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    createError,
+    updateError,
+    deleteError,
+    crearPeriodoPorClase,
+    actualizarPeriodoPorClase,
+    eliminarPeriodoPorClase,
+    clearErrors: clearStoreErrors,
+    periodosPorClasePorCatalogo,
+  } = usePeriodoPorClase(escuelaId);
   
   const {
     isOpen,
@@ -258,11 +252,6 @@ export default function PeriodosClasePage() {
     diasSemana: [],
     activo: true
   });
-  
-  // Mutations
-  const crearperiodoporClase = useMutation(api.periodoporClase.crearPeriodoPorClase);
-  const actualizarperiodoporClase = useMutation(api.periodoporClase.actualizarPeriodoPorClase);
-  const eliminarperiodoporClase = useMutation(api.periodoporClase.eliminarPeriodoPorClase);
 
   // Memoized helper functions
   const getClaseNombre = useCallback((id: string) =>
@@ -305,13 +294,13 @@ export default function PeriodosClasePage() {
         );
 
         await Promise.all(
-          combinaciones.map(combo => crearperiodoporClase(combo))
+          combinaciones.map(combo => crearPeriodoPorClase(combo))
         );
         
         toast.success(`${combinaciones.length} horarios creados exitosamente`);
       } else if (operation === 'edit' && data?._id) {
         // Para editar, solo actualizamos el registro actual
-        await actualizarperiodoporClase({
+        await actualizarPeriodoPorClase({
           id: data._id as Id<"periodoPorClase">,
           escuelaId: escuelaId as Id<"escuelas">,
           catalogoClaseId: values.catalogoClaseId as Id<"catalogosDeClases">,
@@ -325,7 +314,7 @@ export default function PeriodosClasePage() {
       console.error('Error en operación CRUD:', error);
       throw error;
     }
-  }, [operation, data, escuelaId, crearperiodoporClase, actualizarperiodoporClase]);
+  }, [operation, data, escuelaId, crearPeriodoPorClase, actualizarPeriodoPorClase]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (!escuelaId) {
@@ -334,15 +323,12 @@ export default function PeriodosClasePage() {
     }
     
     try {
-      await eliminarperiodoporClase({ 
-        id: id as Id<"periodoPorClase">, 
-        escuelaId: escuelaId as Id<"escuelas"> 
-      });
+      await eliminarPeriodoPorClase(id, escuelaId);
     } catch (error) {
       console.error('Error al eliminar:', error);
       throw error;
     }
-  }, [escuelaId, eliminarperiodoporClase]);
+  }, [escuelaId, eliminarPeriodoPorClase]);
 
   // Event handlers para los botones
   const handleView = useCallback((item: PeriodoPorClaseItem) => {
@@ -371,7 +357,8 @@ export default function PeriodosClasePage() {
 
   const handleRetry = useCallback(() => {
     if (clearErrors) clearErrors();
-  }, [clearErrors]);
+    clearStoreErrors();
+  }, [clearErrors, clearStoreErrors]);
 
   // Render conditions
   if (isLoading) return <LoadingSpinner />;
@@ -381,8 +368,18 @@ export default function PeriodosClasePage() {
   return (
     <div className="w-full px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Horarios por Clase</h1>
-        <Button onClick={openCreate}>
+        <h1 className="text-2xl font-bold">Horarios </h1>
+  
+      </div>
+
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-sm text-muted-foreground">
+          Haz clic en los iconos de acciones en cada horario para ver sus detalles completos, editarlo o eliminarlo. Para crear un nuevo horario, usa el botón Nuevo Horario.
+        </p>
+      </div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-xl font-semibold">Lista de Horarios</h2>
+        <Button onClick={openCreate} disabled={isCreating}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Horario
         </Button>
@@ -394,9 +391,26 @@ export default function PeriodosClasePage() {
         catalogosClases={catalogosClases}
       />
 
+      {/* Mostrar errores del store */}
+      {(createError || updateError || deleteError) && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="text-sm text-red-800">
+            {createError && <div>Error al crear horario: {createError}</div>}
+            {updateError && <div>Error al actualizar horario: {updateError}</div>}
+            {deleteError && <div>Error al eliminar horario: {deleteError}</div>}
+            <button 
+              onClick={clearStoreErrors} 
+              className="text-xs text-blue-500 underline mt-2"
+            >
+              Limpiar errores
+            </button>
+          </div>
+        </div>
+      )}
+
       {catalogoClaseId ? (
-        <PeriodosList
-          items={periodosPorCatalogo}
+        <PeriodosTable
+          items={periodosPorClasePorCatalogo(catalogoClaseId)}
           title="Horarios de la clase seleccionada"
           onView={handleView}
           onEdit={handleEdit}
@@ -404,10 +418,12 @@ export default function PeriodosClasePage() {
           getClaseNombre={getClaseNombre}
           getPeriodoNombreYHorario={getPeriodoNombreYHorario}
           getDiaNombre={getDiaNombre}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
         />
       ) : (
-        <PeriodosList
-          items={periodosPorEscuela}
+        <PeriodosTable
+          items={periodosPorClase}
           title="Todos los horarios"
           onView={handleView}
           onEdit={handleEdit}
@@ -415,6 +431,8 @@ export default function PeriodosClasePage() {
           getClaseNombre={getClaseNombre}
           getPeriodoNombreYHorario={getPeriodoNombreYHorario}
           getDiaNombre={getDiaNombre}
+          isUpdating={isUpdating}
+          isDeleting={isDeleting}
         />
       )}
 

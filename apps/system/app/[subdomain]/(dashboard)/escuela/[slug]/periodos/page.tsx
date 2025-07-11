@@ -3,9 +3,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-// import { api } from "@/convex/_generated/api";
-// import { useMutation, useQuery } from "convex/react";
 import { useEscuela } from "@/app/store/useEscuelaStore";
+import { usePeriodo } from "@/app/store/usePeriodoStore";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
@@ -15,7 +14,6 @@ import { Switch } from "@repo/ui/components/shadcn/switch";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
-import { usePeriodo } from "@/app/store/usePeriodoStore";
 
 // Schema de validación para periodos
 const periodoSchema = z.object({
@@ -92,13 +90,20 @@ export default function PeriodosPage() {
     clearErrors
   } = useEscuela();
 
-  // Mutations y queries
-  const escuelaId = escuela?._id as import("@/convex/_generated/dataModel").Id<"escuelas"> | undefined;
-  const { periodos, crearPeriodo, actualizarPeriodo, eliminarPeriodo } = usePeriodo(escuelaId);
-  // const periodos = useQuery(api.periodos.obtenerPeriodosPorEscuela, escuelaId ? { escuelaId } : "skip");
-  // const crearPeriodo = useMutation(api.periodos.crearPeriodo);
-  // const actualizarPeriodo = useMutation(api.periodos.actualizarPeriodo);
-  // const eliminarPeriodo = useMutation(api.periodos.eliminarPeriodo);
+  // Usar el store de periodos
+  const {
+    periodos,
+    isCreating,
+    isUpdating,
+    isDeleting,
+    createError,
+    updateError,
+    deleteError,
+    crearPeriodo,
+    actualizarPeriodo,
+    eliminarPeriodo,
+    clearErrors: clearStoreErrors,
+  } = usePeriodo(escuela?._id);
 
   // Hook del CrudDialog
   const {
@@ -118,7 +123,7 @@ export default function PeriodosPage() {
   });
 
   const handleSubmit = async (values: Record<string, unknown>) => {
-    if (!escuelaId) {
+    if (!escuela?._id) {
       toast.error('Error: Escuela no seleccionada');
       return;
     }
@@ -126,7 +131,7 @@ export default function PeriodosPage() {
     try {
       if (operation === 'create') {
         await crearPeriodo({
-          escuelaId,
+          escuelaId: escuela._id,
           nombre: values.nombre as string,
           horaInicio: values.horaInicio as string,
           horaFin: values.horaFin as string,
@@ -134,8 +139,8 @@ export default function PeriodosPage() {
         });
       } else if (operation === 'edit' && data?._id) {
         await actualizarPeriodo({
-          id: data._id as import("@/convex/_generated/dataModel").Id<"periodos">,
-          escuelaId,
+          id: data._id,
+          escuelaId: escuela._id,
           nombre: values.nombre as string,
           horaInicio: values.horaInicio as string,
           horaFin: values.horaFin as string,
@@ -149,17 +154,22 @@ export default function PeriodosPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!escuelaId) {
+    if (!escuela?._id) {
       toast.error('Error: Escuela no seleccionada');
       return;
     }
 
     try {
-      await eliminarPeriodo(id, escuelaId);
+      await eliminarPeriodo(id, escuela._id);
     } catch (error) {
       console.error('Error al eliminar periodo:', error);
       throw error;
     }
+  };
+
+  const handleRetry = () => {
+    if (clearErrors) clearErrors();
+    clearStoreErrors();
   };
 
   // Estados de carga y error
@@ -172,16 +182,12 @@ export default function PeriodosPage() {
       <div className="text-center py-10 text-red-500">
         Error: {error}
         <br />
-        {clearErrors && (
-          <button
-            onClick={() => {
-              clearErrors();
-            }}
-            className="text-xs text-blue-500 underline mt-2"
-          >
-            Reintentar
-          </button>
-        )}
+        <button
+          onClick={handleRetry}
+          className="text-xs text-blue-500 underline mt-2"
+        >
+          Reintentar
+        </button>
       </div>
     );
   }
@@ -194,11 +200,36 @@ export default function PeriodosPage() {
     <div className="w-full px-4 md:px-12 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Periodos</h1>
-        <Button size="lg" onClick={openCreate}>
+      </div>
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-sm text-muted-foreground">
+        Haz clic en los iconos de acciones en cada periodo para ver sus detalles completos, editarlo o eliminarlo. Para crear un nuevo periodo, usa el botón Nuevo Periodo.
+        </p>
+      </div>
+      <div className="flex justify-between items-center mb-6">
+      <h2 className="text-xl font-semibold">Lista de Periodos</h2>
+        <Button size="lg" onClick={openCreate} disabled={isCreating}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo periodo
         </Button>
-      </div>
+     </div>
+
+      {/* Mostrar errores del store */}
+      {(createError || updateError || deleteError) && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="text-sm text-red-800">
+            {createError && <div>Error al crear periodo: {createError}</div>}
+            {updateError && <div>Error al actualizar periodo: {updateError}</div>}
+            {deleteError && <div>Error al eliminar periodo: {deleteError}</div>}
+            <button 
+              onClick={clearStoreErrors} 
+              className="text-xs text-blue-500 underline mt-2"
+            >
+              Limpiar errores
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl">
         {periodos?.length === 0 && (
@@ -228,10 +259,10 @@ export default function PeriodosPage() {
               <Button variant="outline" size="sm" onClick={() => openView({ ...periodo, _id: periodo._id })}>
                 <Eye className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => openEdit({ ...periodo, _id: periodo._id })}>
+              <Button variant="outline" size="sm" onClick={() => openEdit({ ...periodo, _id: periodo._id })} disabled={isUpdating}>
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button variant="destructive" size="sm" onClick={() => openDelete({ ...periodo, _id: periodo._id })}>
+              <Button variant="destructive" size="sm" onClick={() => openDelete({ ...periodo, _id: periodo._id })} disabled={isDeleting}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
