@@ -2,20 +2,20 @@
 
 import * as React from "react"
 import {
-  BookOpen,
-  Bot,
+  // BookOpen,
+  // Bot,
   Command,
-  Frame,
+  // Frame,
   LifeBuoy,
-  Map,
-  PieChart,
+  // Map,
+  // PieChart,
   Send,
-  Settings2,
+  // Settings2,
   SquareTerminal,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
+// import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -77,12 +77,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/salones`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Salones",
-          url: `/escuela/${slug}/salones`,
-        },
-      ],
     },
     {
       title: "Materias",
@@ -123,14 +117,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/periodos`,
       icon: SquareTerminal,
       isActive: true,
-      
     },
     {
       title: "Periodos por Clase",
       url: `/escuela/${slug}/periodosPorClase`,
       icon: SquareTerminal,
       isActive: true,
-    
     },
     {
       title: "Alumnos",
@@ -164,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
     },
-
+/* 
     {
       title: "Models",
       url: "#",
@@ -229,18 +221,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: "#",
         },
       ],
-    },
-    {
-      title: "Alumnos",
-      url: `/escuela/${slug}/alumnos`,
-      icon: SquareTerminal ,
-      items: [
+    }, */
         {
-          title: "Padres",
-          url: `/escuela/${slug}/alumnos/padres`,
-        }
-      ],
+      title: "Padres",
+      url: `/escuela/${slug}/padres`,
+      icon: SquareTerminal,
+      isActive: true,
     },
+
   ],
   navSecondary: [
     {
@@ -254,7 +242,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       icon: Send,
     },
   ],
-  projects: [
+ /*  projects: [
     {
       name: "Design Engineering",
       url: "#",
@@ -270,7 +258,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "#",
       icon: Map,
     },
-  ],
+  ], */
 }
   return (
     <Sidebar
@@ -296,7 +284,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {/* <NavProjects projects={data.projects} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
 import { useGrupo } from '../../../store/useGrupoStore'
 
+//import { useEscuela } from '@/app/store/useEscuela' --- este es lo que tiene emilio
+
 export default function Home() {
   const { user } = useUser()
   
@@ -71,7 +73,7 @@ export default function Home() {
         })
       } else if (operation === 'edit' && data?._id) {
         await actualizarGrupo({
-          id: data._id,
+          _id: data._id,
           escuelaId: escuela._id,
           grado: values.grado as string,
           nombre: values.nombre as string,

@@ -11,7 +11,7 @@ import { Badge } from "@repo/ui/components/shadcn/badge";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Checkbox } from "@repo/ui/components/shadcn/checkbox";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 
 // Constants
@@ -26,7 +26,7 @@ const DIAS_SEMANA = [
 ] as const;
 
 // Types
-type CatalogoClase = { id: string; nombre: string; materiaId: string };
+type CatalogoClase = { _id: string; nombre: string; materiaId: string };
 type Periodo = { _id: string; nombre: string; horaInicio?: string; horaFin?: string };
 type PeriodoPorClaseItem = {
   _id: string;
@@ -132,7 +132,7 @@ const ClassFilter = ({
     >
       <option value="">Selecciona una clase</option>
       {catalogosClases?.map((c) => (
-        <option key={c.id} value={c.id}>{c.nombre}</option>
+        <option key={c._id} value={c._id}>{c.nombre}</option>
       ))}
     </select>
     <p className="text-sm text-muted-foreground">
@@ -266,7 +266,7 @@ export default function PeriodosClasePage() {
 
   // Memoized helper functions
   const getClaseNombre = useCallback((id: string) =>
-    catalogosClases?.find((c: CatalogoClase) => c.id === id)?.nombre || id,
+    catalogosClases?.find((c: CatalogoClase) => c._id === id)?.nombre || id,
     [catalogosClases]
   );
 
@@ -444,7 +444,7 @@ export default function PeriodosClasePage() {
           
           // Si es modo "view", mostrar información detallada
           if (currentOperation === 'view' && data) {
-            const clase = catalogosClases?.find((c: CatalogoClase) => c.id === data.catalogoClaseId);
+            const clase = catalogosClases?.find((c: CatalogoClase) => c._id === data.catalogoClaseId);
             const periodo = periodos?.find((p: Periodo) => p._id === data.periodoId);
             const materia = materias?.find((m: { _id: Id<"materias">; nombre: string }) => m._id === clase?.materiaId);
             const maestro = maestros?.find((m: { id: string }) => m.id === clase?.maestroId);
@@ -560,7 +560,7 @@ export default function PeriodosClasePage() {
                       >
                         <option value="">Selecciona una clase</option>
                         {catalogosClases?.map((c) => (
-                          <option key={c.id} value={c.id}>{c.nombre}</option>
+                          <option key={c._id} value={c._id}>{c.nombre}</option>
                         ))}
                       </select>
                     </FormControl>
