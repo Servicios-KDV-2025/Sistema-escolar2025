@@ -34,8 +34,8 @@ export function FormularioCatalogoDeClases({
     useEffect(() => {
         if (operation === 'view') return;
         const materia = materias?.find((m) => m._id === materiaId)?.nombre;
-        const grupo = grupos?.find((g) => g.id === grupoId)?.nombre;
-        const grado = grupos?.find((g) => g.id === grupoId)?.grado;
+        const grupo = grupos?.find((g) => g._id === grupoId)?.nombre;
+        const grado = grupos?.find((g) => g._id === grupoId)?.grado;
 
         if (!isNombreModificadoManualmente && materia && grupo) {
             form.setValue("nombre", `${materia} - ${grado} ${grupo}`);
@@ -182,7 +182,7 @@ export function FormularioCatalogoDeClases({
                             </FormControl>
                             <SelectContent>
                                 {grupos?.map((g) => (
-                                    <SelectItem key={g.id} value={g.id}>
+                                    <SelectItem key={g._id} value={g._id}>
                                         {g.grado} {g.nombre}
                                     </SelectItem>
                                 ))}

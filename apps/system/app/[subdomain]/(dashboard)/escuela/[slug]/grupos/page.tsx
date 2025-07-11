@@ -56,7 +56,7 @@ export default function Page() {
                 })
             } else if (operation === 'edit' && data?._id) {
                 await actualizarGrupo({
-                    id: data._id as Id<"grupos">,
+                    _id: data._id as Id<"grupos">,
                     escuelaId: escuela._id as Id<"escuelas">,
                     grado: values.grado as string,
                     nombre: values.nombre as string,

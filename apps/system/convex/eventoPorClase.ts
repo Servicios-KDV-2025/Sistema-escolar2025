@@ -33,7 +33,7 @@ export const verTodosLosEventosXClases = query({
       .collect();
 
     return eventos.map(({ _id, ...rest }) => ({
-      id: _id,
+      _id,
       ...rest,
     }));
   },
@@ -42,11 +42,11 @@ export const verTodosLosEventosXClases = query({
 // Read one
 export const verUnEventoXClase = query({
   args: {
-    id: v.id("eventoPorClases"),
+    _id: v.id("eventoPorClases"),
     escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {
-    const evento = await ctx.db.get(args.id);
+    const evento = await ctx.db.get(args._id);
     if (!evento || evento.escuelaId !== args.escuelaId) return null;
     return evento;
   },
@@ -55,34 +55,34 @@ export const verUnEventoXClase = query({
 // Update
 export const actualizarEventoXClase = mutation({
   args: {
+    _id: v.id("eventoPorClases"),
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
     eventoEscolarId: v.id("eventosEscolares"),
-    id: v.id("eventoPorClases"),
     escuelaId: v.id("escuelas"),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const evento = await ctx.db.get(args.id);
+    const evento = await ctx.db.get(args._id);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
  
-    const { id, ...data } = args;
-    await ctx.db.patch(id, data);
+    const { _id, ...data } = args;
+    await ctx.db.patch(_id, data);
   },
 });
 
 // Delete
 export const eliminarEventoXClase = mutation({
   args: {
-    id: v.id("eventoPorClases"),
+    _id: v.id("eventoPorClases"),
     escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {
-    const evento = await ctx.db.get(args.id);
+    const evento = await ctx.db.get(args._id);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
-    await ctx.db.delete(args.id);
+    await ctx.db.delete(args._id);
   },
 });
