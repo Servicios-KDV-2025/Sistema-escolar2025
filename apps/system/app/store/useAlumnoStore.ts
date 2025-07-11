@@ -15,7 +15,7 @@ export type Alumno = {
   apellidos: string;
   fechaNacimiento: string;
   email?: string;
-  telefono?: number;
+  telefono?: string;
   direccion?: string;
   activo: boolean;
 };
@@ -30,7 +30,7 @@ export type CrearAlumnoData = {
   apellidos: string;
   fechaNacimiento: string;
   email?: string;
-  telefono?: number;
+  telefono?: string;
   direccion?: string;
   activo: boolean;
 };
@@ -43,7 +43,7 @@ export type ActualizarAlumnoData = {
   apellidos: string;
   fechaNacimiento: string;
   email?: string;
-  telefono?: number;
+  telefono?: string;
   direccion?: string;
   activo: boolean;
 };
@@ -222,7 +222,7 @@ export const useAlumno = (escuelaId?: string) => {
           apellidos: string;
           fechaNacimiento: string;
           email?: string;
-          telefono?: number;
+          telefono?: string;
           direccion?: string;
           activo: boolean;
         }>).map((a) => ({

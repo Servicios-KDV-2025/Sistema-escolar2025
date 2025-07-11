@@ -12,7 +12,7 @@ export const crearAlumno = mutation({
     apellidos: v.string(),
     fechaNacimiento: v.string(),
     email: v.optional(v.string()),
-    telefono: v.optional(v.number()),
+    telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
     activo: v.boolean()
   },
@@ -57,7 +57,7 @@ export const upadateAlumno = mutation({
     apellidos: v.string(),
     fechaNacimiento: v.string(),
     email: v.optional(v.string()),
-    telefono: v.optional(v.number()),
+    telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
     activo: v.boolean()
   },
