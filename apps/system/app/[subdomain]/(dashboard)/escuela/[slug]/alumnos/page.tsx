@@ -277,6 +277,7 @@ export default function Page() {
       >
         {(form, operation) => (
           <div className="space-y-6">
+            {operation === 'edit' ? <></> :  
             <FormField
               control={form.control}
               name="padreId"
@@ -296,7 +297,7 @@ export default function Page() {
                       <SelectContent>
                         {padres?.map((padre) => (
                           <SelectItem key={padre._id} value={padre._id}>
-                            {padre.nombre} ({padre.apellidos})
+                            {padre.nombre} {padre.apellidos}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -304,7 +305,7 @@ export default function Page() {
                   </FormControl>
                 </FormItem>
               )}
-            /> 
+            />}
             <FormField
               control={form.control}
               name="grupoId"
@@ -324,7 +325,7 @@ export default function Page() {
                       <SelectContent>
                         {grupos?.map((grupo) => (
                           <SelectItem key={grupo._id} value={grupo._id}>
-                            {grupo.nombre} ({grupo.grado})
+                            {grupo.grado} {grupo.nombre}
                           </SelectItem>
                         ))}
                       </SelectContent>
