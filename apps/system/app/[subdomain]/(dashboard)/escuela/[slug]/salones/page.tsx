@@ -37,7 +37,7 @@ export default function Page() {
     nombre: '',
     capacidad: 1,
     ubicacion: 'Planta baja'
-  })
+  });
 
   const handleSubmit = async (data: Record<string, unknown>) => {
     if (!escuela?._id) {
