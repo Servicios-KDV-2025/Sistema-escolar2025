@@ -52,6 +52,41 @@ export const verUnEventoXClase = query({
   },
 });
 
+// Get all from name
+export const getEventoPorClaseConNombres = query({
+  args: { escuelaId: v.id("escuelas") },
+  handler: async (ctx, { escuelaId }) => {
+    const eventos = await ctx.db
+      .query("eventoPorClases")
+      .withIndex("by_escuela", q => q.eq("escuelaId", escuelaId))
+      .collect();
+
+    const res = await Promise.all(
+      eventos.map(async evento => {
+        const [catalogoClase, calendario, cicloEscolar, eventoEscolar] = await Promise.all([
+          ctx.db.get(evento.catalogoClaseId),
+          ctx.db.get(evento.calendarioId),
+          ctx.db.get(evento.cicloEscolarId),
+          ctx.db.get(evento.eventoEscolarId),
+        ]);
+
+        return {
+          _id: evento._id,
+          catalogoClase: catalogoClase?.nombre ?? "Sin Catálogo de Clases",
+          calendario: calendario?.fecha ?? "Sin Fecha",
+          cicloEscolar: cicloEscolar?.nombre ?? "Sin Ciclo Escolar",
+          eventoEscolar: eventoEscolar?.nombre ?? "Sin Evento Escolar",
+          fecha: evento.fecha,
+          descripcion: evento.descripcion ?? "",
+          activo: evento.activo,
+        };
+      })
+    );
+
+    return res;
+  },
+});
+
 // Update
 export const actualizarEventoXClase = mutation({
   args: {
