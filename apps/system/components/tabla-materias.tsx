@@ -23,6 +23,7 @@ import { Input } from "@repo/ui/components/shadcn/input";
 import { Textarea } from "@repo/ui/components/shadcn/textarea";
 import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
 export function TablaMaterias() {
   const {escuela} = useEscuela();
@@ -80,7 +81,7 @@ export function TablaMaterias() {
     try {
       if (operation === 'create') {
         await crearMateria({
-          escuelaId: escuela._id,
+          escuelaId: escuela._id as Id<"escuelas">,
           nombre: values.nombre as string,
           descripcion: values.descripcion as string,
           creditos: values.creditos ? Number(values.creditos) : undefined,
@@ -88,8 +89,8 @@ export function TablaMaterias() {
         });
       } else if (operation === 'edit' && data?._id) {
         await actualizarMateria({
-          id: data._id,
-          escuelaId: escuela._id,
+          _id: data._id  as Id<"materias">,
+          escuelaId: escuela._id  as Id<"escuelas">,
           nombre: values.nombre as string,
           descripcion: values.descripcion as string,
           creditos: values.creditos ? Number(values.creditos) : undefined,

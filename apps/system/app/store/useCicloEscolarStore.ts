@@ -3,33 +3,12 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-
-// Tipo de CicloEscolar basado en tu schema de Convex
-export type CicloEscolar = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  fechaInicio: number;
-  fechaFin: number;
-  activo: boolean;
-};
+import { CicloEscolar } from "@/types/convex-zod-types";
 
 // Tipos para crear y actualizar ciclo escolar
-export type CrearCicloEscolarData = {
-  escuelaId: string;
-  nombre: string;
-  fechaInicio: number;
-  fechaFin: number;
-};
+export type CrearCicloEscolarData = Pick<CicloEscolar, "escuelaId" | "nombre" | "fechaInicio" | "fechaFin">;
 
-export type ActualizarCicloEscolarData = {
-  id: string;
-  escuelaId: string;
-  nombre: string;
-  fechaInicio: number;
-  fechaFin: number;
-  activo?: boolean;
-};
+export type ActualizarCicloEscolarData = CicloEscolar;
 
 // Store de CicloEscolar con CRUD completo
 export type CicloEscolarStore = {
@@ -91,15 +70,6 @@ export const useCicloEscolarStore = create<CicloEscolarStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-type CicloEscolarQueryResult = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  fechaInicio: number;
-  fechaFin: number;
-  activo: boolean;
-};
-
 export const useCicloEscolar = (escuelaId?: string) => {
   const {
     ciclosEscolares,
@@ -158,7 +128,7 @@ export const useCicloEscolar = (escuelaId?: string) => {
     setUpdateError(null);
     try {
       await actualizarCicloEscolarMutation({
-        cicloId: data.id as Id<"ciclosEscolares">,
+        cicloId: data._id as Id<"ciclosEscolares">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         nombre: data.nombre,
         fechaInicio: data.fechaInicio,
@@ -196,7 +166,7 @@ export const useCicloEscolar = (escuelaId?: string) => {
   useEffect(() => {
     if (ciclosEscolaresQuery) {
       setCiclosEscolares(
-        (ciclosEscolaresQuery as CicloEscolarQueryResult[]).map((c) => ({
+        (ciclosEscolaresQuery as CicloEscolar[]).map((c) => ({
           _id: c._id,
           escuelaId: c.escuelaId,
           nombre: c.nombre,

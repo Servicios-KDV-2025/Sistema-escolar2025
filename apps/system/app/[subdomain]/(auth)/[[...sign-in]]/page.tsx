@@ -1,47 +1,31 @@
 "use client";
 
-import { SignIn, SignOutButton, useUser } from "@clerk/nextjs";
-import { useOrganization } from "@clerk/nextjs";
-import Link from "next/link";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@repo/ui/components/shadcn/card";
-import { useEscuela } from "../../../store/useEscuelaStore";
-import {
-  CrudDialog,
-  useCrudDialog,
-} from "../../../../components/ui/crud-dialog";
-import { grupoSchema } from "../../../../app/shemas/grupo";
-import { toast } from "sonner";
-import { Button } from "@repo/ui/components/shadcn/button";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@repo/ui/components/shadcn/form";
-import { Input } from "@repo/ui/components/shadcn/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/components/shadcn/select";
-import { Plus, Pencil, Trash2, Eye } from "lucide-react";
-import { useGrupo } from "../../../store/useGrupoStore";
+import { SignIn, SignOutButton, useUser } from '@clerk/nextjs'
+import Link from 'next/link'
+import { Card, CardHeader, CardTitle, CardContent } from '@repo/ui/components/shadcn/card'
+import { useEscuela } from '../../../store/useEscuelaStore'
+import { CrudDialog, useCrudDialog } from '../../../../components/ui/crud-dialog'
+import { grupoSchema } from '../../../../app/shemas/grupo'
+import { toast } from 'sonner'
+import { Button } from '@repo/ui/components/shadcn/button'
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
+import { Input } from '@repo/ui/components/shadcn/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/shadcn/select'
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+import { useGrupo } from '../../../store/useGrupoStore'
 
 //import { useEscuela } from '@/app/store/useEscuela' --- este es lo que tiene emilio
 
 export default function Home() {
-  const { user } = useUser();
-  const { organization } = useOrganization();
-
-  const { escuela, userEmail, isLoading, error, clearErrors } = useEscuela();
+  const { user } = useUser()
+  
+  const { 
+    escuela,
+    userEmail,
+    isLoading,
+    error,
+    clearErrors 
+  } = useEscuela() 
 
   // Ejemplo de CRUD para grupos
   const {
@@ -56,7 +40,7 @@ export default function Home() {
     actualizarGrupo,
     eliminarGrupo,
     clearErrors: clearGrupoErrors,
-  } = useGrupo(escuela?._id);
+  } = useGrupo(escuela?._id)
 
   const {
     isOpen,
@@ -70,68 +54,59 @@ export default function Home() {
   } = useCrudDialog(grupoSchema, {
     grado: "1°",
     nombre: "",
-    activo: true,
-  });
+    activo: true
+  })
 
   const handleSubmit = async (values: Record<string, unknown>) => {
     if (!escuela?._id) {
-      toast.error("Error", {
-        description: "No se pudo identificar la escuela",
-      });
-      return;
+      toast.error('Error', { description: 'No se pudo identificar la escuela' })
+      return
     }
 
     try {
-      if (operation === "create") {
+      if (operation === 'create') {
         await crearGrupo({
           escuelaId: escuela._id,
           grado: values.grado as string,
           nombre: values.nombre as string,
-          activo: values.activo as boolean,
-        });
-      } else if (operation === "edit" && data?._id) {
+          activo: values.activo as boolean
+        })
+      } else if (operation === 'edit' && data?._id) {
         await actualizarGrupo({
           _id: data._id,
           escuelaId: escuela._id,
           grado: values.grado as string,
           nombre: values.nombre as string,
-          activo: values.activo as boolean,
-        });
+          activo: values.activo as boolean
+        })
       } else {
-        throw new Error("Operación no válida o datos faltantes");
+        throw new Error('Operación no válida o datos faltantes')
       }
     } catch (error) {
       // El error ya es manejado por el store, pero puedes mostrar un toast si quieres
-      toast.error("Error en operación CRUD", {
-        description: (error as Error).message,
-      });
-      throw error;
+      toast.error('Error en operación CRUD', { description: (error as Error).message })
+      throw error
     }
-  };
+  }
 
   const handleDelete = async (id: string) => {
     if (!escuela?._id) {
-      toast.error("Error", {
-        description: "No se pudo identificar la escuela",
-      });
-      return;
+      toast.error('Error', { description: 'No se pudo identificar la escuela' })
+      return
     }
     try {
-      await eliminarGrupo(id, escuela._id);
+      await eliminarGrupo(id, escuela._id)
     } catch (error) {
-      toast.error("Error al eliminar grupo", {
-        description: (error as Error).message,
-      });
-      throw error;
+      toast.error('Error al eliminar grupo', { description: (error as Error).message })
+      throw error
     }
-  };
+  }
 
-  if (!user)
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <SignIn />
-      </div>
-    );
+  if (!user) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <SignIn />
+    </div>
+  )
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
@@ -157,55 +132,6 @@ export default function Home() {
             {/* Mostrar información de la escuela si está disponible */}
             {escuela && (
               <div className="pt-4 border-t">
-                <div>
-                  <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-                    <h1 className="text-2xl font-bold mb-6 text-gray-800">
-                      Organization Details
-                    </h1>
-
-                    <div className="flex items-center mb-6">
-                      {organization?.imageUrl && (
-                        <img
-                          src={organization.imageUrl}
-                          alt="Organization logo"
-                          className="w-20 h-20 rounded-full mr-4 object-cover"
-                        />
-                      )}
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-900">
-                          {organization?.name}
-                        </h2>
-                        <p className="text-gray-600">ID: {organization?.id}</p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <DetailCard
-                        title="Created At"
-                        value={
-                          organization?.createdAt?.toLocaleDateString() || ""
-                        }
-                      />
-                      <DetailCard
-                        title="Members Count"
-                        value={organization?.membersCount?.toString() || ""}
-                      />
-                      <DetailCard
-                        title="Admin Delete Enabled"
-                        value={organization?.adminDeleteEnabled ? "Yes" : "No"}
-                      />
-                      <DetailCard
-                        title="Public Metadata"
-                        value={JSON.stringify(
-                          organization?.publicMetadata || {},
-                          null,
-                          2
-                        )}
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 <p className="text-sm text-muted-foreground">
                   Escuela: {escuela.nombre}
                 </p>
@@ -244,8 +170,10 @@ export default function Home() {
             {/* Mostrar error si existe */}
             {error && (
               <div className="pt-4 border-t">
-                <p className="text-sm text-red-500">Error: {error}</p>
-                <button
+                <p className="text-sm text-red-500">
+                  Error: {error}
+                </p>
+                <button 
                   onClick={() => {
                     clearErrors();
                   }}
@@ -355,20 +283,10 @@ export default function Home() {
         {/* CrudDialog */}
         <CrudDialog
           operation={operation}
-          title={
-            operation === "create"
-              ? "Crear Nuevo Grupo"
-              : operation === "edit"
-                ? "Editar Grupo"
-                : "Ver Grupo"
-          }
-          description={
-            operation === "create"
-              ? "Completa la información del nuevo grupo"
-              : operation === "edit"
-                ? "Modifica la información del grupo"
-                : "Información del grupo"
-          }
+          title={operation === 'create' ? 'Crear Nuevo Grupo' : 
+                operation === 'edit' ? 'Editar Grupo' : 'Ver Grupo'}
+          description={operation === 'create' ? 'Completa la información del nuevo grupo' :
+                      operation === 'edit' ? 'Modifica la información del grupo' : 'Información del grupo'}
           schema={grupoSchema}
           defaultValues={{
             grado: "1°",
@@ -417,8 +335,6 @@ export default function Home() {
                 control={form.control}
                 name="nombre"
                 render={({ field }) => {
-                  console.log("Campo nombre - field.value:", field.value);
-                  console.log("Campo nombre - operation:", operation);
                   return (
                     <FormItem>
                       <FormLabel>Nombre</FormLabel>
@@ -443,12 +359,10 @@ export default function Home() {
                   <FormItem>
                     <FormLabel>Estado</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={(value) =>
-                          field.onChange(value === "true")
-                        }
-                        value={field.value ? "true" : "false"}
-                        disabled={operation === "view"}
+                      <Select 
+                        onValueChange={(value) => field.onChange(value === 'true')} 
+                        value={field.value ? 'true' : 'false'}
+                        disabled={operation === 'view'}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar estado" />
@@ -468,12 +382,5 @@ export default function Home() {
         </CrudDialog>
       </div>
     </div>
-  );
+  )
 }
-
-const DetailCard = ({ title, value }: { title: string; value: string }) => (
-  <div className="bg-gray-50 p-4 rounded-lg">
-    <h3 className="font-medium text-gray-700">{title}</h3>
-    <p className="mt-1 text-gray-900 break-words">{value}</p>
-  </div>
-);

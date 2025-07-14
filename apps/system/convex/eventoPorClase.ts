@@ -9,7 +9,7 @@ export const crearEventoXClase = mutation({
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
-    eventoEscolarId: v.id("eventosEscolares"),
+    eventoEscolarId: v.optional(v.id("eventosEscolares")),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
@@ -18,8 +18,6 @@ export const crearEventoXClase = mutation({
     await ctx.db.insert("eventoPorClases", { ...args });
   },
 });
-
-
 
 // Read all
 export const verTodosLosEventosXClases = query({
@@ -31,14 +29,14 @@ export const verTodosLosEventosXClases = query({
       .query("eventoPorClases")
       .filter(q => q.eq(q.field("escuelaId"), args.escuelaId))
       .collect();
-
+ 
     return eventos.map(({ _id, ...rest }) => ({
       _id,
       ...rest,
     }));
   },
 });
-
+ 
 // Read one
 export const verUnEventoXClase = query({
   args: {
@@ -52,6 +50,43 @@ export const verUnEventoXClase = query({
   },
 });
 
+// Get all from name
+export const getEventoPorClaseConNombres = query({
+  args: { escuelaId: v.id("escuelas") },
+  handler: async (ctx, { escuelaId }) => {
+    const eventos = await ctx.db
+      .query("eventoPorClases")
+      .withIndex("by_escuela", q => q.eq("escuelaId", escuelaId))
+      .collect();
+
+    const res = await Promise.all(
+      eventos.map(async evento => {
+        const [catalogoClase, calendario, cicloEscolar, eventoEscolar] = await Promise.all([
+          ctx.db.get(evento.catalogoClaseId),
+          ctx.db.get(evento.calendarioId),
+          ctx.db.get(evento.cicloEscolarId),
+          evento.eventoEscolarId
+            ? ctx.db.get(evento.eventoEscolarId)
+            : Promise.resolve(null),
+        ]);
+
+        return {
+          _id: evento._id,
+          catalogoClase: catalogoClase?.nombre ?? "Sin Catálogo de Clases",
+          calendario: calendario?.fecha ?? "Sin Fecha",
+          cicloEscolar: cicloEscolar?.nombre ?? "Sin Ciclo Escolar",
+          eventoEscolar: eventoEscolar?.nombre ?? "Sin Evento Escolar",
+          fecha: evento.fecha,
+          descripcion: evento.descripcion ?? "",
+          activo: evento.activo,
+        };
+      })
+    );
+
+    return res;
+  },
+});
+
 // Update
 export const actualizarEventoXClase = mutation({
   args: {
@@ -59,7 +94,7 @@ export const actualizarEventoXClase = mutation({
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
-    eventoEscolarId: v.id("eventosEscolares"),
+    eventoEscolarId: v.optional(v.id("eventosEscolares")),
     escuelaId: v.id("escuelas"),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
@@ -68,12 +103,12 @@ export const actualizarEventoXClase = mutation({
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args._id);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
- 
+
     const { _id, ...data } = args;
     await ctx.db.patch(_id, data);
   },
 });
-
+ 
 // Delete
 export const eliminarEventoXClase = mutation({
   args: {

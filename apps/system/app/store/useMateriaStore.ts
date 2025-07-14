@@ -3,34 +3,12 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-
-// Tipo de Materia basado en tu schema de Convex
-export type Materia = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  descripcion?: string;
-  creditos?: number;
-  activa: boolean;
-};
+import { Materia } from "@/types/convex-zod-types";
 
 // Tipos para crear y actualizar materia
-export type CrearMateriaData = {
-  escuelaId: string;
-  nombre: string;
-  descripcion?: string;
-  creditos?: number;
-  activa: boolean;
-};
+export type CrearMateriaData = Pick<Materia, "escuelaId" | "nombre" | "descripcion" | "creditos" | "activa">
 
-export type ActualizarMateriaData = {
-  id: string;
-  escuelaId: string;
-  nombre?: string;
-  descripcion?: string;
-  creditos?: number;
-  activa?: boolean;
-};
+export type ActualizarMateriaData = Materia
 
 // Store de Materia con CRUD completo
 export type MateriaStore = {
@@ -92,15 +70,6 @@ export const useMateriaStore = create<MateriaStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-type MateriaQueryResult = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  descripcion?: string;
-  creditos?: number;
-  activa: boolean;
-};
-
 export const useMateria = (escuelaId?: string) => {
   const {
     materias,
@@ -159,7 +128,7 @@ export const useMateria = (escuelaId?: string) => {
     setUpdateError(null);
     try {
       await actualizarMateriaMutation({
-        id: data.id as Id<"materias">,
+        id: data._id as Id<"materias">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         nombre: data.nombre,
         descripcion: data.descripcion,
@@ -196,7 +165,7 @@ export const useMateria = (escuelaId?: string) => {
   useEffect(() => {
     if (materiasQuery) {
       setMaterias(
-        (materiasQuery as MateriaQueryResult[]).map((m) => ({
+        (materiasQuery as Materia[]).map((m) => ({
           _id: m._id,
           escuelaId: m.escuelaId,
           nombre: m.nombre,

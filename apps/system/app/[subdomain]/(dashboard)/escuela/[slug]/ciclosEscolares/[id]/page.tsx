@@ -105,8 +105,8 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
         try {
             if (operation === 'edit' && data?._id) {
                 await actualizarCicloEscolar({
-                    id: data._id,
-                    escuelaId: escuela._id,
+                    _id: data._id as Id<"ciclosEscolares">,
+                    escuelaId: escuela._id as Id<"escuelas">,
                     nombre: values.nombre as string,
                     fechaInicio: new Date(values.fechaInicio as string).getTime(),
                     fechaFin: new Date(values.fechaFin as string).getTime(),
