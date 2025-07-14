@@ -241,7 +241,7 @@ const applicationTables = {
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
-    eventoEscolarId: v.id("eventosEscolares"),
+    eventoEscolarId: v.optional(v.id("eventosEscolares")),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
