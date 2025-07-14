@@ -9,14 +9,12 @@ import { eventoPorClaseSchema } from "@/app/shemas/eventoPorClase";
 import { toast } from "sonner";
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
-import { Input } from "@/components/ui/input";
 import { useEventoPorClase } from "@/app/store/useEventoPorClaseStore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
 import { useCatalogoDeClase } from "@/app/store/useCatalogoDeClasesStore";
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { useEventoEscolar } from "@/app/store/useEventoEscolarStore";
+import FormularioEventoPorClase from "./FormularioEventoPorClase";
 
 export default function Page() {
     const { escuela } = useEscuela();
@@ -28,7 +26,7 @@ export default function Page() {
     const { ciclosEscolares } = useCicloEscolar(escuela?._id);
     const { eventosEscolares } = useEventoEscolar(escuela?._id);
 
-    const calendario = useQuery(api.calendario.obtenerEventosCalendario, { escuelaId: escuela?._id as Id<"escuelas"> });
+    
 
     const {
         isOpen,
@@ -202,195 +200,14 @@ export default function Page() {
                 onDelete={handleDelete}
             >
                 {(form, operation) => (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="catalogoClases"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Clases</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value as string}
-                                        disabled={operation === 'view'}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona una Clase" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {
-                                                catalogosDeClases?.map(catClas => (
-                                                    <SelectItem key={catClas._id} value={catClas._id}>
-                                                        {catClas.nombre}
-                                                    </SelectItem>
-                                                ))
-                                            }
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="calendario"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Fecha</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value as string}
-                                        disabled={operation === 'view'}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona una fecha" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {
-                                                calendario?.map(cal => (
-                                                    <SelectItem key={cal._id} value={cal._id}>
-                                                        {cal.fecha}
-                                                    </SelectItem>
-                                                ))
-                                            }
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="cicloEscolar"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Ciclo Escolar</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value as string}
-                                        disabled={operation === 'view'}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona un Ciclo Escolar" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {
-                                                ciclosEscolares?.map(ciclEsc => (
-                                                    <SelectItem key={ciclEsc._id} value={ciclEsc._id}>
-                                                        {ciclEsc.nombre}
-                                                    </SelectItem>
-                                                ))
-                                            }
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="eventosEscolares"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Evento Escolar (Opcional)</FormLabel>
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        value={field.value as string}
-                                        disabled={operation === 'view'}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona un Evento Escolar (Opcionl)" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {
-                                                eventosEscolares?.map(eventEsc => (
-                                                    <SelectItem key={eventEsc._id} value={eventEsc._id}>
-                                                        {eventEsc.nombre}
-                                                    </SelectItem>
-                                                ))
-                                            }
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-
-                        <FormField
-                            control={form.control}
-                            name="fecha"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Fecha</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            value={field.value as string || ''}
-                                            placeholder="Fecha del evento"
-                                            type="date"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="descripcion"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Descripcion</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            {...field}
-                                            value={field.value as string || ''}
-                                            placeholder="Descripción del Evento"
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="activo"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Estado</FormLabel>
-                                    <FormControl>
-                                        <Select
-                                            onValueChange={(value) => field.onChange(value === 'true')}
-                                            value={field.value ? 'true' : 'false'}
-                                            disabled={operation === 'view'}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccionar estado" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">Activo</SelectItem>
-                                                <SelectItem value="false">Inactivo</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                    <FormularioEventoPorClase
+                    form={form}
+                    operation={operation}
+                    escuelaId={escuela?._id as Id<"escuelas">}
+                    catalogosDeClases={catalogosDeClases}
+                    eventosEscolares={eventosEscolares}
+                    ciclosEscolares={ciclosEscolares}
+                    />
                 )}
             </CrudDialog>
         </main>

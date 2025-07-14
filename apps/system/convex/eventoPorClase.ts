@@ -9,7 +9,7 @@ export const crearEventoXClase = mutation({
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
-    eventoEscolarId: v.id("eventosEscolares"),
+    eventoEscolarId: v.optional(v.id("eventosEscolares")),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
@@ -18,8 +18,6 @@ export const crearEventoXClase = mutation({
     await ctx.db.insert("eventoPorClases", { ...args });
   },
 });
-
-
 
 // Read all
 export const verTodosLosEventosXClases = query({
@@ -67,7 +65,9 @@ export const getEventoPorClaseConNombres = query({
           ctx.db.get(evento.catalogoClaseId),
           ctx.db.get(evento.calendarioId),
           ctx.db.get(evento.cicloEscolarId),
-          ctx.db.get(evento.eventoEscolarId),
+          evento.eventoEscolarId
+            ? ctx.db.get(evento.eventoEscolarId)
+            : Promise.resolve(null),
         ]);
 
         return {
@@ -94,7 +94,7 @@ export const actualizarEventoXClase = mutation({
     catalogoClaseId: v.id("catalogosDeClases"),
     calendarioId: v.id("calendario"),
     cicloEscolarId: v.id("ciclosEscolares"),
-    eventoEscolarId: v.id("eventosEscolares"),
+    eventoEscolarId: v.optional(v.id("eventosEscolares")),
     escuelaId: v.id("escuelas"),
     fecha: v.number(),
     descripcion: v.optional(v.string()),
