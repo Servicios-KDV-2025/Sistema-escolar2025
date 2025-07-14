@@ -201,7 +201,7 @@ export const usePadre = (escuelaId?: string) => {
     } finally {
       setDeleting(false);
     }
-  }, [eliminarPadreMutation, setDeleting, setDeleteError]);
+  }, [eliminarPadreMutation, setDeleting, setDeleteError, escuelaId]);
 
   // Refrescar padres cuando cambie la query
   useEffect(() => {

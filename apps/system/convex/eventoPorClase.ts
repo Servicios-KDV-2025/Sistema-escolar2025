@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
- 
+
+
 // Crear
 export const crearEventoXClase = mutation({
   args: {
@@ -17,7 +18,9 @@ export const crearEventoXClase = mutation({
     await ctx.db.insert("eventoPorClases", { ...args });
   },
 });
- 
+
+
+
 // Read all
 export const verTodosLosEventosXClases = query({
   args: {
@@ -48,8 +51,8 @@ export const verUnEventoXClase = query({
     return evento;
   },
 });
- 
-// Read whit all names
+
+// Get all from name
 export const getEventoPorClaseConNombres = query({
   args: { escuelaId: v.id("escuelas") },
   handler: async (ctx, { escuelaId }) => {
@@ -57,6 +60,7 @@ export const getEventoPorClaseConNombres = query({
       .query("eventoPorClases")
       .withIndex("by_escuela", q => q.eq("escuelaId", escuelaId))
       .collect();
+
     const res = await Promise.all(
       eventos.map(async evento => {
         const [catalogoClase, calendario, cicloEscolar, eventoEscolar] = await Promise.all([
@@ -65,25 +69,23 @@ export const getEventoPorClaseConNombres = query({
           ctx.db.get(evento.cicloEscolarId),
           ctx.db.get(evento.eventoEscolarId),
         ]);
- 
+
         return {
           _id: evento._id,
-          catalogoClase: catalogoClase?.nombre ?? 'Sin Catálogo de Clases',
-          calendario: calendario?.fecha ?? 'Sin Fecha',
-          cicloEscolar: cicloEscolar?.nombre ?? 'Sin Ciclo Escolar',
-          eventoEscolar: eventoEscolar?.nombre ?? 'Sin Evento Escolar',
+          catalogoClase: catalogoClase?.nombre ?? "Sin Catálogo de Clases",
+          calendario: calendario?.fecha ?? "Sin Fecha",
+          cicloEscolar: cicloEscolar?.nombre ?? "Sin Ciclo Escolar",
+          eventoEscolar: eventoEscolar?.nombre ?? "Sin Evento Escolar",
           fecha: evento.fecha,
           descripcion: evento.descripcion ?? "",
           activo: evento.activo,
         };
       })
     );
- 
+
     return res;
   },
 });
- 
-
 
 // Update
 export const actualizarEventoXClase = mutation({
@@ -101,7 +103,7 @@ export const actualizarEventoXClase = mutation({
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args._id);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("Acceso denegado");
- 
+
     const { _id, ...data } = args;
     await ctx.db.patch(_id, data);
   },

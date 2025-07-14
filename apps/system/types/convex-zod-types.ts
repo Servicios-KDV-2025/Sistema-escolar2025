@@ -39,7 +39,7 @@ export const prospectosSchema = z.object({
 
 export type Prospectos = z.infer<typeof prospectosSchema>;
 
-export const ciclosEscolaresSchema = z.object({
+export const cicloEscolareSchema = z.object({
   _id: z.custom<Id<'ciclosEscolares'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
@@ -48,7 +48,7 @@ export const ciclosEscolaresSchema = z.object({
   activo: z.boolean(),
 });
 
-export type Ciclosescolares = z.infer<typeof ciclosEscolaresSchema>;
+export type CicloEscolar = z.infer<typeof cicloEscolareSchema>;
 
 export const departamentoSchema = z.object({
   id: z.custom<Id<'departamento'>>(),
@@ -75,7 +75,7 @@ export const personalSchema = z.object({
 
 export type Personal = z.infer<typeof personalSchema>;
 
-export const materiasSchema = z.object({
+export const materiaSchema = z.object({
   _id: z.custom<Id<'materias'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
@@ -84,9 +84,9 @@ export const materiasSchema = z.object({
   activa: z.boolean(),
 });
 
-export type Materias = z.infer<typeof materiasSchema>;
+export type Materia = z.infer<typeof materiaSchema>;
 
-export const salonesSchema = z.object({
+export const saloneSchema = z.object({
   _id: z.custom<Id<'salones'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
@@ -95,9 +95,9 @@ export const salonesSchema = z.object({
   activo: z.boolean(),
 });
 
-export type Salones = z.infer<typeof salonesSchema>;
+export type Salon = z.infer<typeof saloneSchema>;
 
-export const gruposSchema = z.object({
+export const grupoSchema = z.object({
   _id: z.custom<Id<'grupos'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
@@ -105,7 +105,7 @@ export const gruposSchema = z.object({
   activo: z.boolean(),
 });
 
-export type Grupos = z.infer<typeof gruposSchema>;
+export type Grupo = z.infer<typeof grupoSchema>;
 
 export const periodoSchema = z.object({
   _id: z.custom<Id<'periodos'>>(),
