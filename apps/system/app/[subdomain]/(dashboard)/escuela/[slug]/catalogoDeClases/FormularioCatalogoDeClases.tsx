@@ -5,15 +5,15 @@ import {
 } from "@repo/ui/components/shadcn/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Input } from "@repo/ui/components/shadcn/input";
-import { Ciclosescolares, Grupos, Materias, Personal, Salones } from "@/types/convex-zod-types";
+import { CicloEscolar, Grupo, Materia, Personal, Salon } from "@/types/convex-zod-types";
 
 interface FormularioCatalogoDeClasesProps {
     form: UseFormReturn<Record<string, unknown>>;
     operation: "create" | "edit" | "view" | "delete";
-    materias: Materias[] | undefined;
-    grupos: Grupos[] | undefined;
-    ciclosEscolares: Ciclosescolares[] | undefined;
-    salones: Salones[] | undefined;
+    materias: Materia[] | undefined;
+    grupos: Grupo[] | undefined;
+    ciclosEscolares: CicloEscolar[] | undefined;
+    salones: Salon[] | undefined;
     maestros: Personal[] | undefined;
 }
 

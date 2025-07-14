@@ -3,31 +3,12 @@ import { api } from "@/convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
 import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
-
-// Tipo de Grupo basado en tu schema de Convex
-export type Grupo = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  grado: string;
-  activo: boolean;
-};
+import { Grupo } from "@/types/convex-zod-types";
 
 // Tipos para crear y actualizar grupo
-export type CrearGrupoData = {
-  escuelaId: string;
-  nombre: string;
-  grado: string;
-  activo: boolean;
-};
+export type CrearGrupoData = Pick<Grupo, "escuelaId" | "nombre" | "grado" | "activo">
 
-export type ActualizarGrupoData = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  grado: string;
-  activo: boolean;
-};
+export type ActualizarGrupoData = Grupo;
 
 // Store de Grupo con CRUD completo
 export type GrupoStore = {
@@ -88,14 +69,6 @@ export const useGrupoStore = create<GrupoStore>((set) => ({
   }),
   reset: () => set(initialState),
 }));
-
-type GrupoQueryResult = {
-  _id: string;
-  escuelaId: string;
-  nombre: string;
-  grado: string;
-  activo: boolean;
-};
 
 export const useGrupo = (escuelaId?: string) => {
   const {
@@ -194,7 +167,7 @@ export const useGrupo = (escuelaId?: string) => {
   useEffect(() => {
     if (gruposQuery) {
       setGrupos(
-        (gruposQuery as GrupoQueryResult[]).map((g) => ({
+        (gruposQuery as Grupo[]).map((g) => ({
           _id: g._id,
           escuelaId: g.escuelaId,
           nombre: g.nombre,

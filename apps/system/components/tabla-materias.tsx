@@ -1,3 +1,4 @@
+// src/components/TablaMaterias.tsx
 "use client";
 
 import {
@@ -10,6 +11,7 @@ import {
 } from "@repo/ui/components/shadcn/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit, Eye } from "lucide-react";
+import { useParams } from "next/navigation";
 import { useEffect } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
@@ -23,7 +25,7 @@ import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 
-export default function Page() {
+export function TablaMaterias() {
   const {escuela} = useEscuela();
 
   // Hook para obtener las materias usando el store
@@ -58,17 +60,17 @@ export default function Page() {
   });
 
   const setItems = useBreadcrumbStore((state) => state.setItems);
-  
-  
+  const params = useParams();
+  const slug = typeof params?.slug === "string" ? params.slug : "";
 
   useEffect(() => {
     if (escuela) {
       setItems([
-        { label: `${(escuela?.nombre).toUpperCase()}`, href: `/escuela/${escuela.nombre}` },
+        { label: `${escuela?.nombre}`, href: `/escuela/${slug}` },
         { label: "Materias", isCurrentPage: true },
       ]);
     }
-  }, [escuela, setItems, escuela?.nombre]);
+  }, [escuela, setItems, slug]);
 
   const handleSubmit = async (values: Record<string, unknown>) => {
     if (!escuela?._id) {
@@ -88,7 +90,7 @@ export default function Page() {
       } else if (operation === 'edit' && data?._id) {
         await actualizarMateria({
           _id: data._id  as Id<"materias">,
-          escuelaId: escuela._id as Id<"escuelas">,
+          escuelaId: escuela._id  as Id<"escuelas">,
           nombre: values.nombre as string,
           descripcion: values.descripcion as string,
           creditos: values.creditos ? Number(values.creditos) : undefined,

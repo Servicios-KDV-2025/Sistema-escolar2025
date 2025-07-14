@@ -1,34 +1,34 @@
 'use client';
 
 import { useEscuela } from "@/app/store/useEscuela";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { eventoPorClaseSchema } from "@/app/shemas/eventoPorClase";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Input } from "@/components/ui/input";
+import { useEventoPorClase } from "@/app/store/useEventoPorClaseStore";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
+import { useCatalogoDeClase } from "@/app/store/useCatalogoDeClasesStore";
+import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
+import { useEventoEscolar } from "@/app/store/useEventoEscolarStore";
 
 export default function Page() {
     const { escuela } = useEscuela();
+    const eventoConNombres = useQuery(api.eventoPorClase.getEventoPorClaseConNombres, { escuelaId: escuela?._id as Id<"escuelas"> });
 
-    // CRUD Eventos por clase
-    const crearEventoXClase = useMutation(api.eventoPorClase.crearEventoXClase);
-    const eventosPorClase = useQuery(api.eventoPorClase.verTodosLosEventosXClases, {
-        escuelaId: escuela?._id as Id<'escuelas'>,
-    });
-    const actualizarEventoXClase = useMutation(api.eventoPorClase.actualizarEventoXClase);
-    const eliminarEventoXClase = useMutation(api.eventoPorClase.eliminarEventoXClase);
+    const { crearEventoPorClase, actualizarEventoPorClase, eliminarEventoPorClase } = useEventoPorClase(escuela?._id);
 
-    const catalogoClases = useQuery(api.catalogosDeClases.verTodosLosCatalogosDeClases, { escuelaId: escuela?._id as Id<"escuelas"> });
+    const { catalogosDeClases } = useCatalogoDeClase(escuela?._id);
+    const { ciclosEscolares } = useCicloEscolar(escuela?._id);
+    const { eventosEscolares } = useEventoEscolar(escuela?._id);
+
     const calendario = useQuery(api.calendario.obtenerEventosCalendario, { escuelaId: escuela?._id as Id<"escuelas"> });
-    const cicloEscolar = useQuery(api.ciclosEscolares.obtenerCiclosEscolares, { escuelaId: escuela?._id as Id<"escuelas"> });
-    const eventosEscolares = useQuery(api.eventosEscolares.obtenerTodosLosEventosEscolares);
 
     const {
         isOpen,
@@ -57,7 +57,7 @@ export default function Page() {
 
         try {
             if (operation === 'create') {
-                await crearEventoXClase({
+                await crearEventoPorClase({
                     escuelaId: escuela?._id as Id<"escuelas">,
                     catalogoClaseId: values.catalogoClases as Id<"catalogosDeClases">,
                     calendarioId: values.calendario as Id<"calendario">,
@@ -68,7 +68,7 @@ export default function Page() {
                     activo: values.activo as boolean,
                 });
             } else if (operation === 'edit' && data?._id) {
-                await actualizarEventoXClase({
+                await actualizarEventoPorClase({
                     _id: values.id as Id<"eventoPorClases">,
                     escuelaId: escuela?._id as Id<"escuelas">,
                     catalogoClaseId: values.catalogoClases as Id<"catalogosDeClases">,
@@ -96,10 +96,7 @@ export default function Page() {
         }
 
         try {
-            await eliminarEventoXClase({
-                _id: id as Id<"eventoPorClases">,
-                escuelaId: escuela._id as Id<"escuelas">,
-            });
+            await eliminarEventoPorClase(id, escuela?._id);
         } catch (error) {
             console.error('Error al eliminar evento:', error);
             throw error;
@@ -110,59 +107,68 @@ export default function Page() {
         <main className="container mx-auto py-10">
             <h1 className="text-3xl font-bold mb-6">Eventos por Clase</h1>
             <p className="text-muted-foreground mb-6">
-                Haz clic en cualquier Evento para ver sus detalles completos,
-                editarlo o eliminarlo. Para crear una nuevo Evento, usa el botón
-                Nuevo Evento.
+                Aquí puedes ver y gestionar todos los Eventos por Clases disponibles en la escuela.
+                Haz clic en los botones para ver información más precisa, editar o eliminarlo.
+                Para crear un nuevo Evento, usa el botón Nuevo Evento.
             </p>
 
-            {escuela && (
-                <Card className="w-full">
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <CardTitle>Gestión de Eventos por Clase</CardTitle>
-                            <Button onClick={openCreate}>
-                                <Plus className="h-4 w-4 mr-2" />
-                                Nuevo Evento
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid gap-4">
-                            {eventosPorClase?.map(evento => (
-                                <div
-                                    key={evento._id}
-                                    className="flex justify-between items-center p-3 border rounded-lg"
-                                >
-                                    <div className="flex gap-2">
-                                        <div>
-                                            <p className="text-sm text-muted-foreground">
-                                                Estado: {evento.activo ? 'Activo' : 'Inactivo'}
-                                            </p>
-                                            <p className="font-medium">Descripción {evento.descripcion}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <Button variant='outline' size='sm' onClick={() => openView({ ...evento, _id: evento._id })}>
-                                            <Eye className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant='outline' size='sm' onClick={() => openEdit({ ...evento, _id: evento._id })}>
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button variant='destructive' size='sm' onClick={() => openDelete({ ...evento, _id: evento._id })}>
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            ))}
-                            {eventosPorClase?.length === 0 && (
-                                <p className="text-center text-muted-foreground py-8">
-                                    No hay eventos creados. Crea el primer evento usando el botón &quot;Nuevo Evento&quot;.
-                                </p>
-                            )}
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
+            <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold">Gestión de Eventos por Clase</h2>
+                <Button onClick={openCreate}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nuevo Evento
+                </Button>
+            </div>
+
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[120px]">Fecha</TableHead>
+                            <TableHead>Descripción</TableHead>
+                            <TableHead>Clase</TableHead>
+                            <TableHead>Calendario</TableHead>
+                            <TableHead>Evento Escolar</TableHead>
+                            <TableHead>Activo</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {eventoConNombres?.length === 0
+                            ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                                        No hay salones registrados para esta escuela.
+                                    </TableCell>
+                                </TableRow>
+                            )
+                            : (
+                                eventoConNombres?.map(evento => (
+                                    <TableRow key={evento._id}>
+                                        <TableCell className="font-medium">{evento.fecha}</TableCell>
+                                        <TableCell>{evento.descripcion}</TableCell>
+                                        <TableCell>{evento.catalogoClase}</TableCell>
+                                        <TableCell>{evento.calendario}</TableCell>
+                                        <TableCell>{evento.eventoEscolar}</TableCell>
+                                        <TableCell>{evento.activo}</TableCell>
+                                        <TableCell className="flex justify-end gap-2">
+                                            <Button variant='outline' size='sm' onClick={() => openView({ ...evento, _id: evento._id })}>
+                                                <Eye className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant='outline' size='sm' onClick={() => openEdit({ ...evento, _id: evento._id })}>
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant='destructive' size='sm' onClick={() => openDelete({ ...evento, _id: evento._id })}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )
+                        }
+                    </TableBody>
+                </Table>
+            </div>
 
             {/* CrudDialog */}
             <CrudDialog
@@ -215,7 +221,7 @@ export default function Page() {
                                         </FormControl>
                                         <SelectContent>
                                             {
-                                                catalogoClases?.map(catClas => (
+                                                catalogosDeClases?.map(catClas => (
                                                     <SelectItem key={catClas._id} value={catClas._id}>
                                                         {catClas.nombre}
                                                     </SelectItem>
@@ -277,7 +283,7 @@ export default function Page() {
                                         </FormControl>
                                         <SelectContent>
                                             {
-                                                cicloEscolar?.map(ciclEsc => (
+                                                ciclosEscolares?.map(ciclEsc => (
                                                     <SelectItem key={ciclEsc._id} value={ciclEsc._id}>
                                                         {ciclEsc.nombre}
                                                     </SelectItem>

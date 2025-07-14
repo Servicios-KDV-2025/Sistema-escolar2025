@@ -14,6 +14,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { cicloEscolarSchema } from "@/app/shemas/cicloEscolar";
 import { toast } from "sonner";
+import { Id } from "@/convex/_generated/dataModel";
 
 export default function CiclosEscolaresPage() {
   const router = useRouter();
@@ -70,15 +71,15 @@ export default function CiclosEscolaresPage() {
     try {
       if (operation === 'create') {
         await crearCicloEscolar({
-          escuelaId: escuela._id,
+          escuelaId: escuela._id as Id<"escuelas">,
           nombre: values.nombre as string,
           fechaInicio: new Date(values.fechaInicio as string).getTime(),
           fechaFin: new Date(values.fechaFin as string).getTime()
         })
       } else if (operation === 'edit' && data?._id) {
         await actualizarCicloEscolar({
-          id: data._id,
-          escuelaId: escuela._id,
+          _id: data._id as Id<"ciclosEscolares">,
+          escuelaId: escuela._id as Id<"escuelas">,
           nombre: values.nombre as string,
           fechaInicio: new Date(values.fechaInicio as string).getTime(),
           fechaFin: new Date(values.fechaFin as string).getTime(),
@@ -144,7 +145,7 @@ export default function CiclosEscolaresPage() {
         <TableBody>
           {ciclosEscolares.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={3} className="text-center">
+              <TableCell colSpan={5} className="text-center">
                 No hay ciclosEscolares registrados
               </TableCell>
             </TableRow>
