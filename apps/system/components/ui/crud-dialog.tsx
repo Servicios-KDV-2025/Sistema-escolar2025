@@ -136,7 +136,7 @@ export function CrudDialog({
     try {
       setIsInternalSubmitting(true)
       await onSubmit(values)
-      toast.success(`${operation === 'create' ? 'Creado' : 'Actualizado'} correctamente`)
+      if(operation === 'edit') {toast.success('Actualizado correctamente')}
       setDialogOpen?.(false)
       form.reset()
       onSuccess?.()

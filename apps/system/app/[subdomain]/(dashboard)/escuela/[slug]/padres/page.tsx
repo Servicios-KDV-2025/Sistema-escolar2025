@@ -91,6 +91,7 @@ export default function PadresPage() {
           direccion: values.direccion as string || undefined,
           activo: values.activo as boolean
         });
+        toast.success('creado correctamente')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPadre({
           id: data._id,
