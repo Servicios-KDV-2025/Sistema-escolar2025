@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useGrupo } from "@/app/store/useGrupoStore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
+import { GruposAlumnosModal } from "@/components/dialog/gruposAlumnosModal";
+import { useState } from "react";
 
 export default function Page() {
     const { escuela } = useEscuela();
@@ -32,6 +34,9 @@ export default function Page() {
         nombre: "",
         activo: true
     });
+
+    const [isAlumnosModalOpen, setAlumnosModalOpen] = useState(false)
+    const [grupoSeleccionado, setGrupoSeleccionado] = useState<Id<"grupos"> | null>(null)
 
     const handleSubmit = async (values: Record<string, unknown>) => {
         if (!escuela?._id) {
@@ -116,7 +121,14 @@ export default function Page() {
                             )
                             : (
                                 grupos.map(grupo => (
-                                    <TableRow key={grupo._id}>
+                                    <TableRow 
+                                      key={grupo._id}
+                                      onClick={() => {
+                                        setGrupoSeleccionado(grupo._id)
+                                        setAlumnosModalOpen(true)
+                                      }}
+                                    >
+                                        <TableCell className="font-medium">{grupo.grado}</TableCell>
                                         <TableCell className="font-medium">{grupo.nombre}</TableCell>
                                         <TableCell>{grupo.activo ? 'Activo' : 'Inactivo'}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
@@ -193,8 +205,6 @@ export default function Page() {
                             control={form.control}
                             name="nombre"
                             render={({ field }) => {
-                                // console.log('Campo nombre - field.value:', field.value)
-                                // console.log('Campo nombre - operation:', operation)
                                 return (
                                     <FormItem>
                                         <FormLabel>Nombre</FormLabel>
@@ -243,6 +253,12 @@ export default function Page() {
                 )}
 
             </CrudDialog>
+            <GruposAlumnosModal
+              isOpen={isAlumnosModalOpen}
+              onClose={() => setAlumnosModalOpen(false)}
+              grupoId={grupoSeleccionado}
+              // escuelaId={escuela?._id ?? null}
+            />
         </main>
     );
 }
