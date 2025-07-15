@@ -156,9 +156,11 @@ export default function Page() {
   return (
     <div className="w-[90%] mx-auto">
       <h1 className="text-3xl font-bold mb-6">Materias</h1>
-      <p className="text-muted-foreground mb-6">Gestión Materias</p>
+      <p className="text-muted-foreground mb-6 w-[80%]">
+        Esta tabla muestra el listado de materias académicas registradas en {escuela.nombre.charAt(0).toUpperCase() + escuela.nombre.slice(1).toLowerCase()}. Cada fila representa una materia con su nombre, descripción, número de créditos y estado actual (activa o inactiva). Desde aquí puedes visualizar, editar o eliminar materias existentes, así como agregar nuevas según sea necesario para el plan de estudios.
+      </p>
       <div className="flex justify-between items-center mb-6">
-        <h2>Lista Materias</h2>
+        <h2 className="text-xl font-semibold">Lista de Materias</h2>
         <div className="flex gap-2">
           <PDFGenerator
             tableTitle="Lista de Materias"
@@ -204,17 +206,17 @@ export default function Page() {
         </div>
       )}
 
-      <div className=" ">
-        <Card className="w-full p-6">
+      
+        <Card >
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[100px]">Nombre</TableHead>
+                  <TableHead className="">Nombre</TableHead>
                   <TableHead>Descripción</TableHead>
                   <TableHead className="text-center">Créditos</TableHead>
                   <TableHead className="text-center">Estado</TableHead>
-                  <TableHead className="text-center">Acciones</TableHead>
+                  <TableHead className="text-center sticky right-0 bg-white">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -244,7 +246,7 @@ export default function Page() {
                       >
                         {materia.activa ? "Activa" : "Inactiva"}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap text-center">
+                      <TableCell className="whitespace-nowrap sticky right-0 bg-white text-center">
                         <div className="flex justify-center gap-2">
                           <Button
                             variant="outline"
@@ -288,7 +290,6 @@ export default function Page() {
             </Table>
           </CardContent>
         </Card>
-      </div>
 
       <CrudDialog
         operation={operation}

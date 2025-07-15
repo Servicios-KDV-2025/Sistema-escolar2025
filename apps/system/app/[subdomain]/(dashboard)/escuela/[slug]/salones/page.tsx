@@ -11,8 +11,6 @@ import { Button } from '@repo/ui/components/shadcn/button'
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/shadcn/table'
 import { toast } from 'sonner'
-import PDFGenerator, { ColumnDataMap } from "@/components/pdf-generator";
-
 
 export default function Page() {
   const escuela = useEscuela((s) => s.escuela)
@@ -99,31 +97,6 @@ export default function Page() {
       </p>
       
       <div className="flex flex-row items-center justify-between mt-6 mb-2">
-        {salones.length > 0 && (
-  <div className="mb-4">
-    <PDFGenerator
-      schoolInfo={{
-        nombre: escuela?.nombre || "Escuela",
-        direccion: escuela?.direccion,
-        telefono: escuela?.telefono,
-        email: escuela?.email,
-        logo: "O",
-      }}
-      tableTitle="Listado de Salones"
-      tableColumns={["Nombre", "Capacidad", "Ubicación"]}
-      tableData={salones}
-      columnDataMap={{
-        Nombre: (data) => data.nombre,
-        Capacidad: (data) => data.capacidad,
-        Ubicación: (data) => data.ubicacion,
-      }}
-      fileName="salones.pdf"
-      buttonText="Exportar a PDF"
-      buttonVariant="outline"
-    />
-  </div>
-)}
-
         <h2 className="text-xl font-semibold">Lista de Salones</h2>
         <Button onClick={openCreate}>
           <Plus className="h-4 w-4 mr-2" />
