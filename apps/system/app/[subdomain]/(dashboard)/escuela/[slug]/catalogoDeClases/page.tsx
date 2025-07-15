@@ -19,7 +19,10 @@ import { useGrupo } from "@/app/store/useGrupoStore";
 
 export default function Page() {
     const { escuela } = useEscuela();
-    const catalogoConNombre = useQuery(api.catalogosDeClases.getCatalogoDeClasesConNombres, { escuelaId: escuela?._id as Id<'escuelas'> });
+    const catalogoConNombre = useQuery(
+        api.catalogosDeClases.getCatalogoDeClasesConNombres,
+        escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
+    );
 
     const { crearCatalogoDeClase, actualizarCatalogoDeClase, eliminarCatalogoDeClase } = useCatalogoDeClase(escuela?._id);
 
@@ -111,6 +114,8 @@ export default function Page() {
         }
     }
 
+    console.log(catalogoConNombre);
+
     return (
         <main className="container mx-auto py-10">
             <h1 className="text-3xl font-bold mb-6">Catalogo de Clases</h1>
@@ -156,12 +161,11 @@ export default function Page() {
                                     <TableRow key={clase._id}>
                                         <TableCell className="font-medium">{clase.nombre}</TableCell>
                                         <TableCell>{clase.cicloEscolar}</TableCell>
-                                        <TableCell>{clase.nombre}</TableCell>
                                         <TableCell>{clase.materia}</TableCell>
                                         <TableCell>{clase.salon}</TableCell>
                                         <TableCell>{clase.maestro}</TableCell>
                                         <TableCell>{clase.grupo}</TableCell>
-                                        <TableCell>{clase.activo ? 'Activa' : 'Inactiva'}</TableCell>
+                                        <TableCell>{clase.activa ? 'Activa' : 'Inactiva'}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
                                             <Button variant='outline' size='sm' onClick={() => openView({ ...clase, _id: clase._id })}>
                                                 <Eye className="h-4 w-4" />

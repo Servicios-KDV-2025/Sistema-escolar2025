@@ -6,6 +6,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Input } from "@repo/ui/components/shadcn/input";
 import { CicloEscolar, Grupo, Materia, Personal, Salon } from "@/types/convex-zod-types";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 
 interface FormularioCatalogoDeClasesProps {
     form: UseFormReturn<Record<string, unknown>>;
@@ -212,6 +213,27 @@ export function FormularioCatalogoDeClases({
                                 placeholder="Ej: Matemáticas - Grupo A"
                                 disabled={operation === "view"}
                             />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
+                name="activo"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Estado</FormLabel>
+                        <FormControl>
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    checked={field.value as boolean}
+                                    onCheckedChange={field.onChange}
+                                    disabled={operation === 'view'}
+                                />
+                                <span>{field.value ? "Activo" : "Inactivo"}</span>
+                            </div>
                         </FormControl>
                         <FormMessage />
                     </FormItem>

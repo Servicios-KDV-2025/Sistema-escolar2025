@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useGrupo } from "@/app/store/useGrupoStore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 
 export default function Page() {
     const { escuela } = useEscuela();
@@ -117,7 +118,7 @@ export default function Page() {
                             : (
                                 grupos.map(grupo => (
                                     <TableRow key={grupo._id}>
-                                        <TableCell className="font-medium">{grupo.nombre}</TableCell>
+                                        <TableCell className="font-medium">{grupo.grado} {grupo.nombre}</TableCell>
                                         <TableCell>{grupo.activo ? 'Activo' : 'Inactivo'}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
                                             <Button variant="outline" size="sm" onClick={() => openView({ ...grupo, _id: grupo._id })}>
@@ -137,7 +138,7 @@ export default function Page() {
                     </TableBody>
                 </Table>
             </div>
-            
+
             {/* CrudDialog */}
             <CrudDialog
                 operation={operation}
@@ -219,19 +220,14 @@ export default function Page() {
                                 <FormItem>
                                     <FormLabel>Estado</FormLabel>
                                     <FormControl>
-                                        <Select
-                                            onValueChange={(value) => field.onChange(value === 'true')}
-                                            value={field.value ? 'true' : 'false'}
-                                            disabled={operation === 'view'}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccionar estado" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="true">Activo</SelectItem>
-                                                <SelectItem value="false">Inactivo</SelectItem>
-                                            </SelectContent>
-                                        </Select>
+                                        <div className="flex items-center gap-2">
+                                            <Switch
+                                                checked={field.value as boolean}
+                                                onCheckedChange={field.onChange}
+                                                disabled={operation === 'view'}
+                                            />
+                                            <span>{field.value ? "Activo" : "Inactivo"}</span>
+                                        </div>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

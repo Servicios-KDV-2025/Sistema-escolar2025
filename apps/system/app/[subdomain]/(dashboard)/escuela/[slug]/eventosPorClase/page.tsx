@@ -16,6 +16,12 @@ import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { useEventoEscolar } from "@/app/store/useEventoEscolarStore";
 import FormularioEventoPorClase from "./FormularioEventoPorClase";
 
+const fechaLegible = (timestamp: number) => {
+    return new Intl.DateTimeFormat('es-MX', {
+        dateStyle: 'medium',
+    }).format(new Date(timestamp));
+}
+
 export default function Page() {
     const { escuela } = useEscuela();
     const eventoConNombres = useQuery(api.eventoPorClase.getEventoPorClaseConNombres, { escuelaId: escuela?._id as Id<"escuelas"> });
@@ -26,7 +32,7 @@ export default function Page() {
     const { ciclosEscolares } = useCicloEscolar(escuela?._id);
     const { eventosEscolares } = useEventoEscolar(escuela?._id);
 
-    
+
 
     const {
         isOpen,
@@ -143,12 +149,12 @@ export default function Page() {
                             : (
                                 eventoConNombres?.map(evento => (
                                     <TableRow key={evento._id}>
-                                        <TableCell className="font-medium">{evento.fecha}</TableCell>
+                                        <TableCell className="font-medium">{fechaLegible(evento.fecha)}</TableCell>
                                         <TableCell>{evento.descripcion}</TableCell>
                                         <TableCell>{evento.catalogoClase}</TableCell>
-                                        <TableCell>{evento.calendario}</TableCell>
+                                        <TableCell>{fechaLegible(+evento.calendario)}</TableCell>
                                         <TableCell>{evento.eventoEscolar}</TableCell>
-                                        <TableCell>{evento.activo}</TableCell>
+                                        <TableCell>{evento.activo ? 'Activo' : 'Inactivo'}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
                                             <Button variant='outline' size='sm' onClick={() => openView({ ...evento, _id: evento._id })}>
                                                 <Eye className="h-4 w-4" />
@@ -201,12 +207,12 @@ export default function Page() {
             >
                 {(form, operation) => (
                     <FormularioEventoPorClase
-                    form={form}
-                    operation={operation}
-                    escuelaId={escuela?._id as Id<"escuelas">}
-                    catalogosDeClases={catalogosDeClases}
-                    eventosEscolares={eventosEscolares}
-                    ciclosEscolares={ciclosEscolares}
+                        form={form}
+                        operation={operation}
+                        escuelaId={escuela?._id as Id<"escuelas">}
+                        catalogosDeClases={catalogosDeClases}
+                        eventosEscolares={eventosEscolares}
+                        ciclosEscolares={ciclosEscolares}
                     />
                 )}
             </CrudDialog>

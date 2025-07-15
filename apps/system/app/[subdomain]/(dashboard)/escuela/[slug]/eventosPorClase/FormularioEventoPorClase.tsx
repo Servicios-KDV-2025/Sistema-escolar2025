@@ -10,6 +10,7 @@ import { api } from "@/convex/_generated/api";
 import { CatalogoDeClase } from "@/app/store/useCatalogoDeClasesStore";
 import { EventoEscolar } from "@/app/store/useEventoEscolarStore";
 import { Id } from "@/convex/_generated/dataModel";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 
 type FormularioEventoPorClaseProps = {
     form: UseFormReturn<Record<string, unknown>>;
@@ -86,6 +87,37 @@ export default function FormularioEventoPorClase({
 
             <FormField
                 control={form.control}
+                name="cicloEscolar"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Ciclo Escolar</FormLabel>
+                        <Select
+                            onValueChange={field.onChange}
+                            value={field.value as string}
+                            disabled={operation === 'view'}
+                        >
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un Ciclo Escolar" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {
+                                    ciclosEscolares?.map(ciclEsc => (
+                                        <SelectItem key={ciclEsc._id} value={ciclEsc._id}>
+                                            {ciclEsc.nombre}
+                                        </SelectItem>
+                                    ))
+                                }
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            <FormField
+                control={form.control}
                 name="calendario"
                 render={({ field }) => (
                     <FormItem>
@@ -110,37 +142,6 @@ export default function FormularioEventoPorClase({
                                             </SelectItem>
                                         )
                                     })
-                                }
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                )}
-            />
-
-            <FormField
-                control={form.control}
-                name="cicloEscolar"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Ciclo Escolar</FormLabel>
-                        <Select
-                            onValueChange={field.onChange}
-                            value={field.value as string}
-                            disabled={operation === 'view'}
-                        >
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona un Ciclo Escolar" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {
-                                    ciclosEscolares?.map(ciclEsc => (
-                                        <SelectItem key={ciclEsc._id} value={ciclEsc._id}>
-                                            {ciclEsc.nombre}
-                                        </SelectItem>
-                                    ))
                                 }
                             </SelectContent>
                         </Select>
@@ -225,24 +226,20 @@ export default function FormularioEventoPorClase({
                     <FormItem>
                         <FormLabel>Estado</FormLabel>
                         <FormControl>
-                            <Select
-                                onValueChange={(value) => field.onChange(value === 'true')}
-                                value={field.value ? 'true' : 'false'}
-                                disabled={operation === 'view'}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Seleccionar estado" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="true">Activo</SelectItem>
-                                    <SelectItem value="false">Inactivo</SelectItem>
-                                </SelectContent>
-                            </Select>
+                            <div className="flex items-center gap-2">
+                                <Switch
+                                    checked={field.value as boolean}
+                                    onCheckedChange={field.onChange}
+                                    disabled={operation === 'view'}
+                                />
+                                <span>{field.value ? "Activo" : "Inactivo"}</span>
+                            </div>
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}
             />
+
         </div>
     )
 }
