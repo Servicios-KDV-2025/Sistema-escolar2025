@@ -13,7 +13,7 @@ export const crearEventoXClase = mutation({
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
-    createdBy: v.id("personal"),
+    // createdBy: v.id("personal"),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert("eventoPorClases", { ...args });
@@ -62,21 +62,21 @@ export const getEventoPorClaseConNombres = query({
 
     const res = await Promise.all(
       eventos.map(async evento => {
-        const [catalogoClase, calendario, cicloEscolar, eventoEscolar, creadoPor, actualizadoPor] = await Promise.all([
+        const [catalogoClase, calendario, cicloEscolar, eventoEscolar, /* creadoPor, actualizadoPor */] = await Promise.all([
           ctx.db.get(evento.catalogoClaseId),
           ctx.db.get(evento.calendarioId),
           ctx.db.get(evento.cicloEscolarId),
           evento.eventoEscolarId
             ? ctx.db.get(evento.eventoEscolarId)
             : Promise.resolve(null),
-          ctx.db.get(evento.createdBy),
-          evento.updatedBy
-            ? ctx.db.get(evento.updatedBy)
-            : Promise.resolve(null),
+          // ctx.db.get(evento.createdBy),
+          // evento.updatedBy
+          //   ? ctx.db.get(evento.updatedBy)
+          //   : Promise.resolve(null),
         ]);
 
-        const nombreCompleto = `${creadoPor?.nombre} ${creadoPor?.apellidos}`;
-        const nombreCompletoActu = `${actualizadoPor?.nombre} ${actualizadoPor?.apellidos}`;
+        // const nombreCompleto = `${creadoPor?.nombre} ${creadoPor?.apellidos}`;
+        // const nombreCompletoActu = `${actualizadoPor?.nombre} ${actualizadoPor?.apellidos}`;
 
         return {
           _id: evento._id,
@@ -86,16 +86,16 @@ export const getEventoPorClaseConNombres = query({
           eventoEscolar: eventoEscolar?.nombre ?? "Sin Evento Escolar",
           fecha: evento.fecha,
           descripcion: evento.descripcion ?? "",
-          createdBy: nombreCompleto ?? 'Nadie lo ha creado',
-          updatedBy: nombreCompletoActu ?? 'Nadie lo ha actualizado',
+          // createdBy: nombreCompleto ?? 'Nadie lo ha creado',
+          // updatedBy: nombreCompletoActu ?? 'Nadie lo ha actualizado',
           activo: evento.activo,
           
           catalogoClaseId: evento.catalogoClaseId,
           calendarioId: evento.calendarioId,
           cicloEscolarId: evento.cicloEscolarId,
           eventoEscolarId: evento.eventoEscolarId ?? null,
-          createdById: evento.createdBy,
-          updatedById: evento.updatedBy,
+          // createdById: evento.createdBy,
+          // updatedById: evento.updatedBy,
         };
       })
     );
