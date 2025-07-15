@@ -86,6 +86,7 @@ export default function Page() {
           direccion: validatedValues.direccion,
           activo: validatedValues.activo
         })
+        toast.success('creado correctamente')
         toast.success('Alumno creado correctamente')
       } else if (operation === 'edit') {
         await actualizarAlumno({

@@ -82,6 +82,7 @@ export default function Page() {
           fechaIngreso: validatedValues.fechaIngreso as string,
           activo: validatedValues.activo as boolean,
         })
+        toast.success('creado correctamente')
         toast.success('Departamento creado')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPersonal({
