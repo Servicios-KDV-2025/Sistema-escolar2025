@@ -31,6 +31,7 @@ import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
 import PDFGenerator from "@/components/pdf-generator";
 import { Id } from "@/convex/_generated/dataModel";
+import { Badge } from "@repo/ui/components/shadcn/badge";
 
 export default function Page() {
   const { escuela } = useEscuela();
@@ -109,7 +110,7 @@ export default function Page() {
         });
       } else if (operation === "edit" && data?._id) {
         await actualizarMateria({
-          _id: data._id  as Id<"materias">,
+          _id: data._id as Id<"materias">,
           escuelaId: escuela._id as Id<"escuelas">,
           nombre: values.nombre as string,
           descripcion: values.descripcion as string,
@@ -158,7 +159,13 @@ export default function Page() {
     <div className="w-[90%] mx-auto">
       <h1 className="text-3xl font-bold mb-6">Materias</h1>
       <p className="text-muted-foreground mb-6 w-[80%]">
-        Esta tabla muestra el listado de materias académicas registradas en {escuela.nombre.charAt(0).toUpperCase() + escuela.nombre.slice(1).toLowerCase()}. Cada fila representa una materia con su nombre, descripción, número de créditos y estado actual (activa o inactiva). Desde aquí puedes visualizar, editar o eliminar materias existentes, así como agregar nuevas según sea necesario para el plan de estudios.
+        Esta tabla muestra el listado de materias académicas registradas en{" "}
+        {escuela.nombre.charAt(0).toUpperCase() +
+          escuela.nombre.slice(1).toLowerCase()}
+        . Cada fila representa una materia con su nombre, descripción, número de
+        créditos y estado actual (activa o inactiva). Desde aquí puedes
+        visualizar, editar o eliminar materias existentes, así como agregar
+        nuevas según sea necesario para el plan de estudios.
       </p>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Materias</h2>
@@ -170,7 +177,6 @@ export default function Page() {
             tableData={materias}
             columnDataMap={columnDataMap}
             fileName={`materias_${escuela?.nombre || "escuela"}.pdf`}
-            primaryColor={[39, 174, 96]}
             buttonVariant={"secondary"}
           />
           <Button
@@ -207,90 +213,93 @@ export default function Page() {
         </div>
       )}
 
-      
-        <Card >
-          <CardContent>
-            <Table>
-              <TableHeader>
+      <Card>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="">Nombre</TableHead>
+                <TableHead>Descripción</TableHead>
+                <TableHead className="text-center">Créditos</TableHead>
+                <TableHead className="text-center">Estado</TableHead>
+                <TableHead className="text-center sticky right-0 bg-white">
+                  Acciones
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {materias.length === 0 ? (
                 <TableRow>
-                  <TableHead className="">Nombre</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead className="text-center">Créditos</TableHead>
-                  <TableHead className="text-center">Estado</TableHead>
-                  <TableHead className="text-center sticky right-0 bg-white">Acciones</TableHead>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center text-gray-500 py-4"
+                  >
+                    No hay materias registradas para esta escuela.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {materias.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-gray-500 py-4"
-                    >
-                      No hay materias registradas para esta escuela.
+              ) : (
+                materias.map((materia) => (
+                  <TableRow key={materia._id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium ">
+                      {materia.nombre}
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  materias.map((materia) => (
-                    <TableRow key={materia._id} className="hover:bg-muted/50">
-                      <TableCell className="font-medium ">
-                        {materia.nombre}
-                      </TableCell>
-                      <TableCell>{materia.descripcion || "N/A"}</TableCell>
-                      <TableCell className="text-center">
-                        {materia.creditos || "N/A"}
-                      </TableCell>
-                      <TableCell
-                        className={`text-center font-medium ${
-                          materia.activa ? "text-green-600" : "text-red-600"
+                    <TableCell>{materia.descripcion || "N/A"}</TableCell>
+                    <TableCell className="text-center">
+                      {materia.creditos || "N/A"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        className={` text-white font-medium py-1 ${
+                          materia?.activa ? "bg-green-600 px-3 " : " bg-red-600 "
                         }`}
                       >
-                        {materia.activa ? "Activa" : "Inactiva"}
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap sticky right-0 bg-white text-center">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openView(materia);
-                            }}
-                            disabled={isUpdatingMateria || isDeletingMateria}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openEdit(materia);
-                            }}
-                            disabled={isUpdatingMateria || isDeletingMateria}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openDelete(materia);
-                            }}
-                            disabled={isDeletingMateria}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                        {materia?.activa ? "Activa" : "Inactiva"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap sticky right-0 bg-white text-center">
+                      <div className="flex justify-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openView(materia);
+                          }}
+                          disabled={isUpdatingMateria || isDeletingMateria}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEdit(materia);
+                          }}
+                          disabled={isUpdatingMateria || isDeletingMateria}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDelete(materia);
+                          }}
+                          disabled={isDeletingMateria}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       <CrudDialog
         operation={operation}
