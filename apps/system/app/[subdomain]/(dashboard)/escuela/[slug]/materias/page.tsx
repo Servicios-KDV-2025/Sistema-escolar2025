@@ -129,14 +129,6 @@ export default function Page() {
     );
   }
 
-  // --- Prepare data for PDFGenerator ---
-  const schoolInfoForPdf: SchoolInfo | undefined = escuela ? {
-    nombre: escuela.nombre,
-    direccion: escuela.direccion,
-    telefono: escuela.telefono,
-    email: escuela.email,
-    logo: "🎓",
-  } : undefined;
 
   // Map your existing materia objects to the MateriaTableData type for the PDF generator
   const materiasTableDataForPdf: MateriaTableData[] = materias.map((materia) => ({

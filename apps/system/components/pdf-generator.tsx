@@ -5,9 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 
-// @ts-ignore
 import autoTable from "jspdf-autotable";
-// @ts-ignore
 import type { HookData } from "jspdf-autotable";
 
 
