@@ -1,3 +1,4 @@
+// src/components/TablaMaterias.tsx
 "use client";
 
 import {
@@ -22,10 +23,13 @@ import { Textarea } from "@repo/ui/components/shadcn/textarea";
 import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
 
+// Import the refined PDFGenerator component and its specific types
+import PDFGenerator, { SchoolInfo, MateriaTableData, ColumnDataMap } from "@/components/pdf-generator";
+
+
 export default function Page() {
   const {escuela} = useEscuela();
 
-  // Hook para obtener las materias usando el store
   const {
     materias,
     isCreating: isCreatingMateria,
@@ -57,8 +61,6 @@ export default function Page() {
   });
 
   const setItems = useBreadcrumbStore((state) => state.setItems);
-  
-  
 
   useEffect(() => {
     if (escuela) {
@@ -127,14 +129,56 @@ export default function Page() {
     );
   }
 
+  // --- Prepare data for PDFGenerator ---
+  const schoolInfoForPdf: SchoolInfo | undefined = escuela ? {
+    nombre: escuela.nombre,
+    direccion: escuela.direccion,
+    telefono: escuela.telefono,
+    email: escuela.email,
+    logo: "🎓",
+  } : undefined;
+
+  // Map your existing materia objects to the MateriaTableData type for the PDF generator
+  const materiasTableDataForPdf: MateriaTableData[] = materias.map((materia) => ({
+    nombre: materia.nombre,
+    descripcion: materia.descripcion,
+    creditos: materia.creditos,
+    activa: materia.activa,
+  }));
+
+  // Define the columnDataMap to tell PDFGenerator how to get data for each column
+  const materiaColumnMap: ColumnDataMap = {
+    "Nombre": (materia) => materia.nombre,
+    "Descripción": (materia) => materia.descripcion || "N/A",
+    "Créditos": (materia) => materia.creditos || "N/A",
+    "Estado": (materia) => materia.activa ? "Activa" : "Inactiva",
+  };
+  // --- End Prepare data for PDFGenerator ---
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Materias</h2>
-        <Button onClick={openCreate} disabled={isCreatingMateria} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Nueva Materia
-        </Button>
+        <div className="flex gap-2">
+          {/* PDF Generator Button */}
+          {schoolInfoForPdf && (
+            <PDFGenerator
+              schoolInfo={schoolInfoForPdf}
+              tableTitle="Reporte de Materias"
+              tableColumns={["Nombre", "Descripción", "Créditos", "Estado"]} // These are your display headers
+              tableData={materiasTableDataForPdf}
+              columnDataMap={materiaColumnMap} // Pass the new mapping
+              fileName={`Reporte_Materias_${escuela?.nombre.replace(/\s/g, '_')}.pdf`}
+              buttonText="Generar PDF"
+              buttonVariant="outline"
+            />
+          )}
+
+          <Button onClick={openCreate} disabled={isCreatingMateria} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Nueva Materia
+          </Button>
+        </div>
       </div>
 
       {/* Mostrar errores del store de materias */}
@@ -145,8 +189,8 @@ export default function Page() {
             {updateMateriaError && <div>Error al actualizar materia: {updateMateriaError}</div>}
             {deleteMateriaError && <div>Error al eliminar materia: {deleteMateriaError}</div>}
           </div>
-          <button 
-            onClick={clearMateriaErrors} 
+          <button
+            onClick={clearMateriaErrors}
             className="text-xs text-blue-500 underline mt-1"
           >
             Limpiar errores
@@ -221,10 +265,9 @@ export default function Page() {
         </TableBody>
       </Table>
 
-      {/* CrudDialog */}
       <CrudDialog
         operation={operation}
-        title={operation === 'create' ? 'Crear Nueva Materia' : 
+        title={operation === 'create' ? 'Crear Nueva Materia' :
               operation === 'edit' ? 'Editar Materia' : 'Ver Materia'}
         description={operation === 'create' ? 'Completa la información de la nueva materia' :
                     operation === 'edit' ? 'Modifica la información de la materia' : 'Información de la materia'}
@@ -252,9 +295,9 @@ export default function Page() {
                 <FormItem className="md:col-span-2">
                   <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
-                      placeholder="Nombre de la materia" 
+                    <Input
+                      {...field}
+                      placeholder="Nombre de la materia"
                       value={field.value as string}
                       disabled={operation === 'view'}
                     />
@@ -271,9 +314,9 @@ export default function Page() {
                 <FormItem className="md:col-span-2">
                   <FormLabel>Descripción</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      {...field} 
-                      placeholder="Descripción de la materia" 
+                    <Textarea
+                      {...field}
+                      placeholder="Descripción de la materia"
                       value={field.value as string}
                       disabled={operation === 'view'}
                     />
@@ -290,10 +333,10 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Créditos</FormLabel>
                   <FormControl>
-                    <Input 
-                      {...field} 
+                    <Input
+                      {...field}
                       type="number"
-                      placeholder="Número de créditos" 
+                      placeholder="Número de créditos"
                       value={field.value as string}
                       disabled={operation === 'view'}
                     />
