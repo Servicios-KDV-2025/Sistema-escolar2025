@@ -57,7 +57,7 @@ export const getCatalogoDeClasesConNombres = query({
             .query("catalogosDeClases")
             .withIndex("by_escuela", (q) => q.eq("escuelaId", escuelaId))
             .collect();
-
+ 
         const resultado = await Promise.all(
             catalogos.map(async (clase) => {
                 const [ciclo, materia, salon, maestro, grupo] = await Promise.all([
@@ -67,7 +67,7 @@ export const getCatalogoDeClasesConNombres = query({
                     ctx.db.get(clase.maestroId),
                     clase.grupoId ? ctx.db.get(clase.grupoId) : Promise.resolve(null),
                 ]);
-
+ 
                 return {
                     _id: clase._id,
                     nombre: clase.nombre,
@@ -79,10 +79,17 @@ export const getCatalogoDeClasesConNombres = query({
                         : "Sin maestro",
                     grupo: grupo?.nombre ?? "Sin grupo",
                     activo: clase.activa,
+ 
+                    cicloEscolarId: clase.cicloEscolarId,
+                    materiaId: clase.materiaId,
+                    salonId: clase.salonId,
+                    maestroId: clase.maestroId,
+                    grupoId: clase.grupoId ?? null,
+                    activa: clase.activa,
                 };
             })
         );
-
+ 
         return resultado;
     },
 });
