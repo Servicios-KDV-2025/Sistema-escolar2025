@@ -84,7 +84,8 @@ export default function Page() {
           email: validatedValues.email,
           telefono: validatedValues.telefono,
           direccion: validatedValues.direccion,
-          activo: validatedValues.activo
+          activo: validatedValues.activo,
+          updatedAt: Date.now() // Asignar la fecha actual como actualizado
         })
         toast.success('creado correctamente')
         toast.success('Alumno creado correctamente')
@@ -100,7 +101,8 @@ export default function Page() {
           email: validatedValues.email,
           telefono: validatedValues.telefono,
           direccion: validatedValues.direccion,
-          activo: validatedValues.activo
+          activo: validatedValues.activo,
+          updatedAt: Date.now() // Asignar la fecha actual si no se proporciona
         })
         toast.success('Alumno actualizado correctamente')
       } else {
