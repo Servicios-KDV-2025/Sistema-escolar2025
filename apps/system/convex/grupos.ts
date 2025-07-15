@@ -5,6 +5,7 @@ import { v } from "convex/values";
 export const crearGrupo = mutation({
   args: {
     escuelaId: v.id("escuelas"),
+    // cicloEscolarId: v.id("ciclosEscolares"),
     nombre: v.string(),
     grado: v.string(),
     activo: v.boolean(),

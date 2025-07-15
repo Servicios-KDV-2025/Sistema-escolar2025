@@ -88,12 +88,13 @@ const applicationTables = {
   // Grupos
   grupos: defineTable({
     escuelaId: v.id("escuelas"),
+    // cicloEscolarId: v.id("ciclosEscolares"),
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
 
-  //* Periodos (horarios)
+  // Periodos (horarios)
   periodos: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1ra hora", "2da hora"
