@@ -13,6 +13,7 @@ import { useGrupo } from "@/app/store/useGrupoStore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
 import { GruposAlumnosModal } from "@/components/dialog/gruposAlumnosModal";
 import { useState } from "react";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 
 export default function Page() {
     const { escuela } = useEscuela();
