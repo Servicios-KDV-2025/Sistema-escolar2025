@@ -86,11 +86,13 @@ export default function Page() {
           direccion: validatedValues.direccion,
           activo: validatedValues.activo
         })
+        toast.success('creado correctamente')
         toast.success('Alumno creado correctamente')
       } else if (operation === 'edit') {
         await actualizarAlumno({
           id: data?._id as Id<"alumnos">,
           escuelaId: escuela?._id as Id<"escuelas">,
+          grupoId: validatedValues.grupoId as Id<"grupos">,
           matricula: validatedValues.matricula,
           nombre: validatedValues.nombre,
           apellidos: validatedValues.apellidos,
@@ -138,7 +140,11 @@ export default function Page() {
     <main className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">Alumnos</h1>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Lista de Alumnos</h2>
+        <p className="text-muted-foreground mb-6">
+          Aquí puedes ver y gestionar todos los Alumnos disponibles en la escuela.
+          Haz clic en los botones para ver información más precisa, editar o eliminarlo.
+          Para crear un nuevo alumno, usa el botón Nuevo Alumno.
+        </p>
         <Button onClick={openCreate} className="flex items-center gap-2">
           <Plus />
           Nuevo Alumno
@@ -277,6 +283,7 @@ export default function Page() {
       >
         {(form, operation) => (
           <div className="space-y-6">
+            {operation === 'edit' ? <></> :  
             <FormField
               control={form.control}
               name="padreId"
@@ -296,7 +303,7 @@ export default function Page() {
                       <SelectContent>
                         {padres?.map((padre) => (
                           <SelectItem key={padre._id} value={padre._id}>
-                            {padre.nombre} ({padre.apellidos})
+                            {padre.nombre} {padre.apellidos}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -304,7 +311,7 @@ export default function Page() {
                   </FormControl>
                 </FormItem>
               )}
-            /> 
+            />}
             <FormField
               control={form.control}
               name="grupoId"
@@ -324,7 +331,7 @@ export default function Page() {
                       <SelectContent>
                         {grupos?.map((grupo) => (
                           <SelectItem key={grupo._id} value={grupo._id}>
-                            {grupo.nombre} ({grupo.grado})
+                            {grupo.grado} {grupo.nombre}
                           </SelectItem>
                         ))}
                       </SelectContent>
