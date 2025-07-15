@@ -33,7 +33,7 @@ const applicationTables = {
     telefono: v.optional(v.string()),
     email: v.string(),
     director: v.optional(v.string()),
-    activo: v.boolean(),
+    activo: v.optional(v.boolean())
   }),
  
   // Ciclos escolares

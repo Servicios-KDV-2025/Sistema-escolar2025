@@ -32,7 +32,6 @@ export async function POST(request: NextRequest) {
       nombre,
       nombreCorto,
       email,
-      activo: false, // Por defecto, el prospecto se crea como inactivo
       // Los campos opcionales se pueden enviar como undefined
       logoUrl: undefined,
       descripcion: undefined,
