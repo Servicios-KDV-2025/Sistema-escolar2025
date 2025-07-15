@@ -8,38 +8,21 @@ import { toast } from "sonner";
 import autoTable from "jspdf-autotable";
 import type { HookData } from "jspdf-autotable";
 
-
+import { useEscuela } from "@/app/store/useEscuelaStore";
 import jsPDF from "jspdf";
 
-// Tipos
-export interface SchoolInfo {
-  nombre: string;
-  direccion?: string;
-  telefono?: string;
-  email?: string;
-  logo?: string;
-}
 
-export interface MateriaTableData {
-  _id: string;
-  nombre: string;
-  descripcion?: string;
-  creditos?: number;
-  activa: boolean;
-}
-
-export type ColumnDataMap = {
-  [columnHeader: string]: (
-    data: MateriaTableData
-  ) => string | number | boolean | undefined;
+// Mapeo de columna a función de extracción
+export type ColumnDataMap<T> = {
+  [columnHeader: string]: (data: T) => string | number | boolean | undefined;
 };
 
-interface PDFGeneratorProps {
-  schoolInfo: SchoolInfo;
+// Props del generador genérico
+export interface PDFGeneratorProps<T> {
   tableTitle: string;
   tableColumns: string[];
-  tableData: MateriaTableData[];
-  columnDataMap: ColumnDataMap;
+  tableData: T[];
+  columnDataMap: ColumnDataMap<T>;
   fileName?: string;
   buttonText?: string;
   buttonVariant?:
@@ -53,8 +36,9 @@ interface PDFGeneratorProps {
   secondaryColor?: [number, number, number];
 }
 
-export default function PDFGenerator({
-  schoolInfo,
+// -------- COMPONENTE --------
+
+export default function PDFGenerator<T>({
   tableTitle,
   tableColumns,
   tableData,
@@ -62,10 +46,11 @@ export default function PDFGenerator({
   fileName,
   buttonText = "Generar PDF",
   buttonVariant = "default",
-  primaryColor = [41, 128, 185],
-  secondaryColor = [52, 73, 94],
-}: PDFGeneratorProps) {
+  primaryColor = [41, 128, 185],     // azul
+  secondaryColor = [52, 73, 94],     // gris oscuro
+}: PDFGeneratorProps<T>) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const {escuela} = useEscuela();
 
   const generatePDF = async () => {
     setIsGenerating(true);
@@ -79,14 +64,14 @@ export default function PDFGenerator({
 
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(20);
-      doc.text(schoolInfo.logo || "🎓", 15, 20);
+      doc.text(escuela?.logoUrl || "E", 15, 20);
       doc.setFontSize(18);
-      doc.text(schoolInfo.nombre, 30, 20);
+      doc.text(escuela?.nombre || "Escuela sin nombre", 30, 20);
 
       doc.setFontSize(10);
-      doc.text(schoolInfo.direccion || "Dirección no disponible", 15, 28);
+      doc.text(escuela?.direccion || "Dirección no disponible", 15, 28);
       doc.text(
-        `Tel: ${schoolInfo.telefono || "N/A"} | Email: ${schoolInfo.email || "N/A"}`,
+        `Tel: ${escuela?.telefono || "N/A"} | Email: ${escuela?.email || "N/A"}`,
         15,
         35
       );
@@ -112,9 +97,7 @@ export default function PDFGenerator({
         tableColumns.map((columnHeader) => {
           const extractor = columnDataMap[columnHeader];
           if (!extractor) {
-            console.warn(
-              `No se definió un extractor para la columna: "${columnHeader}".`
-            );
+            console.warn(`No se definió extractor para: "${columnHeader}"`);
             return "N/A";
           }
           const value = extractor(row);
@@ -122,7 +105,7 @@ export default function PDFGenerator({
         })
       );
 
-      // --- GENERAR TABLA USANDO autoTable(doc, options) ---
+      // --- TABLA ---
       autoTable(doc, {
         head: [tableColumns],
         body: tableRows,
@@ -151,23 +134,24 @@ export default function PDFGenerator({
             doc.internal.pageSize.height - 10
           );
           doc.text(
-            `Generado por ${schoolInfo.nombre || "Sistema"}`,
+            `Generado por ${escuela?.nombre || "Sistema"}`,
             15,
             doc.internal.pageSize.height - 10
           );
         },
       });
 
-      // --- DESCARGA DEL PDF ---
-      const defaultFileName = `${tableTitle.replace(/\s+/g, "_")}_${
-        new Date().toISOString().split("T")[0]
-      }.pdf`;
+      // --- GUARDAR PDF ---
+      const defaultFileName = `${tableTitle.replace(/\s+/g, "_")}_${new Date()
+        .toISOString()
+        .split("T")[0]}.pdf`;
+
       doc.save(fileName || defaultFileName);
     } catch (error) {
       console.error("Error al generar PDF:", error);
-      toast.error("Error al generar el PDF.", {
+      toast.error("Error al generar el PDF", {
         description:
-          "Hubo un problema inesperado al crear el reporte. Por favor, intenta de nuevo.",
+          "Hubo un problema al crear el reporte. Intenta nuevamente.",
       });
     } finally {
       setIsGenerating(false);

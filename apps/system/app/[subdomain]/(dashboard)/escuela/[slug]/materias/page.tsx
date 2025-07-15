@@ -17,18 +17,22 @@ import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useMateria } from "@/app/store/useMateriaStore";
 import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { materiaSchema } from "@/app/shemas/materia";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
+import { Card, CardContent } from "@repo/ui/components/shadcn/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@repo/ui/components/shadcn/form";
 import { Input } from "@repo/ui/components/shadcn/input";
 import { Textarea } from "@repo/ui/components/shadcn/textarea";
 import { Switch } from "@repo/ui/components/shadcn/switch";
 import { toast } from "sonner";
-
-// Import the refined PDFGenerator component and its specific types
-import PDFGenerator, { SchoolInfo, MateriaTableData, ColumnDataMap } from "@/components/pdf-generator";
-
+import PDFGenerator from "@/components/pdf-generator";
 
 export default function Page() {
-  const {escuela} = useEscuela();
+  const { escuela } = useEscuela();
 
   const {
     materias,
@@ -44,6 +48,17 @@ export default function Page() {
     clearErrors: clearMateriaErrors,
   } = useMateria(escuela?._id);
 
+  const columnHeaders = ["Nombre", "Descripción", "Créditos", "Activa"];
+
+  const columnDataMap = {
+    Nombre: (materia: (typeof materias)[number]) => materia.nombre,
+    Descripción: (materia: (typeof materias)[number]) =>
+      materia.descripcion ?? "N/A",
+    Créditos: (materia: (typeof materias)[number]) => materia.creditos ?? "N/A",
+    Activa: (materia: (typeof materias)[number]) =>
+      materia.activa ? "Sí" : "No",
+  };
+
   const {
     isOpen,
     operation,
@@ -52,12 +67,12 @@ export default function Page() {
     openEdit,
     openView,
     openDelete,
-    close
+    close,
   } = useCrudDialog(materiaSchema, {
     nombre: "",
     descripcion: "",
     creditos: "",
-    activa: true
+    activa: true,
   });
 
   const setItems = useBreadcrumbStore((state) => state.setItems);
@@ -65,7 +80,10 @@ export default function Page() {
   useEffect(() => {
     if (escuela) {
       setItems([
-        { label: `${(escuela?.nombre).toUpperCase()}`, href: `/escuela/${escuela.nombre}` },
+        {
+          label: `${(escuela?.nombre).toUpperCase()}`,
+          href: `/escuela/${escuela.nombre}`,
+        },
         { label: "Materias", isCurrentPage: true },
       ]);
     }
@@ -73,33 +91,37 @@ export default function Page() {
 
   const handleSubmit = async (values: Record<string, unknown>) => {
     if (!escuela?._id) {
-      toast.error('Error', { description: 'No se pudo identificar la escuela' });
+      toast.error("Error", {
+        description: "No se pudo identificar la escuela",
+      });
       return;
     }
 
     try {
-      if (operation === 'create') {
+      if (operation === "create") {
         await crearMateria({
           escuelaId: escuela._id,
           nombre: values.nombre as string,
           descripcion: values.descripcion as string,
           creditos: values.creditos ? Number(values.creditos) : undefined,
-          activa: values.activa as boolean
+          activa: values.activa as boolean,
         });
-      } else if (operation === 'edit' && data?._id) {
+      } else if (operation === "edit" && data?._id) {
         await actualizarMateria({
           id: data._id,
           escuelaId: escuela._id,
           nombre: values.nombre as string,
           descripcion: values.descripcion as string,
           creditos: values.creditos ? Number(values.creditos) : undefined,
-          activa: values.activa as boolean
+          activa: values.activa as boolean,
         });
       } else {
-        throw new Error('Operación no válida o datos faltantes');
+        throw new Error("Operación no válida o datos faltantes");
       }
     } catch (error) {
-      toast.error('Error en operación CRUD', { description: (error as Error).message });
+      toast.error("Error en operación CRUD", {
+        description: (error as Error).message,
+      });
       throw error;
     }
   };
@@ -108,7 +130,9 @@ export default function Page() {
     try {
       await eliminarMateria(id);
     } catch (error) {
-      toast.error('Error al eliminar materia', { description: (error as Error).message });
+      toast.error("Error al eliminar materia", {
+        description: (error as Error).message,
+      });
       throw error;
     }
   };
@@ -129,44 +153,28 @@ export default function Page() {
     );
   }
 
-
-  // Map your existing materia objects to the MateriaTableData type for the PDF generator
-  const materiasTableDataForPdf: MateriaTableData[] = materias.map((materia) => ({
-    nombre: materia.nombre,
-    descripcion: materia.descripcion,
-    creditos: materia.creditos,
-    activa: materia.activa,
-  }));
-
-  // Define the columnDataMap to tell PDFGenerator how to get data for each column
-  const materiaColumnMap: ColumnDataMap = {
-    "Nombre": (materia) => materia.nombre,
-    "Descripción": (materia) => materia.descripcion || "N/A",
-    "Créditos": (materia) => materia.creditos || "N/A",
-    "Estado": (materia) => materia.activa ? "Activa" : "Inactiva",
-  };
-  // --- End Prepare data for PDFGenerator ---
-
   return (
-    <div>
+    <div className="w-[90%] mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Materias</h1>
+      <p className="text-muted-foreground mb-6">Gestión Materias</p>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Lista de Materias</h2>
+        <h2>Lista Materias</h2>
         <div className="flex gap-2">
-          {/* PDF Generator Button */}
-          {schoolInfoForPdf && (
-            <PDFGenerator
-              schoolInfo={schoolInfoForPdf}
-              tableTitle="Reporte de Materias"
-              tableColumns={["Nombre", "Descripción", "Créditos", "Estado"]} // These are your display headers
-              tableData={materiasTableDataForPdf}
-              columnDataMap={materiaColumnMap} // Pass the new mapping
-              fileName={`Reporte_Materias_${escuela?.nombre.replace(/\s/g, '_')}.pdf`}
-              buttonText="Generar PDF"
-              buttonVariant="outline"
-            />
-          )}
-
-          <Button onClick={openCreate} disabled={isCreatingMateria} className="flex items-center gap-2">
+          <PDFGenerator
+            tableTitle="Lista de Materias"
+            buttonText="Exportar"
+            tableColumns={columnHeaders}
+            tableData={materias}
+            columnDataMap={columnDataMap}
+            fileName={`materias_${escuela?.nombre || "escuela"}.pdf`}
+            primaryColor={[39, 174, 96]}
+            buttonVariant={"secondary"}
+          />
+          <Button
+            onClick={openCreate}
+            disabled={isCreatingMateria}
+            className="flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" />
             Nueva Materia
           </Button>
@@ -177,9 +185,15 @@ export default function Page() {
       {(createMateriaError || updateMateriaError || deleteMateriaError) && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
           <div className="text-sm text-red-600">
-            {createMateriaError && <div>Error al crear materia: {createMateriaError}</div>}
-            {updateMateriaError && <div>Error al actualizar materia: {updateMateriaError}</div>}
-            {deleteMateriaError && <div>Error al eliminar materia: {deleteMateriaError}</div>}
+            {createMateriaError && (
+              <div>Error al crear materia: {createMateriaError}</div>
+            )}
+            {updateMateriaError && (
+              <div>Error al actualizar materia: {updateMateriaError}</div>
+            )}
+            {deleteMateriaError && (
+              <div>Error al eliminar materia: {deleteMateriaError}</div>
+            )}
           </div>
           <button
             onClick={clearMateriaErrors}
@@ -190,85 +204,114 @@ export default function Page() {
         </div>
       )}
 
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[100px]">Nombre</TableHead>
-            <TableHead>Descripción</TableHead>
-            <TableHead>Créditos</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {materias.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center text-gray-500 py-4">
-                No hay materias registradas para esta escuela.
-              </TableCell>
-            </TableRow>
-          ) : (
-            materias.map((materia) => (
-              <TableRow key={materia._id} className="hover:bg-muted/50">
-                <TableCell className="font-medium">{materia.nombre}</TableCell>
-                <TableCell>{materia.descripcion || "N/A"}</TableCell>
-                <TableCell>{materia.creditos || "N/A"}</TableCell>
-                <TableCell>{materia.activa ? "Activa" : "Inactiva"}</TableCell>
-                <TableCell className="text-right whitespace-nowrap">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openView(materia);
-                      }}
-                      disabled={isUpdatingMateria || isDeletingMateria}
+      <div className=" ">
+        <Card className="w-full p-6">
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Nombre</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="text-center">Créditos</TableHead>
+                  <TableHead className="text-center">Estado</TableHead>
+                  <TableHead className="text-center">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {materias.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center text-gray-500 py-4"
                     >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openEdit(materia);
-                      }}
-                      disabled={isUpdatingMateria || isDeletingMateria}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDelete(materia);
-                      }}
-                      disabled={isDeletingMateria}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                      No hay materias registradas para esta escuela.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  materias.map((materia) => (
+                    <TableRow key={materia._id} className="hover:bg-muted/50">
+                      <TableCell className="font-medium ">
+                        {materia.nombre}
+                      </TableCell>
+                      <TableCell>{materia.descripcion || "N/A"}</TableCell>
+                      <TableCell className="text-center">
+                        {materia.creditos || "N/A"}
+                      </TableCell>
+                      <TableCell
+                        className={`text-center font-medium ${
+                          materia.activa ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {materia.activa ? "Activa" : "Inactiva"}
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap text-center">
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openView(materia);
+                            }}
+                            disabled={isUpdatingMateria || isDeletingMateria}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openEdit(materia);
+                            }}
+                            disabled={isUpdatingMateria || isDeletingMateria}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openDelete(materia);
+                            }}
+                            disabled={isDeletingMateria}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
 
       <CrudDialog
         operation={operation}
-        title={operation === 'create' ? 'Crear Nueva Materia' :
-              operation === 'edit' ? 'Editar Materia' : 'Ver Materia'}
-        description={operation === 'create' ? 'Completa la información de la nueva materia' :
-                    operation === 'edit' ? 'Modifica la información de la materia' : 'Información de la materia'}
+        title={
+          operation === "create"
+            ? "Crear Nueva Materia"
+            : operation === "edit"
+              ? "Editar Materia"
+              : "Ver Materia"
+        }
+        description={
+          operation === "create"
+            ? "Completa la información de la nueva materia"
+            : operation === "edit"
+              ? "Modifica la información de la materia"
+              : "Información de la materia"
+        }
         schema={materiaSchema}
         defaultValues={{
           nombre: "",
           descripcion: "",
           creditos: "",
-          activa: true
+          activa: true,
         }}
         data={data}
         isOpen={isOpen}
@@ -291,7 +334,7 @@ export default function Page() {
                       {...field}
                       placeholder="Nombre de la materia"
                       value={field.value as string}
-                      disabled={operation === 'view'}
+                      disabled={operation === "view"}
                     />
                   </FormControl>
                   <FormMessage />
@@ -310,7 +353,7 @@ export default function Page() {
                       {...field}
                       placeholder="Descripción de la materia"
                       value={field.value as string}
-                      disabled={operation === 'view'}
+                      disabled={operation === "view"}
                     />
                   </FormControl>
                   <FormMessage />
@@ -330,7 +373,7 @@ export default function Page() {
                       type="number"
                       placeholder="Número de créditos"
                       value={field.value as string}
-                      disabled={operation === 'view'}
+                      disabled={operation === "view"}
                     />
                   </FormControl>
                   <FormMessage />
@@ -346,14 +389,14 @@ export default function Page() {
                   <div className="space-y-0.5">
                     <FormLabel className="text-base">Estado</FormLabel>
                     <div className="text-sm text-muted-foreground">
-                      {field.value ? 'Materia activa' : 'Materia inactiva'}
+                      {field.value ? "Materia activa" : "Materia inactiva"}
                     </div>
                   </div>
                   <FormControl>
                     <Switch
                       checked={field.value as boolean}
                       onCheckedChange={field.onChange}
-                      disabled={operation === 'view'}
+                      disabled={operation === "view"}
                     />
                   </FormControl>
                 </FormItem>
