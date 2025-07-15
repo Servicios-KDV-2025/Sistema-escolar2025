@@ -6,12 +6,13 @@ import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { grupoSchema } from "@/app/shemas/grupo";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
+import { Eye, Pencil, Plus, Trash2, Users } from "lucide-react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
-import { Input } from "@/components/ui/input";
 import { useGrupo } from "@/app/store/useGrupoStore";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
+import { GruposAlumnosModal } from "@/components/dialog/gruposAlumnosModal";
+import { useState } from "react";
 
 export default function Page() {
     const { escuela } = useEscuela();
@@ -33,9 +34,23 @@ export default function Page() {
         activo: true
     });
 
+    const [isAlumnosModalOpen, setAlumnosModalOpen] = useState(false)
+    const [grupoSeleccionado, setGrupoSeleccionado] = useState<Id<"grupos"> | null>(null)
+
     const handleSubmit = async (values: Record<string, unknown>) => {
         if (!escuela?._id) {
             toast.error('Error', { description: 'No se pudo identificar la escuela' })
+            return
+        }
+
+        const grupoExiste = grupos.some(
+            (grupo) => grupo.nombre === values.nombre && grupo.grado === values.grado
+        )
+
+        if (operation === 'create' && grupoExiste) {
+            toast.warning('Grupo dublicado', {
+                description: `Ya existe un grupo con el nombre "${values.nombre}" y grado "${values.grado}".`
+            })
             return
         }
 
@@ -47,6 +62,7 @@ export default function Page() {
                     nombre: values.nombre as string,
                     activo: values.activo as boolean
                 })
+                toast.success('creado correctamente')
             } else if (operation === 'edit' && data?._id) {
                 await actualizarGrupo({
                     _id: data._id as Id<"grupos">,
@@ -84,7 +100,8 @@ export default function Page() {
             <h1 className="text-3xl font-bold mb-6">Grupo</h1>
             <p className="text-muted-foreground mb-6">
                 Aquí puedes ver y gestionar todos los Grupos disponibles en la escuela.
-                Haz clic en los botones para ver información más precisa, editar o eliminarlo.
+                Haz clic en los botones para ver información más precisa, editar, eliminarlo o ver el 
+                listado de alumnos por cada grupo.
                 Para crear un nuevo Grupo, usa el botón Nuevo Grupo.
             </p>
 
@@ -100,6 +117,7 @@ export default function Page() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Grado</TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Activo</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
@@ -116,10 +134,27 @@ export default function Page() {
                             )
                             : (
                                 grupos.map(grupo => (
-                                    <TableRow key={grupo._id}>
+                                    <TableRow 
+                                      key={grupo._id}
+                                    //   onClick={() => {
+                                    //     setGrupoSeleccionado(grupo._id)
+                                    //     setAlumnosModalOpen(true)
+                                    //   }}
+                                    >
+                                        <TableCell className="font-medium">{grupo.grado}</TableCell>
                                         <TableCell className="font-medium">{grupo.nombre}</TableCell>
                                         <TableCell>{grupo.activo ? 'Activo' : 'Inactivo'}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setGrupoSeleccionado(grupo._id)
+                                                    setAlumnosModalOpen(true)
+                                                }}
+                                            >
+                                                <Users /> Alumnos
+                                            </Button>
                                             <Button variant="outline" size="sm" onClick={() => openView({ ...grupo, _id: grupo._id })}>
                                                 <Eye className="h-4 w-4" />
                                             </Button>
@@ -193,18 +228,31 @@ export default function Page() {
                             control={form.control}
                             name="nombre"
                             render={({ field }) => {
-                                // console.log('Campo nombre - field.value:', field.value)
-                                // console.log('Campo nombre - operation:', operation)
                                 return (
                                     <FormItem>
                                         <FormLabel>Nombre</FormLabel>
                                         <FormControl>
-                                            <Input
+                                            {/* <Input
                                                 {...field}
                                                 placeholder="Nombre del grupo"
                                                 value={field.value as string}
                                                 disabled={operation === 'view'}
-                                            />
+                                            /> */}
+                                            <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value as string}
+                                            disabled={operation === 'view'}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Seleccionar Nombre" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="A">A</SelectItem>
+                                                    <SelectItem value="B">B</SelectItem>
+                                                    <SelectItem value="C">C</SelectItem>
+                                                    <SelectItem value="D">D</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -243,6 +291,11 @@ export default function Page() {
                 )}
 
             </CrudDialog>
+            <GruposAlumnosModal
+              isOpen={isAlumnosModalOpen}
+              onClose={() => setAlumnosModalOpen(false)}
+              grupoId={grupoSeleccionado}
+            />
         </main>
     );
 }
