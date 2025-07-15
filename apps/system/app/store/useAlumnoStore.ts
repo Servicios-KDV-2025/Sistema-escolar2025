@@ -38,6 +38,7 @@ export type CrearAlumnoData = {
 export type ActualizarAlumnoData = {
   id: string;
   escuelaId: string;
+  grupoId: string;
   matricula: string;
   nombre: string;
   apellidos: string;
@@ -172,6 +173,7 @@ export const useAlumno = (escuelaId?: string) => {
       await actualizarAlumnoMutation({
         id: data.id as Id<"alumnos">,
         escuelaId: data.escuelaId as Id<"escuelas">,
+        grupoId: data.grupoId as Id<"grupos">,
         matricula: data.matricula,
         nombre: data.nombre,
         apellidos: data.apellidos,

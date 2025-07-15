@@ -49,6 +49,7 @@ export const verUnCatalogoDeClase = query({
     },
 });
 
+// Read whit all names
 export const getCatalogoDeClasesConNombres = query({
     args: { escuelaId: v.id("escuelas") },
     handler: async (ctx, { escuelaId }) => {

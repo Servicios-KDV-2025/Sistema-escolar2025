@@ -101,16 +101,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/personal`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Personal",
-          url: `/escuela/${slug}/personal`,
-        },
-        {
-          title: "Crear Personal",
-          url: `/escuela/${slug}/personal/create?escuelaId=${slug}`,
-        },
-      ],
     },
     {
       title: "Periodos",
@@ -129,16 +119,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/escuela/${slug}/alumnos`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Alumnos",
-          url: `/escuela/${slug}/alumnos`,
-        },
-        {
-          title: "Crear Alumno",
-          url: `/escuela/${slug}/alumnos/create?escuelaId=${slug}`,
-        },
-      ],
     },
     {
       title: "Calificaciones",

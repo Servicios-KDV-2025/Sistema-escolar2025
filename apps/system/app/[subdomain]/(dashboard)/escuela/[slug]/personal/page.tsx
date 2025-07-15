@@ -82,6 +82,7 @@ export default function Page() {
           fechaIngreso: validatedValues.fechaIngreso as string,
           activo: validatedValues.activo as boolean,
         })
+        toast.success('creado correctamente')
         toast.success('Departamento creado')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPersonal({
@@ -132,7 +133,11 @@ export default function Page() {
     <main className="container mx-auto py-10">
       <h1 className="text-3xl font-bold mb-6">Personal</h1>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Lista de Personal</h2>
+        <p className="text-muted-foreground mb-6">
+          Aquí puedes ver y gestionar todos el personal disponibles en la escuela.
+          Haz clic en los botones para ver información más precisa, editar o eliminarlo.
+          Para crear un nuevo empleado, usa el botón Nuevo Empleado.
+        </p>
         <Button onClick={openCreate} className="flex items-center gap-2">
           <Plus />
           Nuevo Empleado

@@ -47,11 +47,27 @@ export const alumnoById = query({
   }
 })
 
+export const obtenerAlumnosPorGrupo = query({
+  args: {
+    escuelaId: v.id("escuelas"),
+    grupoId: v.id("grupos")
+  },
+  handler: async (ctx, args) => {
+    const alumno = await ctx.db
+      .query("alumnos")
+      .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
+      .filter(q => q.eq(q.field("grupoId"), args.grupoId))
+      .collect()
+    return alumno
+  }
+})
+
 // actualizar alumno
 export const upadateAlumno = mutation({
   args: {
     id: v.id("alumnos"),
     escuelaId: v.id("escuelas"),
+    grupoId: v.id("grupos"),
     matricula: v.string(),
     nombre: v.string(),
     apellidos: v.string(),

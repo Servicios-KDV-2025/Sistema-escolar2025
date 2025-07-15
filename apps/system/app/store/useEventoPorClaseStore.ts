@@ -158,7 +158,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
         catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
         calendarioId: data.calendarioId as Id<"calendario">,
         cicloEscolarId: data.cicloEscolarId as Id<"ciclosEscolares">,
-        eventoEscolarId: data.eventoEscolarId as Id<"eventosEscolares">,
+        eventoEscolarId: data.eventoEscolarId ? data.eventoEscolarId as Id<"eventosEscolares"> : undefined,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al crear evento por clase';
