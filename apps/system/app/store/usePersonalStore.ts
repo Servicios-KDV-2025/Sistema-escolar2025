@@ -16,6 +16,7 @@ export type Personal = {
   maestro: boolean;
   fechaIngreso: string;
   activo: boolean;
+  updateAt?: number; // Timestamp para la última actualización
 };
 
 // Tipos para crear y actualizar personal
@@ -29,6 +30,7 @@ export type CrearPersonalData = {
   maestro: boolean;
   fechaIngreso: string;
   activo: boolean;
+  updateAt?: number; // Timestamp para la creación
 };
 
 export type ActualizarPersonalData = {
@@ -40,6 +42,7 @@ export type ActualizarPersonalData = {
   maestro: boolean;
   fechaIngreso: string;
   activo: boolean;
+  updateAt?: number; // Timestamp para la actualización
 };
 
 // Store de Personal con CRUD completo
@@ -118,6 +121,7 @@ type PersonalQueryData = {
   maestro: boolean;
   fechaIngreso: string;
   activo: boolean;
+  updateAt?: number; // Timestamp para la última actualización
 };
 
 export const usePersonal = (escuelaId?: string) => {
@@ -195,6 +199,7 @@ export const usePersonal = (escuelaId?: string) => {
         maestro: data.maestro,
         fechaIngreso: data.fechaIngreso,
         activo: data.activo,
+        updateAt: Date.now(), // Actualizar el timestamp
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar personal';
@@ -237,6 +242,7 @@ export const usePersonal = (escuelaId?: string) => {
           maestro: p.maestro,
           fechaIngreso: p.fechaIngreso,
           activo: p.activo,
+          updateAt: p.updateAt,
         }))
       );
     }
@@ -257,6 +263,7 @@ export const usePersonal = (escuelaId?: string) => {
           maestro: m.maestro,
           fechaIngreso: m.fechaIngreso,
           activo: m.activo,
+          updateAt: m.updateAt,
         }))
       );
     }
