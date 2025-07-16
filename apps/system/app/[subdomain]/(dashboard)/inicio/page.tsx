@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect } from "react";
-import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
+// import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Badge } from "@repo/ui/components/shadcn/badge";
@@ -15,7 +14,6 @@ import { useEscuela } from "@/app/store/useEscuelaStore";
 export default function EscuelaHome() {
   
   const { escuela } = useEscuela();
-  const setItems = useBreadcrumbStore(state => state.setItems);
 
 
 
