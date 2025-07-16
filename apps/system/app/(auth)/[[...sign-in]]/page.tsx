@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import MostrarEscuelas from "@/components/mostrar-escuelas";
+// import MostrarEscuelas from "@/components/mostrar-escuelas";
 import ListaSubdominios from "@/components/lista-subdominios";
 import CustomSignIn from "@/components/CustomSignIn";
 import Navbar from "@/components/Navbar";
@@ -70,6 +70,9 @@ export default function Home() {
         </>
       ) : (
         <CustomSignIn />
+        // <div className="flex items-center justify-center min-h-screen">
+        //   <SignIn />
+        // </div>
       )}
     </div>
   );

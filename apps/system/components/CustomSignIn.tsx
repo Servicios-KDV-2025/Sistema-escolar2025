@@ -7,6 +7,7 @@ import { Button } from '@repo/ui/components/shadcn/button'
 import { Input } from '@repo/ui/components/shadcn/input'
 import { Label } from '@repo/ui/components/shadcn/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@repo/ui/components/shadcn/card'
+import { toast } from 'sonner'
 
 export default function SignInForm() {
   const { isLoaded, signIn, setActive } = useSignIn()
@@ -36,13 +37,14 @@ export default function SignInForm() {
       if (signInAttempt.status === 'complete') {
         await setActive({ session: signInAttempt.createdSessionId })
         router.push('/')
+        toast.success('Inicio de sesión exitoso')
       } else {
         // Si el estado no está completo, verificar por qué. El usuario puede necesitar
         // completar pasos adicionales.
         console.error(JSON.stringify(signInAttempt, null, 2))
         setError('Error en el proceso de inicio de sesión')
       }
-    } catch (err: any) {
+    } catch (err) {
       // Ver https://clerk.com/docs/custom-flows/error-handling
       // para más información sobre el manejo de errores
       console.error(JSON.stringify(err, null, 2))
