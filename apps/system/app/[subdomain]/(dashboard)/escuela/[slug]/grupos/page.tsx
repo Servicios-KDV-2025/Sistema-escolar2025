@@ -72,6 +72,7 @@ export default function Page() {
                     _id: data._id as Id<"grupos">,
                     escuelaId: escuela._id as Id<"escuelas">,
                     cicloEscolarId: values.cicloEscolarId as Id<"ciclosEscolares">,
+                    cicloEscolar: values.cicloEscolar as string,
                     grado: values.grado as string,
                     nombre: values.nombre as string,
                     activo: values.activo as boolean

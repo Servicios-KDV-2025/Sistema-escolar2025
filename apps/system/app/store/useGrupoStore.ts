@@ -168,12 +168,13 @@ export const useGrupo = (escuelaId?: string) => {
     if (gruposQuery) {
       setGrupos(
         (gruposQuery as Grupo[]).map((g) => ({
-          _id: g._id,
-          escuelaId: g.escuelaId,
-          cicloEscolarId: g.cicloEscolarId,
+          _id: g._id as Id<"grupos">,
+          escuelaId: g.escuelaId as Id<"escuelas">,
+          cicloEscolarId: g.cicloEscolarId as Id<"ciclosEscolares">,
+          cicloEscolar: g.cicloEscolar,
           nombre: g.nombre,
           grado: g.grado,
-          activo: g.activo,
+          activo: g.activo === true,
         }))
       );
     }
