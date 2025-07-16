@@ -12,6 +12,7 @@ export const crearCatalogoDeCases = mutation({
         grupoId: v.optional(v.id("grupos")),
         nombre: v.string(),
         activa: v.boolean(),
+        createdBy: v.id("personal"),
     },
     handler: async (ctx, args) => {
         await ctx.db.insert("catalogosDeClases", { ...args });
@@ -57,17 +58,19 @@ export const getCatalogoDeClasesConNombres = query({
             .query("catalogosDeClases")
             .withIndex("by_escuela", (q) => q.eq("escuelaId", escuelaId))
             .collect();
-
+ 
         const resultado = await Promise.all(
-            catalogos.map(async (clase) => {
-                const [ciclo, materia, salon, maestro, grupo] = await Promise.all([
+            catalogos.map(async clase => {
+                const [ciclo, materia, salon, maestro, grupo, creadoPor] = await Promise.all([
                     ctx.db.get(clase.cicloEscolarId),
                     ctx.db.get(clase.materiaId),
                     ctx.db.get(clase.salonId),
                     ctx.db.get(clase.maestroId),
                     clase.grupoId ? ctx.db.get(clase.grupoId) : Promise.resolve(null),
+                    clase.createdBy ? ctx.db.get(clase.createdBy) : Promise.resolve(null)
+,
                 ]);
-
+ 
                 return {
                     _id: clase._id,
                     nombre: clase.nombre,
@@ -77,12 +80,21 @@ export const getCatalogoDeClasesConNombres = query({
                     maestro: maestro
                         ? `${maestro.nombre} ${maestro.apellidos}`
                         : "Sin maestro",
+                    grado: grupo?.grado ?? "Sin grado",
                     grupo: grupo?.nombre ?? "Sin grupo",
-                    activo: clase.activa,
+                    activa: clase.activa,
+                    createdBy: `${creadoPor?.nombre} ${creadoPor?.nombre}`,
+
+                    cicloEscolarId: clase.cicloEscolarId,
+                    materiaId: clase.materiaId,
+                    salonId: clase.salonId,
+                    maestroId: clase.maestroId,
+                    grupoId: clase.grupoId ?? null,
+                    createdById: clase.createdBy,
                 };
             })
         );
-
+ 
         return resultado;
     },
 });
@@ -98,6 +110,7 @@ export const actualizarCatalogoDeClase = mutation({
         maestroId: v.id("personal"),
         grupoId: v.optional(v.id("grupos")),
         nombre: v.string(),
+        // createdBy: v.id("personal"),
         activa: v.boolean(),
     },
     handler: async (ctx, args) => {

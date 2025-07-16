@@ -11,6 +11,7 @@ export const alumnoSchema = z.object({
   telefono: z.string().min(1, { message: "El numero de telefono es rquerido" }),
   direccion: z.string().min(1, { message: "La dirección es requerida" }),
   activo: z.boolean(),
+  updateAt: z.number().optional(),
 })
 
 export type AlumnoFormValues = z.infer<typeof alumnoSchema>

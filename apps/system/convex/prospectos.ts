@@ -8,12 +8,22 @@ export const obtenerProspectos = query({
     }
 });
 
+// Obtener solo prospectos activos
+export const obtenerProspectosActivos = query({
+    handler: async (ctx) => {
+        const prospectos = await ctx.db.query("prospectos")
+            .filter((q) => q.eq(q.field("activo"), true))
+            .collect();
+        return prospectos;
+    }
+});
+
 export const obtenerProspectoPorId = query({
     args: { id: v.id("prospectos") },
     handler: async (ctx, { id }) => {
         const prospecto = await ctx.db.get(id);
         if (!prospecto) {
-            return null; // Devolver null en lugar de lanzar error
+            return null;
         }
         return prospecto;
     }
@@ -40,20 +50,71 @@ export const crearProspecto = mutation({
             telefono,
             email,
             director,
+            activo: false, // Por defecto, el prospecto se crea como inactivo
         });
         return nuevoProspecto;
     }
-}); 
+});
+
+// Actualizar prospecto
+export const actualizarProspecto = mutation({
+    args: {
+        id: v.id("prospectos"),
+        nombre: v.optional(v.string()),
+        nombreCorto: v.optional(v.string()),
+        logoUrl: v.optional(v.string()),
+        descripcion: v.optional(v.string()),
+        direccion: v.optional(v.string()),
+        telefono: v.optional(v.string()),
+        email: v.optional(v.string()),
+        director: v.optional(v.string()),
+        activo: v.optional(v.boolean()),
+    },
+    handler: async (ctx, { id, nombre, nombreCorto, logoUrl, descripcion, direccion, telefono, email, director, activo }) => {
+        const prospecto = await ctx.db.get(id);
+        if (!prospecto) {
+            throw new Error("Prospecto no encontrado");
+        }
+
+        const datosActualizados: any = {};
+        if (nombre !== undefined) datosActualizados.nombre = nombre;
+        if (nombreCorto !== undefined) datosActualizados.nombreCorto = nombreCorto;
+        if (logoUrl !== undefined) datosActualizados.logoUrl = logoUrl;
+        if (descripcion !== undefined) datosActualizados.descripcion = descripcion;
+        if (direccion !== undefined) datosActualizados.direccion = direccion;
+        if (telefono !== undefined) datosActualizados.telefono = telefono;
+        if (email !== undefined) datosActualizados.email = email;
+        if (director !== undefined) datosActualizados.director = director;
+        if (activo !== undefined) datosActualizados.activo = activo;
+
+        await ctx.db.patch(id, datosActualizados);
+        return await ctx.db.get(id);
+    }
+});
 
 export const eliminarProspecto = mutation({
     args: { id: v.id("prospectos") },
     handler: async (ctx, { id }) => {
         const prospecto = await ctx.db.get(id);
         if (!prospecto) {
-            return null; // Devolver null si no se encuentra el prospecto
+            return null;
         }
         await ctx.db.delete(id);
-        return prospecto; // Devolver el prospecto eliminado
+        return prospecto;
+    }
+});
+
+// Activar/Desactivar prospecto
+export const toggleActivoProspecto = mutation({
+    args: { id: v.id("prospectos") },
+    handler: async (ctx, { id }) => {
+        const prospecto = await ctx.db.get(id);
+        if (!prospecto) {
+            throw new Error("Prospecto no encontrado");
+        }
+        
+        await ctx.db.patch(id, { activo: !prospecto.activo });
+        return await ctx.db.get(id);
     }
 });
 
@@ -65,13 +126,11 @@ export const transferirProspectoAEscuela = mutation({
         director: v.optional(v.string()),
     },
     handler: async (ctx, { prospectoId, direccion, telefono, director }) => {
-        // Obtener el prospecto
         const prospecto = await ctx.db.get(prospectoId);
         if (!prospecto) {
             throw new Error("Prospecto no encontrado");
         }
 
-        // Crear la escuela con los datos del prospecto
         const nuevaEscuela = await ctx.db.insert("escuelas", {
             nombre: prospecto.nombre,
             nombreCorto: prospecto.nombreCorto,
@@ -81,14 +140,13 @@ export const transferirProspectoAEscuela = mutation({
             telefono: telefono || prospecto.telefono,
             email: prospecto.email,
             director: director || prospecto.director,
-            activa: true, // La escuela se crea como activa
+            activa: true,
         });
 
         const sanitizedSubdomain = prospecto.nombreCorto
             .toLowerCase()
             .replace(/[^a-z0-9-]/g, '');
 
-        // Verificar si el subdominio ya existe
         const existing = await ctx.db
             .query("subdominios")
             .withIndex("by_subdomain", (q) => q.eq("subdomain", sanitizedSubdomain))
@@ -101,9 +159,6 @@ export const transferirProspectoAEscuela = mutation({
                 activo: true,
             });
         }
-
-        // Eliminar el prospecto después de transferirlo
-        await ctx.db.delete(prospectoId);
 
         return {
             escuelaId: nuevaEscuela,

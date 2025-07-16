@@ -81,9 +81,9 @@ export default function Page() {
           maestro: validatedValues.maestro as boolean,
           fechaIngreso: validatedValues.fechaIngreso as string,
           activo: validatedValues.activo as boolean,
+          updateAt: Date.now(),
         })
         toast.success('creado correctamente')
-        toast.success('Departamento creado')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPersonal({
           id: data._id,
@@ -94,6 +94,7 @@ export default function Page() {
           maestro: validatedValues.maestro as boolean,
           fechaIngreso: validatedValues.fechaIngreso as string,
           activo: validatedValues.activo as boolean,
+          updateAt: Date.now(),
         })
         toast.success('Departamento actualizado')
       } else {

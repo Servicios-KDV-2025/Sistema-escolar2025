@@ -5,17 +5,17 @@ import { useForm, UseFormReturn } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from '@repo/ui/components/shadcn/dialog'
 import { Button } from '@repo/ui/components/shadcn/button'
 import { Form } from '@repo/ui/components/shadcn/form'
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -45,32 +45,32 @@ export interface CrudDialogProps {
   description?: string
   schema: z.ZodSchema
   defaultValues?: Record<string, unknown>
-  
+
   // Datos y estado
   data?: Record<string, unknown> & Partial<WithId>
   isOpen?: boolean
   onOpenChange?: (open: boolean) => void
-  
+
   // Operaciones
   onSubmit: (data: Record<string, unknown>) => Promise<void>
   onDelete?: (id: string) => Promise<void>
-  
+
   // Renderizado
   trigger?: React.ReactNode
   children: (form: UseFormReturn<Record<string, unknown>>, operation: CrudOperation) => React.ReactNode
-  
+
   // Configuración adicional
   deleteConfirmationTitle?: string
   deleteConfirmationDescription?: string
   submitButtonText?: string
   cancelButtonText?: string
   deleteButtonText?: string
-  
+
   // Estados de carga
   isLoading?: boolean
   isSubmitting?: boolean
   isDeleting?: boolean
-  
+
   // Callbacks
   onSuccess?: () => void
   onError?: (error: unknown) => void
@@ -116,9 +116,7 @@ export function CrudDialog({
 
   // Actualizar valores del formulario cuando cambian los datos
   useEffect(() => {
-    if (operation === 'edit' && data) {
-      form.reset(data)
-    } else if (operation === 'view' && data) {
+    if ((operation === 'edit' || operation === 'view') && data) {
       form.reset(data)
     } else if (operation === 'create') {
       form.reset(defaultValues || {})
@@ -136,7 +134,7 @@ export function CrudDialog({
     try {
       setIsInternalSubmitting(true)
       await onSubmit(values)
-      if(operation === 'edit') {toast.success('Actualizado correctamente')}
+      if (operation === 'edit') { toast.success('Actualizado correctamente') }
       setDialogOpen?.(false)
       form.reset()
       onSuccess?.()
@@ -152,7 +150,7 @@ export function CrudDialog({
 
   const handleDelete = async () => {
     if (!onDelete || !data || !data._id) return
-    
+
     try {
       setIsInternalDeleting(true)
       await onDelete(data._id)
@@ -240,13 +238,13 @@ export function CrudDialog({
             </DialogDescription>
           )}
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="space-y-4">
               {children(form, operation)}
             </div>
-            
+
             <DialogFooter>
               <Button
                 type="button"
