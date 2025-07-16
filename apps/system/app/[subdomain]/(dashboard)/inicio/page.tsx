@@ -1,9 +1,7 @@
 "use client";
 
 import Image from "next/image";
-//import { useEscuela } from "../../../../store/useEscuela";
-import { useEffect } from "react";
-import { useBreadcrumbStore } from "../../../../store/breadcrumbStore";
+// import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 import { Badge } from "@repo/ui/components/shadcn/badge";
@@ -11,19 +9,13 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, Calendar, BarChart3,  Settings, GraduationCap, MapPin, Shield, Clock, Award } from "lucide-react";
 import { SignOutButton } from "@clerk/nextjs";
-import { useEscuela } from "@/app/store/useEscuela";
+import { useEscuela } from "@/app/store/useEscuelaStore";
 
 export default function EscuelaHome() {
-  const escuela = useEscuela((s) => s.escuela);
-  const setItems = useBreadcrumbStore(state => state.setItems);
+  
+  const { escuela } = useEscuela();
 
-  useEffect(() => {
-    if (escuela) {
-      setItems([
-        { label: `${escuela?.nombre}` }
-      ]);
-    }
-  }, [escuela, setItems]);
+
 
   if (!escuela) {
     return (

@@ -96,7 +96,9 @@ departamento: defineTable({
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
     activo: v.boolean(),
-  }).index("by_escuela", ["escuelaId"]),
+  })
+    .index("by_escuela", ["escuelaId"])
+    .index("by_ciclo", ["cicloEscolarId"]),
 
   // Periodos (horarios)
   periodos: defineTable({
