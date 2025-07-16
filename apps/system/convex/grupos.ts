@@ -32,6 +32,7 @@ export const verTodosLosGrupos = query({
 
         return {
           _id: grupo._id,
+          escuelaId: grupo.escuelaId,
           activo: grupo.activo,
           cicloEscolarId: grupo.cicloEscolarId,
           cicloEscolar: ciclo?.nombre ?? "Sin ciclo",

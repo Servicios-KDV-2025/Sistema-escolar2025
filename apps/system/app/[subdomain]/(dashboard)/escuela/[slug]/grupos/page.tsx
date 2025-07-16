@@ -71,8 +71,6 @@ export default function Page() {
                 await actualizarGrupo({
                     _id: data._id as Id<"grupos">,
                     escuelaId: escuela._id as Id<"escuelas">,
-                    cicloEscolarId: values.cicloEscolarId as Id<"ciclosEscolares">,
-                    cicloEscolar: values.cicloEscolar as string,
                     grado: values.grado as string,
                     nombre: values.nombre as string,
                     activo: values.activo as boolean
@@ -127,6 +125,7 @@ export default function Page() {
                             <TableHead>Grado</TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Activo</TableHead>
+                            <TableHead>Ciclo Escolar</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -134,7 +133,7 @@ export default function Page() {
                         {grupos.length === 0
                             ? (
                                 <TableRow>
-                                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                                         No hay grupos registrados para esta escuela.
                                     </TableCell>
                                 </TableRow>
@@ -151,6 +150,7 @@ export default function Page() {
                                         <TableCell className="font-medium">{grupo.grado}</TableCell>
                                         <TableCell className="font-medium">{grupo.nombre}</TableCell>
                                         <TableCell>{grupo.activo ? 'Activo' : 'Inactivo'}</TableCell>
+                                        <TableCell className="font-medium">{grupo.cicloEscolar}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
                                             <Button
                                                 variant="outline"
@@ -191,7 +191,8 @@ export default function Page() {
                 defaultValues={{
                     grado: "1°",
                     nombre: "",
-                    activo: true
+                    activo: true,
+                    cicloEscolarId: "",
                 }}
                 data={data}
                 isOpen={isOpen}

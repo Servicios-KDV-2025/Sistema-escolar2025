@@ -6,9 +6,22 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Grupo } from "@/types/convex-zod-types";
 
 // Tipos para crear y actualizar grupo
-export type CrearGrupoData = Pick<Grupo, "escuelaId" | "nombre" | "grado" | "activo" | "cicloEscolarId">
+type CrearGrupoData = {
+  escuelaId: Id<"escuelas">;
+  nombre: string;
+  grado: string;
+  activo: boolean;
+  cicloEscolarId: Id<"ciclosEscolares">;
+};
 
-export type ActualizarGrupoData = Grupo;
+
+export type ActualizarGrupoData = {
+  _id: string,
+  escuelaId: string,
+  nombre: string,
+  grado: string,
+  activo: boolean,
+}
 
 // Store de Grupo con CRUD completo
 export type GrupoStore = {
@@ -70,6 +83,16 @@ export const useGrupoStore = create<GrupoStore>((set) => ({
   reset: () => set(initialState),
 }));
 
+type GrupoResultFromQuery = {
+  _id: string;
+  escuelaId: string;
+  cicloEscolarId: string;
+  nombre: string;
+  grado: string;
+  activo: boolean;
+  cicloEscolar: string;
+};
+
 export const useGrupo = (escuelaId?: string) => {
   const {
     grupos,
@@ -112,8 +135,11 @@ export const useGrupo = (escuelaId?: string) => {
     setCreateError(null);
     try {
       await crearGrupoMutation({
-        ...data,
         escuelaId: data.escuelaId as Id<"escuelas">,
+        cicloEscolarId: data.cicloEscolarId as Id<"ciclosEscolares">,
+        nombre: data.nombre,
+        grado: data.grado,
+        activo: data.activo,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al crear grupo';
@@ -167,18 +193,19 @@ export const useGrupo = (escuelaId?: string) => {
   useEffect(() => {
     if (gruposQuery) {
       setGrupos(
-        (gruposQuery as Grupo[]).map((g) => ({
+        (gruposQuery as GrupoResultFromQuery[]).map((g) => ({
           _id: g._id as Id<"grupos">,
           escuelaId: g.escuelaId as Id<"escuelas">,
           cicloEscolarId: g.cicloEscolarId as Id<"ciclosEscolares">,
           cicloEscolar: g.cicloEscolar,
           nombre: g.nombre,
           grado: g.grado,
-          activo: g.activo === true,
+          activo: g.activo,
         }))
       );
     }
   }, [gruposQuery, setGrupos]);
+
 
   return {
     grupos,
