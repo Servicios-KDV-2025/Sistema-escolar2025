@@ -27,10 +27,6 @@ export default function ListaSubdominios() {
     return (
       <Card className="w-full max-w-2xl">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="h-5 w-5" />
-            Subdominios Disponibles
-          </CardTitle>
           <CardDescription>
             No hay subdominios registrados en el sistema
           </CardDescription>
@@ -40,13 +36,7 @@ export default function ListaSubdominios() {
   }
 
   return (
-    <div className="w-full max-w-4xl space-y-6">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-2">Subdominios Disponibles</h1>
-        <p className="text-gray-600">
-          Selecciona un subdominio para visitar su aplicación
-        </p>
-      </div>
+    <div className="w-full space-y-6">
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {subdomains.map((subdomain: Subdomain) => (
@@ -62,20 +52,37 @@ export default function ListaSubdominios() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Button 
-                asChild 
-                className="w-full"
-              >
-                <a 
-                  href={`${protocol}://${subdomain.subdomain}.${rootDomain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2"
+              <div className="flex flex-col md:flex-row gap-2 w-full">
+                <Button 
+                  asChild 
+                  className="w-1/2"
                 >
-                  <ExternalLink className="h-4 w-4" />
-                  Visitar
-                </a>
-              </Button>
+                  <a 
+                    href={`${protocol}://${subdomain.subdomain}.${rootDomain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 justify-center"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    Visitar
+                  </a>
+                </Button>
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="w-1/2"
+                >
+                  <a
+                    href={`${protocol}://${subdomain.subdomain}.${rootDomain}/inicio`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 justify-center"
+                  >
+                    <Globe className="h-4 w-4" />
+                    Panel Administrativo
+                  </a>
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

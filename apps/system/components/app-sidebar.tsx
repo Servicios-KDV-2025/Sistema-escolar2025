@@ -16,6 +16,7 @@ import {
 
 import { NavMain } from "@/components/nav-main"
 // import { NavProjects } from "@/components/nav-projects"
+
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -27,116 +28,112 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useParams } from "next/navigation"
+import { useEscuela } from "@/app/store/useEscuelaStore"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const params = useParams();
-  const slug = typeof params?.slug === "string" ? params.slug : "";
+
+  const { escuela } = useEscuela();
 
   const data = {
   user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
+    name: escuela?.nombre ?? "",
+    email: escuela?.email ?? "",
+    avatar: escuela?.logoUrl ?? "",
   },
   navMain: [
     {
       title: "Ciclos Escolares",
-      url: `/escuela/${slug}/ciclosEscolares`,
+      url: `/ciclosEscolares`,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Ciclos Escolares",
-          url: `/escuela/${slug}/ciclosEscolares`,
+          url: `/ciclosEscolares`,
         },
         {
           title: "Calendario Escolar",
-          url: `/escuela/${slug}/calendario`,
+          url: `/calendario`,
         },
         {
           title: "Clases por Alumno",
-          url: `/escuela/${slug}/clasesPorAlumnos`,
+          url: `/clasesPorAlumnos`,
         },
         {
           title: "Grupos",
-          url: `/escuela/${slug}/grupos`,
+          url: `/grupos`,
         },
         {
           title: "Catalogo de Clases",
-          url: `/escuela/${slug}/catalogoDeClases`,
+          url: `/catalogoDeClases`,
         },
         {
           title: "Eventos Por Clase",
-          url: `/escuela/${slug}/eventosPorClase`,
+          url: `/eventosPorClase`,
         },
         {
           title: "Eventos Escolares",
-          url: `/escuela/${slug}/eventosEscolares`,
+          url: `/eventosEscolares`,
         },
       ],
     },
     {
       title: "Salones",
-      url: `/escuela/${slug}/salones`,
+      url: `/salones`,
       icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Materias",
-      url: `/escuela/${slug}/materias`,
+      url: `/materias`,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Materias",
-          url: `/escuela/${slug}/materias`,
+          url: `/materias`,
         },
       ],
     },
     {
       title: "Departamentos",
-      url: `/escuela/${slug}/departamentos`,
+      url: `/departamentos`,
       icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Personal",
-      url: `/escuela/${slug}/personal`,
+      url: `/personal`,
       icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Periodos",
-      url: `/escuela/${slug}/periodos`,
+      url: `/periodos`,
       icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Periodos por Clase",
-      url: `/escuela/${slug}/periodosPorClase`,
+      url: `/periodosPorClase`,
       icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Alumnos",
-      url: `/escuela/${slug}/alumnos`,
+      url: `/alumnos`,
       icon: SquareTerminal,
       isActive: true,
     },
     {
       title: "Calificaciones",
-      url: `/escuela/${slug}/calificaciones`,
+      url: `/calificaciones`,
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Calificaciones",
-          url: `/escuela/${slug}/calificaciones`,
-        },
-        {
-          title: "Crear Calificación",
-          url: `/escuela/${slug}/calificaciones/create?escuelaId=${slug}`,
+          url: `/calificaciones`,
         },
       ],
     },
@@ -208,7 +205,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }, */
         {
       title: "Padres",
-      url: `/escuela/${slug}/padres`,
+      url: `/padres`,
       icon: SquareTerminal,
       isActive: true,
     },
