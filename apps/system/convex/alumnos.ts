@@ -14,7 +14,8 @@ export const crearAlumno = mutation({
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
-    activo: v.boolean()
+    activo: v.boolean(),
+    updatedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     await ctx.db.insert('alumnos', { ...args })
@@ -75,7 +76,8 @@ export const upadateAlumno = mutation({
     email: v.optional(v.string()),
     telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
-    activo: v.boolean()
+    activo: v.boolean(),
+    updatedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const alumno = await ctx.db.get(args.id)
