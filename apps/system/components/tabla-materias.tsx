@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useMateria } from "@/app/store/useMateriaStore";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { materiaSchema } from "@/app/shemas/materia";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Input } from "@repo/ui/components/shadcn/input";

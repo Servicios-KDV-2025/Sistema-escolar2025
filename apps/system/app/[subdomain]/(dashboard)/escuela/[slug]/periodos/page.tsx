@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { usePeriodo } from "@/app/store/usePeriodoStore";
 import { Badge } from "@repo/ui/components/shadcn/badge";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Input } from "@repo/ui/components/shadcn/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
@@ -137,6 +137,7 @@ export default function PeriodosPage() {
           horaFin: values.horaFin as string,
           activo: values.activo as boolean
         });
+        toast.success('Creado correctamente')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPeriodo({
           id: data._id,
@@ -146,6 +147,7 @@ export default function PeriodosPage() {
           horaFin: values.horaFin as string,
           activo: values.activo as boolean
         });
+        toast.success('Actualizado correctamente')
       }
     } catch (error) {
       console.error('Error en operación CRUD:', error);
@@ -161,6 +163,7 @@ export default function PeriodosPage() {
 
     try {
       await eliminarPeriodo(id, escuela._id);
+      toast.success('Eliminado correctamente')
     } catch (error) {
       console.error('Error al eliminar periodo:', error);
       throw error;

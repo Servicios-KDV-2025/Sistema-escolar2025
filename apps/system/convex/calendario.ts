@@ -17,6 +17,7 @@ export const crearEventoCalendario = mutation({
       tipoEventoId: args.tipoEventoId,
       descripcion: args.descripcion,
       activo: true,
+      createdAt: Date.now(),
     });
   },
 });
@@ -74,7 +75,8 @@ export const actualizarEventoCalendario = mutation({
       tipoEventoId: args.tipoEventoId,
       descripcion: args.descripcion,
       cicloEscolarId: args.cicloEscolarId,
-      activo: args.activo
+      activo: args.activo,
+      updatedAt: Date.now(),
     });
   },
 });
@@ -87,6 +89,6 @@ export const eliminarEventoCalendario = mutation({
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.eventoId);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("No autorizado o no encontrado");
-    return await ctx.db.patch(args.eventoId, { activo: false });
+    return await ctx.db.patch(args.eventoId, { activo: false, updatedAt: Date.now() });
   },
 });

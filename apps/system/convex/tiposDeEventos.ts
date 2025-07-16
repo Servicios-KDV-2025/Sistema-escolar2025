@@ -14,6 +14,7 @@ export const crearTipoEvento = mutation({
     return await ctx.db.insert("tiposDeEventos", {
       ...args,
       activo: true,
+      createdAt: Date.now(),
     });
   },
 });
@@ -27,6 +28,7 @@ export const editarTipoEvento = mutation({
     descripcion: v.optional(v.string()),
     color: v.optional(v.string()),
     icono: v.optional(v.string()),
+    activo: v.boolean(),
   },
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.tipoEventoId);
@@ -36,7 +38,9 @@ export const editarTipoEvento = mutation({
       clave: args.clave,
       descripcion: args.descripcion,
       color: args.color,
-      icono: args.icono
+      icono: args.icono,
+      activo: args.activo,
+      updatedAt: Date.now(),
     });
   },
 });
@@ -77,6 +81,6 @@ export const eliminarTipoEvento = mutation({
   handler: async (ctx, args) => {
     const evento = await ctx.db.get(args.tipoEventoId);
     if (!evento || evento.escuelaId !== args.escuelaId) throw new Error("No autorizado o no encontrado");
-    return await ctx.db.patch(args.tipoEventoId, { activo: false });
+    return await ctx.db.patch(args.tipoEventoId, { activo: false, updatedAt: Date.now() });
 },
 });
