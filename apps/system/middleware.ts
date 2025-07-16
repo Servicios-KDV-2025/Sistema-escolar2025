@@ -92,7 +92,7 @@ export default clerkMiddleware(async (auth, req) => {
 },
 {
   debug: process.env.NODE_ENV === 'development',
-  authorizedParties: ['http://localhost:3000', 'http://test.localhost:3000'],
+  // authorizedParties: ['http://localhost:3000', 'http://mbvsr2.localhost:3000'],
 }
 )
 
