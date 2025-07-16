@@ -63,6 +63,7 @@ const applicationTables = {
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
     fechaIngreso: v.string(),
     activo: v.boolean(),
+    updateAt: v.optional(v.number()),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_departamento", ["departamentoId"]),
@@ -158,6 +159,7 @@ const applicationTables = {
     telefono: v.optional(v.string()),
     direccion: v.optional(v.string()),
     activo: v.boolean(),
+    updatedAt: v.optional(v.number())
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_padre", ["padreId"])

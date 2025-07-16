@@ -13,6 +13,7 @@ export const crearPersonal = mutation({
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
     fechaIngreso: v.string(),
     activo: v.boolean(),
+    updateAt: v.optional(v.number()), // Timestamp para la última actualización
   },
   handler: async (ctx, args) => {
     await ctx.db.insert('personal', { ...args })
@@ -58,9 +59,10 @@ export const upadatePersonal = mutation({
     telefono: v.optional(v.string()),
     maestro: v.boolean(), // "maestro", "director", "administrativo", etc.
     fechaIngreso: v.string(),
-    activo: v.boolean()
+    activo: v.boolean(),
+    updateAt: v.optional(v.number()), // Timestamp para la última actualización
   },
-  handler: async (ctx, {id, nombre, apellidos, email, telefono, maestro, fechaIngreso, activo}) => {
+  handler: async (ctx, {id, nombre, apellidos, email, telefono, maestro, fechaIngreso, activo, updateAt}) => {
     const personalActualizado = await ctx.db.patch(id, {
       nombre,
       apellidos,
@@ -69,6 +71,7 @@ export const upadatePersonal = mutation({
       maestro,
       fechaIngreso,
       activo,
+      updateAt
     });
     return personalActualizado;
   }
