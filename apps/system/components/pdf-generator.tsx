@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
 import { toast } from "sonner";
 
 import autoTable from "jspdf-autotable";
@@ -10,7 +9,6 @@ import type { HookData } from "jspdf-autotable";
 
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import jsPDF from "jspdf";
-
 
 // Mapeo de columna a función de extracción
 export type ColumnDataMap<T> = {
@@ -45,12 +43,12 @@ export default function PDFGenerator<T>({
   columnDataMap,
   fileName,
   buttonText = "Generar PDF",
-  buttonVariant = "default",
-  primaryColor = [41, 128, 185],     // azul
-  secondaryColor = [52, 73, 94],     // gris oscuro
+  buttonVariant = "secondary",
+  primaryColor = [41, 128, 185], // azul
+  secondaryColor = [52, 73, 94], // gris oscuro
 }: PDFGeneratorProps<T>) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const {escuela} = useEscuela();
+  const { escuela } = useEscuela();
 
   const generatePDF = async () => {
     setIsGenerating(true);
@@ -142,9 +140,9 @@ export default function PDFGenerator<T>({
       });
 
       // --- GUARDAR PDF ---
-      const defaultFileName = `${tableTitle.replace(/\s+/g, "_")}_${new Date()
-        .toISOString()
-        .split("T")[0]}.pdf`;
+      const defaultFileName = `${tableTitle.replace(/\s+/g, "_")}_${
+        new Date().toISOString().split("T")[0]
+      }.pdf`;
 
       doc.save(fileName || defaultFileName);
     } catch (error) {
@@ -163,10 +161,8 @@ export default function PDFGenerator<T>({
       onClick={generatePDF}
       disabled={isGenerating}
       variant={buttonVariant}
-      className="flex items-center gap-2"
     >
-      <Download className="h-4 w-4" />
-      {isGenerating ? "Generando PDF..." : buttonText}
+      {buttonText}
     </Button>
   );
 }
