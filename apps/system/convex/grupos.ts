@@ -24,10 +24,25 @@ export const verTodosLosGrupos = query({
       .withIndex("by_escuela", q => q.eq("escuelaId", args.escuelaId))
       .collect();
 
-    return grupos.map(({ _id, ...rest }) => ({
-      _id,
-      ...rest,
-    }));
+    const res = await Promise.all(
+      grupos.map(async grupo => {
+        const [ciclo] = await Promise.all([
+          ctx.db.get(grupo.cicloEscolarId),
+        ]);
+
+        return {
+          _id: grupo._id,
+          escuelaId: grupo.escuelaId,
+          activo: grupo.activo,
+          cicloEscolarId: grupo.cicloEscolarId,
+          cicloEscolar: ciclo?.nombre ?? "Sin ciclo",
+          nombre: grupo.nombre,
+          grado: grupo?.grado ?? "Sin grado",
+        };
+      }),
+    );
+
+    return res
   },
 });
 

@@ -6,6 +6,7 @@ export const grupoSchema = z.object({
   }),
   nombre: z.string().min(1, { message: 'El nombre es requerido' }),
   activo: z.boolean(),
+  cicloEscolarId: z.string().min(1, "Debes seleccionar un ciclo escolar") 
 });
 
 export type GrupoFormValues = z.infer<typeof grupoSchema>;
