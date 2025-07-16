@@ -18,6 +18,7 @@ import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Switch } from "@repo/ui/components/shadcn/switch"
+import { Badge } from "@repo/ui/components/shadcn/badge"
 
 export default function Page() {
   const { escuela } = useEscuela()
@@ -207,7 +208,18 @@ export default function Page() {
                 <TableCell>{alumno.fechaNacimiento}</TableCell>
                 <TableCell>{alumno.telefono}</TableCell>
                 <TableCell>{alumno.direccion}</TableCell>
-                <TableCell>{alumno.activo ? 'Activo' : 'Inactivo'}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className={
+                      alumno.activo
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
+                    {alumno.activo ? 'Activo' : 'Inactivo'}
+                  </Badge>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button

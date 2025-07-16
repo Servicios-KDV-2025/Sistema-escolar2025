@@ -26,6 +26,7 @@ import { FormControl, FormField, FormItem, FormLabel } from "@repo/ui/components
 import { Select, SelectTrigger, SelectItem, SelectContent, SelectValue } from "@repo/ui/components/shadcn/select"
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Switch } from "@repo/ui/components/shadcn/switch"
+import { Badge } from "@repo/ui/components/shadcn/badge"
 
 export default function Page() {
   const { escuela } = useEscuela()
@@ -195,7 +196,18 @@ export default function Page() {
               <TableCell>{empleado.telefono}</TableCell>
               <TableCell>{empleado.maestro ? 'Si': 'No'}</TableCell>
               <TableCell>{empleado.fechaIngreso}</TableCell>
-              <TableCell>{empleado.activo ? 'Activo' : 'Inactivo'}</TableCell>
+              <TableCell>
+                <Badge
+                  variant="secondary"
+                  className={
+                    empleado.activo
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }
+                >
+                {empleado.activo ? 'Activo' : 'Inactivo'}
+                </Badge>
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button 
