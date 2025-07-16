@@ -116,7 +116,7 @@ const applicationTables = {
     nombre: v.string(), // ej: "Matemáticas 1°A"
     activa: v.boolean(),
 
-    createdBy: v.id("personal"),
+    createdBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_ciclo", ["cicloEscolarId"])
@@ -252,7 +252,7 @@ const applicationTables = {
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
 
-    createdBy: v.id("personal"),
+    createdBy: v.optional(v.id("personal")),
     updatedBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])

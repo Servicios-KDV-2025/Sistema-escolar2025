@@ -67,7 +67,8 @@ export const getCatalogoDeClasesConNombres = query({
                     ctx.db.get(clase.salonId),
                     ctx.db.get(clase.maestroId),
                     clase.grupoId ? ctx.db.get(clase.grupoId) : Promise.resolve(null),
-                    ctx.db.get(clase.createdBy),
+                    clase.createdBy ? ctx.db.get(clase.createdBy) : Promise.resolve(null)
+,
                 ]);
  
                 return {
