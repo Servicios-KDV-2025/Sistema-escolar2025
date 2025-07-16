@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@repo/ui/components/shadcn/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Edit, Eye } from "lucide-react";
+import { Plus, Trash2, Edit, Eye, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
@@ -32,6 +32,13 @@ import { toast } from "sonner";
 import PDFGenerator from "@/components/pdf-generator";
 import { Id } from "@/convex/_generated/dataModel";
 import { Badge } from "@repo/ui/components/shadcn/badge";
+import { exportToExcel } from "@/app/utils/exportToExcel";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/ui/components/shadcn/dropdown-menu";
 
 export default function Page() {
   const { escuela } = useEscuela();
@@ -59,13 +66,21 @@ export default function Page() {
     if (filtroActiva === "inactivas") return !materia.activa;
     return true; // "todas"
   });
+  const materiasParaExcel = materiasFiltradas.map((materia) => ({
+    Nombre: materia.nombre,
+    Descripción: materia.descripcion || "N/A",
+    Créditos: materia.creditos ?? "N/A",
+    Estado: materia.activa ? "Activa" : "Inactiva",
+  }));
 
   const columnHeaders = ["Nombre", "Descripción", "Créditos", "Activa"];
   const columnDataMap = {
     Nombre: (materia: (typeof materias)[number]) => materia.nombre,
-    Descripción: (materia: (typeof materias)[number]) =>  materia.descripcion ?? "N/A",
+    Descripción: (materia: (typeof materias)[number]) =>
+      materia.descripcion ?? "N/A",
     Créditos: (materia: (typeof materias)[number]) => materia.creditos ?? "N/A",
-    Activa: (materia: (typeof materias)[number]) =>   materia.activa ? "Sí" : "No",
+    Activa: (materia: (typeof materias)[number]) =>
+      materia.activa ? "Sí" : "No",
   };
 
   const {
@@ -80,7 +95,7 @@ export default function Page() {
   } = useCrudDialog(materiaSchema, {
     nombre: "",
     descripcion: "",
-    creditos: "",
+    creditos: undefined,
     activa: true,
   });
 
@@ -195,16 +210,37 @@ export default function Page() {
           >
             Inactivas
           </Button>
-          <PDFGenerator
-            tableTitle={`Lista de Materias `+filtroActiva}
-            buttonText=""
-            tableColumns={columnHeaders}
-            tableData={materiasFiltradas}
-            columnDataMap={columnDataMap}
-            fileName={`materias_${filtroActiva.toLowerCase()}_${escuela?.nombre || "escuela"}.pdf`}
-            buttonVariant={"secondary"}
-          />
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" className="flex items-center gap-2">
+              <Download className="h-4 w-4" />
+              Exportar
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              className="justify-center "
+              onClick={() =>
+                exportToExcel(materiasParaExcel, `Materias_${filtroActiva}`, `${filtroActiva}`)
+              }
+            >
+              Generar Excel
+            </DropdownMenuItem>
+            <DropdownMenuItem className="justify-center">
+              <PDFGenerator
+                tableTitle={`Lista de Materias ${filtroActiva}`}
+                buttonVariant="ghost"
+                buttonText="Generar PDF"
+                tableColumns={columnHeaders}
+                tableData={materiasFiltradas}
+                columnDataMap={columnDataMap}
+                fileName={`materias_${filtroActiva.toLowerCase()}_${escuela?.nombre || "escuela"}.pdf`}
+              />
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="flex gap-2">
           <Button
@@ -304,7 +340,14 @@ export default function Page() {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openEdit(materia);
+                            openEdit({
+                              ...materia,
+                              creditos:
+                                materia.creditos !== undefined &&
+                                materia.creditos !== null
+                                  ? String(materia.creditos)
+                                  : undefined,
+                            });
                           }}
                           disabled={isUpdatingMateria || isDeletingMateria}
                         >
@@ -413,7 +456,7 @@ export default function Page() {
                       {...field}
                       type="number"
                       placeholder="Número de créditos"
-                      value={field.value as string}
+                      value={field.value as number}
                       disabled={operation === "view"}
                     />
                   </FormControl>
