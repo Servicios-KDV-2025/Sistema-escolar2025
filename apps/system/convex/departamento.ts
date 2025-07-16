@@ -16,7 +16,7 @@ export const obtenerDepartamentosPorId = query({
     handler: async (ctx, { id }) => {
         const departamento = await ctx.db.get(id);
         if (!departamento) {
-            return null; // Devolver null si no se encuentra el departamento
+            return null;
         }
         return departamento;    
     }
@@ -30,11 +30,15 @@ export const crearDepartamento = mutation({
         activo: v.boolean(),
     },
     handler: async (ctx, { escuelaId, nombre, descripcion, activo }) => {
+        const ahora = Date.now();
+        
         const nuevoDepartamento = await ctx.db.insert("departamento", {
             escuelaId,
             nombre,
             descripcion,
             activo,
+            createdAt: ahora,
+            updatedAt: ahora, // Se establece igual que createdAt al crear
         });
         return nuevoDepartamento;
     }
@@ -48,11 +52,18 @@ export const actualizarDepartamento = mutation({
         activo: v.optional(v.boolean()),
     },
     handler: async (ctx, { id, nombre, descripcion, activo }) => {
-        const departamentoActualizado = await ctx.db.patch(id, {
-            nombre,
-            descripcion,
-            activo,
-        });
+        const ahora = Date.now();
+        
+        // Crear objeto con solo los campos que se van a actualizar
+        const camposActualizados: any = {
+            updatedAt: ahora,
+        };
+        
+        if (nombre !== undefined) camposActualizados.nombre = nombre;
+        if (descripcion !== undefined) camposActualizados.descripcion = descripcion;
+        if (activo !== undefined) camposActualizados.activo = activo;
+        
+        const departamentoActualizado = await ctx.db.patch(id, camposActualizados);
         return departamentoActualizado;
     }
 });
@@ -65,3 +76,28 @@ export const eliminarDepartamento = mutation({
     }
 });
 
+// Función adicional para soft delete (marcar como inactivo)
+export const desactivarDepartamento = mutation({
+    args: { id: v.id("departamento") },
+    handler: async (ctx, { id }) => {
+        const ahora = Date.now();
+        
+        const departamentoDesactivado = await ctx.db.patch(id, {
+            activo: false,
+            updatedAt: ahora,
+        });
+        return departamentoDesactivado;
+    }
+});
+
+// Query para obtener solo departamentos activos
+export const obtenerDepartamentosActivos = query({
+    args: { escuelaId: v.id("escuelas") },
+    handler: async (ctx, { escuelaId }) => {
+        const departamentos = await ctx.db.query("departamento")
+            .withIndex("by_escuela", (q) => q.eq("escuelaId", escuelaId))
+            .filter((q) => q.eq(q.field("activo"), true))
+            .collect();
+        return departamentos;
+    }    
+});

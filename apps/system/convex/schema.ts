@@ -46,11 +46,13 @@ const applicationTables = {
   }).index("by_escuela", ["escuelaId", "activo"]),
 
   // Departamentos
-  departamento: defineTable({
+departamento: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   }).index("by_escuela", ["escuelaId"]),
 
   // Personal (maestros, administrativos, etc.)
