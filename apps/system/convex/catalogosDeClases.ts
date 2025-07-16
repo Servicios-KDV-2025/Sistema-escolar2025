@@ -12,7 +12,7 @@ export const crearCatalogoDeCases = mutation({
         grupoId: v.optional(v.id("grupos")),
         nombre: v.string(),
         activa: v.boolean(),
-        // createdBy: v.id("personal"),
+        createdBy: v.id("personal"),
     },
     handler: async (ctx, args) => {
         await ctx.db.insert("catalogosDeClases", { ...args });
@@ -61,13 +61,13 @@ export const getCatalogoDeClasesConNombres = query({
 
         const resultado = await Promise.all(
             catalogos.map(async clase => {
-                const [ciclo, materia, salon, maestro, grupo, /* creadoPor */] = await Promise.all([
+                const [ciclo, materia, salon, maestro, grupo, creadoPor] = await Promise.all([
                     ctx.db.get(clase.cicloEscolarId),
                     ctx.db.get(clase.materiaId),
                     ctx.db.get(clase.salonId),
                     ctx.db.get(clase.maestroId),
                     clase.grupoId ? ctx.db.get(clase.grupoId) : Promise.resolve(null),
-                    // ctx.db.get(clase.createdBy),
+                    ctx.db.get(clase.createdBy),
                 ]);
 
                 return {
@@ -82,14 +82,14 @@ export const getCatalogoDeClasesConNombres = query({
                     grado: grupo?.grado ?? "Sin grado",
                     grupo: grupo?.nombre ?? "Sin grupo",
                     activa: clase.activa,
-                    // createdBy: `${creadoPor?.nombre} ${creadoPor?.nombre}`,
+                    createdBy: `${creadoPor?.nombre} ${creadoPor?.nombre}`,
 
                     cicloEscolarId: clase.cicloEscolarId,
                     materiaId: clase.materiaId,
                     salonId: clase.salonId,
                     maestroId: clase.maestroId,
                     grupoId: clase.grupoId ?? null,
-                    // createdById: clase.createdBy,
+                    createdById: clase.createdBy,
                 };
             })
         );

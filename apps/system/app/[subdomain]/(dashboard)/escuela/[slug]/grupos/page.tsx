@@ -14,11 +14,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { GruposAlumnosModal } from "@/components/dialog/gruposAlumnosModal";
 import { useState } from "react";
 import { Switch } from "@repo/ui/components/shadcn/switch";
+import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 
 export default function Page() {
     const { escuela } = useEscuela();
 
     const { crearGrupo, actualizarGrupo, eliminarGrupo, grupos } = useGrupo(escuela?._id);
+    const { ciclosEscolares } = useCicloEscolar(escuela?._id);
 
     const {
         isOpen,
@@ -59,6 +61,7 @@ export default function Page() {
             if (operation === 'create') {
                 await crearGrupo({
                     escuelaId: escuela._id as Id<"escuelas">,
+                    cicloEscolarId: values.cicloEscolarId as Id<"ciclosEscolares">,
                     grado: values.grado as string,
                     nombre: values.nombre as string,
                     activo: values.activo as boolean
@@ -68,6 +71,7 @@ export default function Page() {
                 await actualizarGrupo({
                     _id: data._id as Id<"grupos">,
                     escuelaId: escuela._id as Id<"escuelas">,
+                    cicloEscolarId: values.cicloEscolarId as Id<"ciclosEscolares">,
                     grado: values.grado as string,
                     nombre: values.nombre as string,
                     activo: values.activo as boolean
@@ -101,7 +105,7 @@ export default function Page() {
             <h1 className="text-3xl font-bold mb-6">Grupo</h1>
             <p className="text-muted-foreground mb-6">
                 Aquí puedes ver y gestionar todos los Grupos disponibles en la escuela.
-                Haz clic en los botones para ver información más precisa, editar, eliminarlo o ver el 
+                Haz clic en los botones para ver información más precisa, editar, eliminarlo o ver el
                 listado de alumnos por cada grupo.
                 Para crear un nuevo Grupo, usa el botón Nuevo Grupo.
             </p>
@@ -135,8 +139,8 @@ export default function Page() {
                             )
                             : (
                                 grupos.map(grupo => (
-                                    <TableRow 
-                                      key={grupo._id}
+                                    <TableRow
+                                        key={grupo._id}
                                     //   onClick={() => {
                                     //     setGrupoSeleccionado(grupo._id)
                                     //     setAlumnosModalOpen(true)
@@ -240,9 +244,9 @@ export default function Page() {
                                                 disabled={operation === 'view'}
                                             /> */}
                                             <Select
-                                            onValueChange={field.onChange}
-                                            value={field.value as string}
-                                            disabled={operation === 'view'}
+                                                onValueChange={field.onChange}
+                                                value={field.value as string}
+                                                disabled={operation === 'view'}
                                             >
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Seleccionar Nombre" />
@@ -259,6 +263,35 @@ export default function Page() {
                                     </FormItem>
                                 )
                             }}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="cicloEscolarId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Ciclo Escolar</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        value={field.value as string}
+                                        disabled={operation === "view"}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Selecciona un Ciclo Escolar" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {ciclosEscolares?.map((c) => (
+                                                <SelectItem key={c._id} value={c._id}>
+                                                    {c.nombre}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
 
                         <FormField
@@ -288,9 +321,9 @@ export default function Page() {
 
             </CrudDialog>
             <GruposAlumnosModal
-              isOpen={isAlumnosModalOpen}
-              onClose={() => setAlumnosModalOpen(false)}
-              grupoId={grupoSeleccionado}
+                isOpen={isAlumnosModalOpen}
+                onClose={() => setAlumnosModalOpen(false)}
+                grupoId={grupoSeleccionado}
             />
         </main>
     );

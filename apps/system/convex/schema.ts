@@ -88,7 +88,7 @@ const applicationTables = {
   // Grupos
   grupos: defineTable({
     escuelaId: v.id("escuelas"),
-    // cicloEscolarId: v.id("ciclosEscolares"),
+    cicloEscolarId: v.id("ciclosEscolares"),
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
     activo: v.boolean(),
@@ -114,7 +114,7 @@ const applicationTables = {
     nombre: v.string(), // ej: "Matemáticas 1°A"
     activa: v.boolean(),
 
-    // createdBy: v.id("personal"),
+    createdBy: v.id("personal"),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_ciclo", ["cicloEscolarId"])
@@ -249,8 +249,8 @@ const applicationTables = {
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
 
-    // createdBy: v.id("personal"),
-    // updatedBy: v.optional(v.id("personal")),
+    createdBy: v.id("personal"),
+    updatedBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])

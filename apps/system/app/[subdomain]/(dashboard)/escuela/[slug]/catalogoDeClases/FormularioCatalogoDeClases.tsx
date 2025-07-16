@@ -16,6 +16,7 @@ interface FormularioCatalogoDeClasesProps {
     ciclosEscolares: CicloEscolar[] | undefined;
     salones: Salon[] | undefined;
     maestros: Personal[] | undefined;
+    personal: Personal[] | undefined;
 }
 
 export function FormularioCatalogoDeClases({
@@ -25,7 +26,8 @@ export function FormularioCatalogoDeClases({
     grupos,
     ciclosEscolares,
     salones,
-    maestros
+    maestros,
+    personal,
 }: FormularioCatalogoDeClasesProps) {
     const [isNombreModificadoManualmente, setIsNombreModificadoManualmente] = useState(false);
 
@@ -214,6 +216,36 @@ export function FormularioCatalogoDeClases({
                                 disabled={operation === "view"}
                             />
                         </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            {/* createdBy */}
+            <FormField
+                control={form.control}
+                name="maestroId"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Creado Por</FormLabel>
+                        <Select
+                            onValueChange={field.onChange}
+                            value={field.value as string}
+                            disabled={operation === "view"}
+                        >
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un Maestro" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {personal?.map((p) => (
+                                    <SelectItem key={p._id} value={p._id}>
+                                        {p.nombre}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                         <FormMessage />
                     </FormItem>
                 )}

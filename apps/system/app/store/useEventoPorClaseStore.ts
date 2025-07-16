@@ -15,6 +15,7 @@ export type EventoPorClase = {
   fecha: number;
   descripcion?: string;
   activo: boolean;
+  createdBy: string;
 };
 
 // Tipos para crear y actualizar evento por clase
@@ -27,6 +28,7 @@ export type CrearEventoPorClaseData = {
   fecha: number;
   descripcion?: string;
   activo: boolean;
+  createdBy: string;
 };
 
 export type ActualizarEventoPorClaseData = {
@@ -39,6 +41,7 @@ export type ActualizarEventoPorClaseData = {
   fecha: number;
   descripcion?: string;
   activo: boolean;
+  createdBy: string;
 };
 
 // Store de Evento por Clase con CRUD completo
@@ -111,6 +114,7 @@ type EventoPorClaseQueryResult = {
   fecha: number;
   descripcion?: string;
   activo: boolean;
+  createdBy: string;
 };
 
 export const useEventoPorClase = (escuelaId?: string) => {
@@ -159,6 +163,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
         calendarioId: data.calendarioId as Id<"calendario">,
         cicloEscolarId: data.cicloEscolarId as Id<"ciclosEscolares">,
         eventoEscolarId: data.eventoEscolarId ? data.eventoEscolarId as Id<"eventosEscolares"> : undefined,
+        createdBy: data.createdBy as Id<"personal">
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al crear evento por clase';
@@ -184,6 +189,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
         fecha: data.fecha,
         descripcion: data.descripcion,
         activo: data.activo,
+        createdBy: data.createdBy as Id<"personal">
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar evento por clase';
@@ -226,6 +232,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
           fecha: e.fecha,
           descripcion: e.descripcion,
           activo: e.activo,
+          createdBy: e.createdBy as Id<"personal">
         }))
       );
     }

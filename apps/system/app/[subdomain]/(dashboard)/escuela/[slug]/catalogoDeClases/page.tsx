@@ -16,6 +16,7 @@ import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { useMateria } from "@/app/store/useMateriaStore";
 import { useSalon } from "@/app/store/useSalonStore";
 import { useGrupo } from "@/app/store/useGrupoStore";
+import { usePersonal } from "@/app/store/usePersonalStore";
 
 export default function Page() {
     const { escuela } = useEscuela();
@@ -31,6 +32,7 @@ export default function Page() {
     const { salones } = useSalon(escuela?._id);
     const { grupos } = useGrupo(escuela?._id);
 
+    const { personal } = usePersonal(escuela?._id)
     const maestros = useQuery(api.personal.verMaestrosDelPersonal, { escuelaId: escuela?._id as Id<"escuelas"> });
 
     const maestrosAdaptados = maestros?.map(maestro => ({
@@ -40,6 +42,18 @@ export default function Page() {
             : maestro.fechaIngreso,
         email: maestro.email ?? null,
         telefono: maestro.telefono ?? null,
+    }));
+
+    const personalAdaptado = personal?.map(p => ({
+        ...p,
+        _id: p._id as Id<'personal'>, // 👈 fuerza el tipo correcto
+        telefono: p.telefono ?? null,
+        email: p.email ?? null,
+        escuelaId: p.escuelaId as Id<'escuelas'>,
+        departamentoId: p.departamentoId as Id<'departamento'>,
+        fechaIngreso: typeof p.fechaIngreso === 'string'
+            ? new Date(p.fechaIngreso).getTime()
+            : p.fechaIngreso,
     }));
 
     const {
@@ -78,6 +92,7 @@ export default function Page() {
                     grupoId: values?.grupoId as Id<'grupos'>,
                     nombre: values?.nombre as string,
                     activa: values?.activa as boolean,
+                    createdBy: values?.createdBy as Id<'personal'>
                 })
             } else if (operation === 'edit' && data?._id) {
                 await actualizarCatalogoDeClase({
@@ -90,6 +105,7 @@ export default function Page() {
                     grupoId: values?.grupoId as Id<'grupos'>,
                     nombre: values?.nombre as string,
                     activa: values?.activa as boolean,
+                    createdBy: values?.createdBy as Id<'personal'>
                 })
             } else {
                 console.error('Operación no válida o datos faltantes:', { operation, data });
@@ -225,6 +241,7 @@ export default function Page() {
                         ciclosEscolares={ciclosEscolares || []}
                         salones={salones || []}
                         maestros={maestrosAdaptados || []}
+                        personal={personalAdaptado || []}
                     />
                 )}
             </CrudDialog>
