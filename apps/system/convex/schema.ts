@@ -33,6 +33,7 @@ const applicationTables = {
     telefono: v.optional(v.string()),
     email: v.string(),
     director: v.optional(v.string()),
+    activo: v.optional(v.boolean())
   }),
 
   // Ciclos escolares
@@ -45,11 +46,13 @@ const applicationTables = {
   }).index("by_escuela", ["escuelaId", "activo"]),
 
   // Departamentos
-  departamento: defineTable({
+departamento: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   }).index("by_escuela", ["escuelaId"]),
 
   // Personal (maestros, administrativos, etc.)
@@ -115,7 +118,7 @@ const applicationTables = {
     nombre: v.string(), // ej: "Matemáticas 1°A"
     activa: v.boolean(),
 
-    createdBy: v.id("personal"),
+    createdBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_ciclo", ["cicloEscolarId"])
@@ -251,7 +254,7 @@ const applicationTables = {
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
 
-    createdBy: v.id("personal"),
+    createdBy: v.optional(v.id("personal")),
     updatedBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])

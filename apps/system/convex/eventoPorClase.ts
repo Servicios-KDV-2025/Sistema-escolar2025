@@ -68,7 +68,7 @@ export const getEventoPorClaseConNombres = query({
           evento.eventoEscolarId
             ? ctx.db.get(evento.eventoEscolarId)
             : Promise.resolve(null),
-          ctx.db.get(evento.createdBy),
+          evento.createdBy ? ctx.db.get(evento.createdBy) : Promise.resolve(null),
           evento.updatedBy
             ? ctx.db.get(evento.updatedBy)
             : Promise.resolve(null),
