@@ -57,22 +57,6 @@ export default function Page() {
     clearErrors: clearMateriaErrors,
   } = useMateria(escuela?._id);
 
-  const [filtroActiva, setFiltroActiva] = useState<
-    "todas" | "activas" | "inactivas"
-  >("todas");
-
-  const materiasFiltradas = materias.filter((materia) => {
-    if (filtroActiva === "activas") return materia.activa;
-    if (filtroActiva === "inactivas") return !materia.activa;
-    return true; // "todas"
-  });
-  const materiasParaExcel = materiasFiltradas.map((materia) => ({
-    Nombre: materia.nombre,
-    Descripción: materia.descripcion || "N/A",
-    Créditos: materia.creditos ?? "N/A",
-    Estado: materia.activa ? "Activa" : "Inactiva",
-  }));
-
   const columnHeaders = ["Nombre", "Descripción", "Créditos", "Activa"];
   const columnDataMap = {
     Nombre: (materia: (typeof materias)[number]) => materia.nombre,
@@ -83,6 +67,39 @@ export default function Page() {
       materia.activa ? "Sí" : "No",
   };
 
+  const [filtroActiva, setFiltroActiva] = useState<
+    "todas" | "activas" | "inactivas"
+  >("todas");
+  const [ordenColumna, setOrdenColumna] = useState<
+    keyof typeof columnDataMap | null
+  >(null);
+  const [ordenAscendente, setOrdenAscendente] = useState(true);
+
+  const materiasFiltradas = materias.filter((materia) => {
+    if (filtroActiva === "activas") return materia.activa;
+    if (filtroActiva === "inactivas") return !materia.activa;
+    return true; // "todas"
+  });
+  const materiasOrdenadas = [...materiasFiltradas].sort((a, b) => {
+    if (!ordenColumna) return 0;
+    const aValue = columnDataMap[ordenColumna](a);
+    const bValue = columnDataMap[ordenColumna](b);
+
+    // Convierte a string para comparación consistente
+    const aStr = String(aValue).toLowerCase();
+    const bStr = String(bValue).toLowerCase();
+
+    if (aStr < bStr) return ordenAscendente ? -1 : 1;
+    if (aStr > bStr) return ordenAscendente ? 1 : -1;
+    return 0;
+  });
+
+  const materiasParaExcel = materiasOrdenadas.map((materia) => ({
+    Nombre: materia.nombre,
+    Descripción: materia.descripcion || "N/A",
+    Créditos: materia.creditos ?? "N/A",
+    Estado: materia.activa ? "Activa" : "Inactiva",
+  }));
   const {
     isOpen,
     operation,
@@ -130,7 +147,7 @@ export default function Page() {
           creditos: values.creditos ? Number(values.creditos) : undefined,
           activa: values.activa as boolean,
         });
-        toast.success('Creado correctamente')
+        toast.success("Creado correctamente");
       } else if (operation === "edit" && data?._id) {
         await actualizarMateria({
           _id: data._id as Id<"materias">,
@@ -140,7 +157,7 @@ export default function Page() {
           creditos: values.creditos ? Number(values.creditos) : undefined,
           activa: values.activa as boolean,
         });
-        toast.success('Actualizado correctamente')
+        toast.success("Actualizado correctamente");
       } else {
         throw new Error("Operación no válida o datos faltantes");
       }
@@ -155,7 +172,7 @@ export default function Page() {
   const handleDelete = async (id: string) => {
     try {
       await eliminarMateria(id);
-      toast.success('Eliminado correctamente')
+      toast.success("Eliminado correctamente");
     } catch (error) {
       toast.error("Error al eliminar materia", {
         description: (error as Error).message,
@@ -226,7 +243,11 @@ export default function Page() {
             <DropdownMenuItem
               className="justify-center "
               onClick={() =>
-                exportToExcel(materiasParaExcel, `Materias_${filtroActiva}`, `${filtroActiva}`)
+                exportToExcel(
+                  materiasParaExcel,
+                  `Materias_${filtroActiva}`,
+                  `${filtroActiva}`
+                )
               }
             >
               Generar Excel
@@ -237,7 +258,7 @@ export default function Page() {
                 buttonVariant="ghost"
                 buttonText="Generar PDF"
                 tableColumns={columnHeaders}
-                tableData={materiasFiltradas}
+                tableData={materiasOrdenadas}
                 columnDataMap={columnDataMap}
                 fileName={`materias_${filtroActiva.toLowerCase()}_${escuela?.nombre || "escuela"}.pdf`}
               />
@@ -285,10 +306,80 @@ export default function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="">Nombre</TableHead>
-                <TableHead>Descripción</TableHead>
-                <TableHead className="text-center">Créditos</TableHead>
-                <TableHead className="text-center">Estado</TableHead>
+                <TableHead
+                  onClick={() => {
+                    if (ordenColumna === "Nombre") {
+                      setOrdenAscendente(!ordenAscendente);
+                    } else {
+                      setOrdenColumna("Nombre");
+                      setOrdenAscendente(true);
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
+                  Nombre{" "}
+                  {ordenColumna === "Nombre"
+                    ? ordenAscendente
+                      ? "↑"
+                      : "↓"
+                    : ""}
+                </TableHead>
+                <TableHead
+                  onClick={() => {
+                    if (ordenColumna === "Descripción") {
+                      setOrdenAscendente(!ordenAscendente);
+                    } else {
+                      setOrdenColumna("Descripción");
+                      setOrdenAscendente(true);
+                    }
+                  }}
+                  
+                >
+                  Descripción{" "}
+                  {ordenColumna === "Descripción"
+                    ? ordenAscendente
+                      ? "↑"
+                      : "↓"
+                    : ""}
+                </TableHead>
+                <TableHead
+                  onClick={() => {
+                    if (ordenColumna === "Créditos") {
+                      setOrdenAscendente(!ordenAscendente);
+                    } else {
+                      setOrdenColumna("Créditos");
+                      setOrdenAscendente(true);
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
+                  Créditos{" "}
+                  {ordenColumna === "Créditos"
+                    ? ordenAscendente
+                      ? "↑"
+                      : "↓"
+                    : ""}
+                </TableHead>
+
+                <TableHead
+                  onClick={() => {
+                    if (ordenColumna === "Activa") {
+                      setOrdenAscendente(!ordenAscendente);
+                    } else {
+                      setOrdenColumna("Activa");
+                      setOrdenAscendente(true);
+                    }
+                  }}
+                  className="text-center cursor-pointer"
+                >
+                  Estado{" "}
+                  {ordenColumna === "Activa"
+                    ? ordenAscendente
+                      ? "↑"
+                      : "↓"
+                    : ""}
+                </TableHead>
+
                 <TableHead className="text-center sticky right-0 bg-white">
                   Acciones
                 </TableHead>
@@ -305,7 +396,7 @@ export default function Page() {
                   </TableCell>
                 </TableRow>
               ) : (
-                materiasFiltradas.map((materia) => (
+                materiasOrdenadas.map((materia) => (
                   <TableRow key={materia._id} className="hover:bg-muted/50">
                     <TableCell className="font-medium ">
                       {materia.nombre}
