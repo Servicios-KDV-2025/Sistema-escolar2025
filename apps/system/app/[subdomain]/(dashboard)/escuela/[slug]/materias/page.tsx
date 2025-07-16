@@ -11,7 +11,7 @@ import {
 } from "@repo/ui/components/shadcn/table";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, Edit, Eye } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useMateria } from "@/app/store/useMateriaStore";
@@ -50,15 +50,22 @@ export default function Page() {
     clearErrors: clearMateriaErrors,
   } = useMateria(escuela?._id);
 
-  const columnHeaders = ["Nombre", "Descripción", "Créditos", "Activa"];
+  const [filtroActiva, setFiltroActiva] = useState<
+    "todas" | "activas" | "inactivas"
+  >("todas");
 
+  const materiasFiltradas = materias.filter((materia) => {
+    if (filtroActiva === "activas") return materia.activa;
+    if (filtroActiva === "inactivas") return !materia.activa;
+    return true; // "todas"
+  });
+
+  const columnHeaders = ["Nombre", "Descripción", "Créditos", "Activa"];
   const columnDataMap = {
     Nombre: (materia: (typeof materias)[number]) => materia.nombre,
-    Descripción: (materia: (typeof materias)[number]) =>
-      materia.descripcion ?? "N/A",
+    Descripción: (materia: (typeof materias)[number]) =>  materia.descripcion ?? "N/A",
     Créditos: (materia: (typeof materias)[number]) => materia.creditos ?? "N/A",
-    Activa: (materia: (typeof materias)[number]) =>
-      materia.activa ? "Sí" : "No",
+    Activa: (materia: (typeof materias)[number]) =>   materia.activa ? "Sí" : "No",
   };
 
   const {
@@ -169,16 +176,37 @@ export default function Page() {
       </p>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Materias</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <Button
+            variant={filtroActiva === "todas" ? "default" : "outline"}
+            onClick={() => setFiltroActiva("todas")}
+          >
+            Todas
+          </Button>
+          <Button
+            variant={filtroActiva === "activas" ? "default" : "outline"}
+            onClick={() => setFiltroActiva("activas")}
+          >
+            Activas
+          </Button>
+          <Button
+            variant={filtroActiva === "inactivas" ? "default" : "outline"}
+            onClick={() => setFiltroActiva("inactivas")}
+          >
+            Inactivas
+          </Button>
           <PDFGenerator
-            tableTitle="Lista de Materias"
-            buttonText="Exportar"
+            tableTitle={`Lista de Materias `+filtroActiva}
+            buttonText=""
             tableColumns={columnHeaders}
-            tableData={materias}
+            tableData={materiasFiltradas}
             columnDataMap={columnDataMap}
-            fileName={`materias_${escuela?.nombre || "escuela"}.pdf`}
+            fileName={`materias_${filtroActiva.toLowerCase()}_${escuela?.nombre || "escuela"}.pdf`}
             buttonVariant={"secondary"}
           />
+        </div>
+
+        <div className="flex gap-2">
           <Button
             onClick={openCreate}
             disabled={isCreatingMateria}
@@ -238,7 +266,7 @@ export default function Page() {
                   </TableCell>
                 </TableRow>
               ) : (
-                materias.map((materia) => (
+                materiasFiltradas.map((materia) => (
                   <TableRow key={materia._id} className="hover:bg-muted/50">
                     <TableCell className="font-medium ">
                       {materia.nombre}
@@ -250,7 +278,9 @@ export default function Page() {
                     <TableCell className="text-center">
                       <Badge
                         className={` text-white font-medium py-1 ${
-                          materia?.activa ? "bg-green-600 px-3 " : " bg-red-600 "
+                          materia?.activa
+                            ? "bg-green-600 px-3 "
+                            : " bg-red-600 "
                         }`}
                       >
                         {materia?.activa ? "Activa" : "Inactiva"}
@@ -270,7 +300,7 @@ export default function Page() {
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button
-                          variant="secondary"
+                          variant="outline"
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
