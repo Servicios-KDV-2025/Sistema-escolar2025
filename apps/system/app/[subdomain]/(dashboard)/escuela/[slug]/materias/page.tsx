@@ -15,7 +15,6 @@ import { useEffect, useState } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useMateria } from "@/app/store/useMateriaStore";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
 import { materiaSchema } from "@/app/shemas/materia";
 import { Card, CardContent } from "@repo/ui/components/shadcn/card";
 import {
@@ -39,6 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@repo/ui/components/shadcn/dropdown-menu";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 
 export default function Page() {
   const { escuela } = useEscuela();
@@ -130,6 +130,7 @@ export default function Page() {
           creditos: values.creditos ? Number(values.creditos) : undefined,
           activa: values.activa as boolean,
         });
+        toast.success('Creado correctamente')
       } else if (operation === "edit" && data?._id) {
         await actualizarMateria({
           _id: data._id as Id<"materias">,
@@ -139,6 +140,7 @@ export default function Page() {
           creditos: values.creditos ? Number(values.creditos) : undefined,
           activa: values.activa as boolean,
         });
+        toast.success('Actualizado correctamente')
       } else {
         throw new Error("Operación no válida o datos faltantes");
       }
@@ -153,6 +155,7 @@ export default function Page() {
   const handleDelete = async (id: string) => {
     try {
       await eliminarMateria(id);
+      toast.success('Eliminado correctamente')
     } catch (error) {
       toast.error("Error al eliminar materia", {
         description: (error as Error).message,

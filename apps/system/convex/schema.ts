@@ -174,12 +174,14 @@ departamento: defineTable({
     escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     alumnoId: v.id("alumnos"),
+    cicloEscolarId: v.id("ciclosEscolares"),
     fechaInscripcion: v.number(),
-    activa: v.boolean(),
+    activo: v.boolean(),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
-    .index("by_alumno", ["alumnoId"]),
+    .index("by_alumno", ["alumnoId"])
+    .index("by_ciclo", ["cicloEscolarId"]),
 
   // Calificaciones
   calificaciones: defineTable({
@@ -238,6 +240,8 @@ departamento: defineTable({
     tipoEventoId: v.id("tiposDeEventos"),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_escuela", ["escuelaId", "activo"])
     .index("by_ciclo", ["cicloEscolarId"])
@@ -272,6 +276,8 @@ departamento: defineTable({
     color: v.optional(v.string()),
     icono: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   }).index("by_escuela", ["escuelaId"]),
 
 };

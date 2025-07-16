@@ -1,7 +1,6 @@
 "use client";
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@repo/ui/components/shadcn/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Button } from "@repo/ui/components/shadcn/button";
 import { Eye, Pencil, Plus, Trash2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -9,12 +8,14 @@ import { useEffect } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Input } from "@/components/ui/input";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { cicloEscolarSchema } from "@/app/shemas/cicloEscolar";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
+import { Switch } from "@repo/ui/components/shadcn/switch";
+import { Badge } from "@repo/ui/components/shadcn/badge";
 
 export default function CiclosEscolaresPage() {
   const router = useRouter();
@@ -67,7 +68,7 @@ export default function CiclosEscolaresPage() {
       toast.error('Error', { description: 'No se pudo identificar la escuela' })
       return
     }
-    
+
     try {
       if (operation === 'create') {
         await crearCicloEscolar({
@@ -76,6 +77,7 @@ export default function CiclosEscolaresPage() {
           fechaInicio: new Date(values.fechaInicio as string).getTime(),
           fechaFin: new Date(values.fechaFin as string).getTime()
         })
+        toast.success("Creado correctamente")
       } else if (operation === 'edit' && data?._id) {
         await actualizarCicloEscolar({
           _id: data._id as Id<"ciclosEscolares">,
@@ -85,6 +87,7 @@ export default function CiclosEscolaresPage() {
           fechaFin: new Date(values.fechaFin as string).getTime(),
           activo: values.activo as boolean
         })
+        toast.success("Actualizado correctamente")
       } else {
         throw new Error('Operación no válida o datos faltantes')
       }
@@ -101,6 +104,7 @@ export default function CiclosEscolaresPage() {
     }
     try {
       await eliminarCicloEscolar(id, escuela._id)
+      toast.success("Eliminado correctamente")
     } catch (error) {
       toast.error('Error al eliminar grupo', { description: (error as Error).message })
       throw error
@@ -157,7 +161,13 @@ export default function CiclosEscolaresPage() {
                 </TableCell>
                 <TableCell>{new Date(cicloEscolar.fechaInicio).toISOString().split("T")[0]}</TableCell>
                 <TableCell>{new Date(cicloEscolar.fechaFin).toISOString().split("T")[0]}</TableCell>
-                <TableCell>{cicloEscolar.activo ? "Activo" : "Inactivo"}</TableCell>
+                <TableCell className="px-4">
+                  <Badge
+                    className={cicloEscolar?.activo ? "bg-green-600 text-white" : " bg-red-600 text-white"}
+                  >
+                    {cicloEscolar?.activo ? "Activo" : "Inactivo"}
+                  </Badge>
+                </TableCell>
                 <TableCell>
                   {(createError || updateError || deleteError) && (
                     <div className="mb-2 text-sm text-red-500">
@@ -173,8 +183,10 @@ export default function CiclosEscolaresPage() {
                         <Button variant="outline" size="sm" onClick={() => handleVerCicloEscolar(cicloEscolar._id)}>
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation();
-                          openEdit(cicloEscolar); }} disabled={isUpdating}>
+                        <Button variant="outline" size="sm" onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(cicloEscolar);
+                        }} disabled={isUpdating}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button variant="destructive" size="sm" onClick={() => openDelete(cicloEscolar)} disabled={isDeleting}>
@@ -215,100 +227,99 @@ export default function CiclosEscolaresPage() {
         onDelete={handleDelete}
       >
         {(form, operation) => (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="nombre"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: 2024-2025" {...field} disabled={operation === 'view'} value={field.value as string} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="fechaInicio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha de Inicio</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="date" 
-                      disabled={operation === 'view'} 
-                      value={
-                        field.value
-                          ? (typeof field.value === 'number' 
-                              ? new Date(field.value).toISOString().split("T")[0]
-                              : new Date(field.value as string).toISOString().split("T")[0])
-                          : ''
-                      }
-                      onChange={(e) => field.onChange(e.target.value)} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="fechaFin"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fecha Final</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="date" 
-                      disabled={operation === 'view'} 
-                      value={
-                        field.value
-                          ? (typeof field.value === 'number' 
-                              ? new Date(field.value).toISOString().split("T")[0]
-                              : new Date(field.value as string).toISOString().split("T")[0])
-                          : ''
-                      }
-                      onChange={(e) => field.onChange(e.target.value)} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {operation == 'edit' ?
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="activo"
+                name="nombre"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Estado</FormLabel>
+                    <FormLabel>Nombre</FormLabel>
                     <FormControl>
-                      <Select
-                        onValueChange={value => field.onChange(value === "true")}
-                        value={field.value ? "true" : "false"}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona el estado" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="true">Activo</SelectItem>
-                          <SelectItem value="false">Inactivo</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Input placeholder="Ej: 2024-2025" {...field} disabled={operation === 'view'} value={field.value as string} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              : ""}
+              <FormField
+                control={form.control}
+                name="fechaInicio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha de Inicio</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        disabled={operation === 'view'}
+                        value={
+                          field.value
+                            ? (typeof field.value === 'number'
+                              ? new Date(field.value).toISOString().split("T")[0]
+                              : new Date(field.value as string).toISOString().split("T")[0])
+                            : ''
+                        }
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
+              <FormField
+                control={form.control}
+                name="fechaFin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha Final</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        disabled={operation === 'view'}
+                        value={
+                          field.value
+                            ? (typeof field.value === 'number'
+                              ? new Date(field.value).toISOString().split("T")[0]
+                              : new Date(field.value as string).toISOString().split("T")[0])
+                            : ''
+                        }
+                        onChange={(e) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          </div>
+            </div>
+            <div className="space-y-6">
+              {operation == 'edit' ?
+                <FormField
+                  control={form.control}
+                  name="activo"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Estado Activo</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Determina si la inscripción está activa o inactiva
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value as boolean}
+                          onCheckedChange={(val) => field.onChange(val)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                : ""}
+            </div>
+          </>
+
         )}
       </CrudDialog>
     </div>

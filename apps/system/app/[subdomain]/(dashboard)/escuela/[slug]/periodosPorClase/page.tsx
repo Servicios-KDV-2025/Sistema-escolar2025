@@ -10,7 +10,7 @@ import { usePeriodo } from "@/app/store/usePeriodoStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Badge } from "@repo/ui/components/shadcn/badge";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Checkbox } from "@repo/ui/components/shadcn/checkbox";
 import { Switch } from "@repo/ui/components/shadcn/switch";
@@ -308,7 +308,7 @@ export default function PeriodosClasePage() {
           diaSemana: (values.diasSemana as number[])[0],
           activo: values.activo as boolean,
         });
-        toast.success("Horario actualizado exitosamente");
+        toast.success("Actualizado exitosamente");
       }
     } catch (error) {
       console.error('Error en operación CRUD:', error);
@@ -324,6 +324,7 @@ export default function PeriodosClasePage() {
     
     try {
       await eliminarPeriodoPorClase(id, escuelaId);
+      toast.success('Eliminado correctamente')
     } catch (error) {
       console.error('Error al eliminar:', error);
       throw error;

@@ -125,7 +125,8 @@ export default function TipoDeEventoDialog({
           clave: data.clave,
           descripcion: data.descripcion,
           color: data.color,
-          icono: data.icono
+          icono: data.icono,
+          activo: data.activo || true
         })
         toast.success("¡Tipo de Evento editado exitosamente!");
       } else if (modo === null) {
