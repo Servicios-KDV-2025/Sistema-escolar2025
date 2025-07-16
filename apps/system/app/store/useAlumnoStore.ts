@@ -18,6 +18,7 @@ export type Alumno = {
   telefono?: string;
   direccion?: string;
   activo: boolean;
+  updatedAt?: number; // Fecha de actualización opcional
 };
 
 // Tipos para crear y actualizar alumno
@@ -33,6 +34,7 @@ export type CrearAlumnoData = {
   telefono?: string;
   direccion?: string;
   activo: boolean;
+  updatedAt?: number; // Fecha de actualización opcional
 };
 
 export type ActualizarAlumnoData = {
@@ -47,6 +49,7 @@ export type ActualizarAlumnoData = {
   telefono?: string;
   direccion?: string;
   activo: boolean;
+  updatedAt?: number; // Fecha de actualización opcional
 };
 
 // Store de Alumno con CRUD completo
@@ -182,6 +185,7 @@ export const useAlumno = (escuelaId?: string) => {
         telefono: data.telefono,
         direccion: data.direccion,
         activo: data.activo,
+        updatedAt: data.updatedAt // Asignar la fecha actual como actualizado
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar alumno';
@@ -227,6 +231,7 @@ export const useAlumno = (escuelaId?: string) => {
           telefono?: string;
           direccion?: string;
           activo: boolean;
+          updatedAt?: number;
         }>).map((a) => ({
           _id: a._id,
           escuelaId: a.escuelaId,
@@ -240,6 +245,7 @@ export const useAlumno = (escuelaId?: string) => {
           telefono: a.telefono,
           direccion: a.direccion,
           activo: a.activo,
+          updatedAt: a.updatedAt,
         }))
       );
     }
