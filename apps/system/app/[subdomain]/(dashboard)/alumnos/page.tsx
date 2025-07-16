@@ -8,7 +8,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Edit, Eye, Plus, Trash2 } from "lucide-react"
 import { useParams } from "next/navigation"
 import { useEffect } from "react"
-import { CrudDialog, useCrudDialog } from "../../../../../../components/ui/crud-dialog"
+import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog"
 import { AlumnoFormValues, alumnoSchema } from "@/app/shemas/alumno"
 import { useAlumno } from "@/app/store/useAlumnoStore"
 import { toast } from "sonner"
