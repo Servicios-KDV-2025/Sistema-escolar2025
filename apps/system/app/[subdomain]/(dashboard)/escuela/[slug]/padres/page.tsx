@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { usePadre } from "@/app/store/usePadreStore";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { padreSchema } from "@/app/shemas/padre";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Input } from "@repo/ui/components/shadcn/input";
@@ -91,7 +91,7 @@ export default function PadresPage() {
           direccion: values.direccion as string || undefined,
           activo: values.activo as boolean
         });
-        toast.success('creado correctamente')
+        toast.success('Creado correctamente')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPadre({
           id: data._id,
@@ -103,6 +103,7 @@ export default function PadresPage() {
           direccion: values.direccion as string || undefined,
           activo: values.activo as boolean
         });
+        toast.success('Actualizado correctamente')
       } else {
         throw new Error('Operación no válida o datos faltantes');
       }
@@ -115,6 +116,7 @@ export default function PadresPage() {
   const handleDelete = async (id: string) => {
     try {
       await eliminarPadre(id);
+      toast.success('Eliminado correctamente')
     } catch (error) {
       toast.error('Error al eliminar padre', { description: (error as Error).message });
       throw error;

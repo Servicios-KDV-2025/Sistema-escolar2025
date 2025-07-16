@@ -4,7 +4,7 @@ import { useEscuela } from "@/app/store/useEscuela";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { eventoPorClaseSchema } from "@/app/shemas/eventoPorClase";
 import { toast } from "sonner";
 import { Button } from "@repo/ui/components/shadcn/button";
@@ -85,6 +85,7 @@ export default function Page() {
                     activo: values.activo as boolean,
                     createdBy: values.createdBy as Id<"personal">,
                 });
+                toast.success('Creado correctamente')
             } else if (operation === 'edit' && data?._id) {
                 await actualizarEventoPorClase({
                     _id: values?._id as Id<"eventoPorClases">,
@@ -99,6 +100,7 @@ export default function Page() {
                     createdBy: values.createdBy as Id<"personal">,
                     updatedBy: values.updatedBy as Id<"personal">,
                 })
+                toast.success('Actualizado correctamente')
             } else {
                 console.error('Operación no válida o datos faltantes:', { operation, data });
                 throw new Error('Operación no válida o datos faltantes:');
@@ -114,9 +116,9 @@ export default function Page() {
             toast.error('Error', { description: 'No se pudo identificar la escuela' })
             return
         }
-
         try {
             await eliminarEventoPorClase(id, escuela?._id);
+            toast.success('Eliminado correctamente')
         } catch (error) {
             console.error('Error al eliminar evento:', error);
             throw error;

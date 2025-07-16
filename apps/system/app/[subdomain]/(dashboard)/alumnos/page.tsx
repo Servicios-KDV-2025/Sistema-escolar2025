@@ -87,8 +87,7 @@ export default function Page() {
           activo: validatedValues.activo,
           updatedAt: Date.now() // Asignar la fecha actual como actualizado
         })
-        toast.success('creado correctamente')
-        toast.success('Alumno creado correctamente')
+        toast.success('Creado correctamente')
       } else if (operation === 'edit') {
         await actualizarAlumno({
           id: data?._id as Id<"alumnos">,
@@ -104,7 +103,7 @@ export default function Page() {
           activo: validatedValues.activo,
           updatedAt: Date.now() // Asignar la fecha actual si no se proporciona
         })
-        toast.success('Alumno actualizado correctamente')
+        toast.success('Actualizado correctamente')
       } else {
         throw new Error('Operación no válida')
       }
@@ -118,7 +117,7 @@ export default function Page() {
   const handleDelete = async (id: string) => {
     try{
       await eliminarAlumno(id, escuela?._id as Id<"escuelas">)
-      toast.success('Alumno eliminado correctamente')
+      toast.success('Eliminado correctamente')
       close()
     } catch(err){
       const errorMessage = err instanceof Error ? err.message : 'Error al eliminar el alumno'

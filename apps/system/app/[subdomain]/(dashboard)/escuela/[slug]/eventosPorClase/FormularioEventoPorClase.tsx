@@ -1,4 +1,4 @@
-import { CrudOperation } from "@/components/ui/crud-dialog"
+import { CrudOperation } from "@/components/dialog/crud-dialog"
 import { Escuela } from "@/types/escuelas"
 import { UseFormReturn } from "react-hook-form"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";

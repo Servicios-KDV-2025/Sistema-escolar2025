@@ -16,10 +16,10 @@ import { toast } from "sonner";
 import EventoDialog from "@/components/dialog/eventoDialog";
 import { Calendario } from "@/app/types/calendario";
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { cicloEscolarSchema } from "@/app/shemas/cicloEscolar";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { Input } from "@repo/ui/components/shadcn/input";
+import { Switch } from "@repo/ui/components/shadcn/switch";
 
 export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -112,6 +112,7 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                     fechaFin: new Date(values.fechaFin as string).getTime(),
                     activo: values.activo as boolean
                 })
+                toast.success("Ciclo escolar actualizado correctamente")
             } else {
                 throw new Error('Operación no válida o datos faltantes')
             }
@@ -128,6 +129,7 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
         }
         try {
             await eliminarCicloEscolar(id, escuela._id)
+            toast.success("Ciclo escolar eliminado correctamente")
         } catch (error) {
             toast.error('Error al eliminar grupo', { description: (error as Error).message })
             throw error
@@ -303,100 +305,98 @@ export default function DetalleCicloEscolarPage({ params }: { params: Promise<{ 
                 onDelete={handleDelete}
             >
                 {(form, operation) => (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="nombre"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Nombre</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="Ej: 2024-2025" {...field} disabled={operation === 'view'} value={field.value as string} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="fechaInicio"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Fecha de Inicio</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="date"
-                                            disabled={operation === 'view'}
-                                            value={
-                                                field.value
-                                                    ? (typeof field.value === 'number'
-                                                        ? new Date(field.value).toISOString().split("T")[0]
-                                                        : new Date(field.value as string).toISOString().split("T")[0])
-                                                    : ''
-                                            }
-                                            onChange={(e) => field.onChange(e.target.value)}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="fechaFin"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Fecha Final</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="date"
-                                            disabled={operation === 'view'}
-                                            value={
-                                                field.value
-                                                    ? (typeof field.value === 'number'
-                                                        ? new Date(field.value).toISOString().split("T")[0]
-                                                        : new Date(field.value as string).toISOString().split("T")[0])
-                                                    : ''
-                                            }
-                                            onChange={(e) => field.onChange(e.target.value)}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        {operation == 'edit' ?
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 control={form.control}
-                                name="activo"
+                                name="nombre"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Estado</FormLabel>
+                                        <FormLabel>Nombre</FormLabel>
                                         <FormControl>
-                                            <Select
-                                                onValueChange={value => field.onChange(value === "true")}
-                                                value={field.value ? "true" : "false"}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Selecciona el estado" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="true">Activo</SelectItem>
-                                                    <SelectItem value="false">Inactivo</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                            <Input placeholder="Ej: 2024-2025" {...field} disabled={operation === 'view'} value={field.value as string} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
 
-                            : ""}
+                            <FormField
+                                control={form.control}
+                                name="fechaInicio"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Fecha de Inicio</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="date"
+                                                disabled={operation === 'view'}
+                                                value={
+                                                    field.value
+                                                        ? (typeof field.value === 'number'
+                                                            ? new Date(field.value).toISOString().split("T")[0]
+                                                            : new Date(field.value as string).toISOString().split("T")[0])
+                                                        : ''
+                                                }
+                                                onChange={(e) => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
+                            <FormField
+                                control={form.control}
+                                name="fechaFin"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Fecha Final</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="date"
+                                                disabled={operation === 'view'}
+                                                value={
+                                                    field.value
+                                                        ? (typeof field.value === 'number'
+                                                            ? new Date(field.value).toISOString().split("T")[0]
+                                                            : new Date(field.value as string).toISOString().split("T")[0])
+                                                        : ''
+                                                }
+                                                onChange={(e) => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                    </div>
+                        </div>
+                        <div className="space-y-6">
+                            {operation == 'edit' ?
+                                <FormField
+                                    control={form.control}
+                                    name="activo"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                            <div className="space-y-0.5">
+                                                <FormLabel className="text-base">Estado Activo</FormLabel>
+                                                <div className="text-sm text-muted-foreground">
+                                                    Determina si la inscripción está activa o inactiva
+                                                </div>
+                                            </div>
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value as boolean}
+                                                    onCheckedChange={(val) => field.onChange(val)}
+                                                />
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                : ""}
+                        </div>
+                    </>
                 )}
             </CrudDialog>
             <EventoDialog

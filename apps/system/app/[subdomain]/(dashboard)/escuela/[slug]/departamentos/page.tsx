@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Eye, Pencil } from 'lucide-react';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@repo/ui/components/shadcn/table';
 import { Button } from '@/components/ui/button';
-import { CrudDialog, useCrudDialog } from '@/components/ui/crud-dialog';
+import { CrudDialog, useCrudDialog } from '@/components/dialog/crud-dialog';
 import { departamentoSchema, DepartamentoFormValues } from '@/app/shemas/departamento';
 import { Badge } from '@repo/ui/components/shadcn/badge';
 import {
@@ -176,13 +176,13 @@ export default function DepartamentosPage() {
           escuelaId: routerSchool._id,
           ...validatedValues
         });
-        toast.success('Departamento creado exitosamente');
+        toast.success('Creado exitosamente');
       } else if (operation === 'edit' && data?._id) {
         await actualizarDepartamento({
           id: data._id as string,
           ...validatedValues
         });
-        toast.success('Departamento actualizado exitosamente');
+        toast.success('Actualizado exitosamente');
       }
       close();
     } catch (err: unknown) {
@@ -193,7 +193,7 @@ export default function DepartamentosPage() {
   const handleDelete = async (id: string) => {
     try {
       await eliminarDepartamento(id);
-      toast.success('Departamento eliminado exitosamente');
+      toast.success('Eliminado exitosamente');
       close();
     } catch (err: unknown) {
       console.error('Error al eliminar:', err);

@@ -15,7 +15,7 @@ import {
 } from "@repo/ui/components/shadcn/table"
 import { Edit, Eye, Plus, Trash2 } from "lucide-react"
 import { useEffect } from "react"
-import { CrudDialog, useCrudDialog } from "../../../../../../components/ui/crud-dialog"
+import { CrudDialog, useCrudDialog } from "../../../../../../components/dialog/crud-dialog"
 import { PersonalFormValues, personalSchema } from "@/app/shemas/personal"
 import { toast } from "sonner"
 import { useQuery } from "convex/react"
@@ -83,7 +83,7 @@ export default function Page() {
           activo: validatedValues.activo as boolean,
           updateAt: Date.now(),
         })
-        toast.success('creado correctamente')
+        toast.success('Creado correctamente')
       } else if (operation === 'edit' && data?._id) {
         await actualizarPersonal({
           id: data._id,
@@ -96,7 +96,7 @@ export default function Page() {
           activo: validatedValues.activo as boolean,
           updateAt: Date.now(),
         })
-        toast.success('Departamento actualizado')
+        toast.success('Actualizado correctamente')
       } else {
         throw new Error('Operación no válida')
       }
@@ -110,7 +110,7 @@ export default function Page() {
   const handleDelete = async (id: string) => {
     try {
       await eliminarPersonal(id)
-      toast.success('Departamento eliminado')
+      toast.success('Eliminado correctamente')
       close()
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error al eliminar'

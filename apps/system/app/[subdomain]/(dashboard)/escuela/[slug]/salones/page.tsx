@@ -2,7 +2,7 @@
 
 import { useEscuela } from '@/app/store/useEscuela'
 import { salonSchema, SalonFormValues } from '@/app/shemas/salon'
-import { CrudDialog, useCrudDialog } from '@/components/ui/crud-dialog'
+import { CrudDialog, useCrudDialog } from '@/components/dialog/crud-dialog'
 import { useSalon } from '@/app/store/useSalonStore'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@repo/ui/components/shadcn/form'
 import { Input } from '@repo/ui/components/shadcn/input'
@@ -62,6 +62,7 @@ export default function Page() {
           capacidad: parsed.capacidad,
           ubicacion: parsed.ubicacion
         })
+        toast.success('Creado correctamente')
       } else if (operation === 'edit' && data?._id) {
         await actualizarSalon({
           _id: data._id  as Id<"salones">,
@@ -70,6 +71,7 @@ export default function Page() {
           capacidad: parsed.capacidad,
           ubicacion: parsed.ubicacion
         })
+        toast.success('Actualizado correctamente')
       }
     } catch (err) {
       toast.error("Ocurrió un error al guardar")
@@ -84,6 +86,7 @@ export default function Page() {
     }
     try {
       await eliminarSalon(id, escuela._id)
+      toast.success('Eliminado correctamente')
     } catch (err) {
       toast.error("Ocurrió un error al eliminar")
       console.error(err)

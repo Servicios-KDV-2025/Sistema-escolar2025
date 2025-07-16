@@ -19,6 +19,7 @@ import type * as calendario from "../calendario.js";
 import type * as calificaciones from "../calificaciones.js";
 import type * as catalogosDeClases from "../catalogosDeClases.js";
 import type * as ciclosEscolares from "../ciclosEscolares.js";
+import type * as clasesPorAlumno from "../clasesPorAlumno.js";
 import type * as departamento from "../departamento.js";
 import type * as escuelas from "../escuelas.js";
 import type * as eventoPorClase from "../eventoPorClase.js";
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   calificaciones: typeof calificaciones;
   catalogosDeClases: typeof catalogosDeClases;
   ciclosEscolares: typeof ciclosEscolares;
+  clasesPorAlumno: typeof clasesPorAlumno;
   departamento: typeof departamento;
   escuelas: typeof escuelas;
   eventoPorClase: typeof eventoPorClase;
