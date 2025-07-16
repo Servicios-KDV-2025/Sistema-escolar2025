@@ -11,6 +11,7 @@ import { CatalogoDeClase } from "@/app/store/useCatalogoDeClasesStore";
 import { EventoEscolar } from "@/app/store/useEventoEscolarStore";
 import { Id } from "@/convex/_generated/dataModel";
 import { Switch } from "@repo/ui/components/shadcn/switch";
+import { Personal } from "@/types/convex-zod-types";
 
 type FormularioEventoPorClaseProps = {
     form: UseFormReturn<Record<string, unknown>>;
@@ -29,7 +30,8 @@ type FormularioEventoPorClaseProps = {
         };
         fechaInicio: number;
         fechaFin: number;
-    }[]
+    }[],
+    personal: Personal[]
 }
 
 export default function FormularioEventoPorClase({
@@ -38,7 +40,8 @@ export default function FormularioEventoPorClase({
     escuelaId,
     catalogosDeClases,
     eventosEscolares,
-    ciclosEscolares
+    ciclosEscolares,
+    personal,
 }: FormularioEventoPorClaseProps) {
     const cicloEscolarSeleccionado = useWatch({ control: form.control, name: "cicloEscolar" });
 
@@ -218,6 +221,68 @@ export default function FormularioEventoPorClase({
                     </FormItem>
                 )}
             />
+
+            {/* createdBy */}
+            <FormField
+                control={form.control}
+                name="createdBy"
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Creado Por</FormLabel>
+                        <Select
+                            onValueChange={field.onChange}
+                            value={field.value as string}
+                            disabled={operation === "edit"}
+                        >
+                            <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un Maestro" />
+                                </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                                {personal?.map((p) => (
+                                    <SelectItem key={p._id} value={p._id}>
+                                        {p.nombre}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )}
+            />
+
+            {/* updatedBy */}
+            {operation === 'edit' && (
+                < FormField
+                    control={form.control}
+                    name="updatedBy"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Actualizado Por</FormLabel>
+                            <Select
+                                onValueChange={field.onChange}
+                                value={field.value as string}
+                                disabled={operation === "edit"}
+                            >
+                                <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona un Maestro" />
+                                    </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {personal?.map((p) => (
+                                        <SelectItem key={p._id} value={p._id}>
+                                            {p.nombre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
 
             <FormField
                 control={form.control}

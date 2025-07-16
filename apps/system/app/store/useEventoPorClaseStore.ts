@@ -16,6 +16,7 @@ export type EventoPorClase = {
   descripcion?: string;
   activo: boolean;
   createdBy: string;
+  updatedBy: string;
 };
 
 // Tipos para crear y actualizar evento por clase
@@ -42,6 +43,7 @@ export type ActualizarEventoPorClaseData = {
   descripcion?: string;
   activo: boolean;
   createdBy: string;
+  updatedBy: string;
 };
 
 // Store de Evento por Clase con CRUD completo
@@ -115,6 +117,7 @@ type EventoPorClaseQueryResult = {
   descripcion?: string;
   activo: boolean;
   createdBy: string;
+  updatedBy: string;
 };
 
 export const useEventoPorClase = (escuelaId?: string) => {
@@ -189,7 +192,7 @@ export const useEventoPorClase = (escuelaId?: string) => {
         fecha: data.fecha,
         descripcion: data.descripcion,
         activo: data.activo,
-        createdBy: data.createdBy as Id<"personal">
+        updatedBy: data.updatedBy as Id<"personal">,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al actualizar evento por clase';
@@ -232,7 +235,8 @@ export const useEventoPorClase = (escuelaId?: string) => {
           fecha: e.fecha,
           descripcion: e.descripcion,
           activo: e.activo,
-          createdBy: e.createdBy as Id<"personal">
+          createdBy: e.createdBy as Id<"personal">,
+          updatedBy: e.updatedBy as Id<"personal">,
         }))
       );
     }

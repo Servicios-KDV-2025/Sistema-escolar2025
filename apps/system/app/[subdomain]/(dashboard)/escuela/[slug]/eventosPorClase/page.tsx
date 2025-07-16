@@ -15,6 +15,7 @@ import { useCatalogoDeClase } from "@/app/store/useCatalogoDeClasesStore";
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { useEventoEscolar } from "@/app/store/useEventoEscolarStore";
 import FormularioEventoPorClase from "./FormularioEventoPorClase";
+import { usePersonal } from "@/app/store/usePersonalStore";
 
 const fechaLegible = (timestamp: number) => {
     return new Intl.DateTimeFormat('es-MX', {
@@ -24,6 +25,7 @@ const fechaLegible = (timestamp: number) => {
 
 export default function Page() {
     const { escuela } = useEscuela();
+
     const eventoConNombres = useQuery(api.eventoPorClase.getEventoPorClaseConNombres, { escuelaId: escuela?._id as Id<"escuelas"> });
 
     const { crearEventoPorClase, actualizarEventoPorClase, eliminarEventoPorClase } = useEventoPorClase(escuela?._id);
@@ -31,8 +33,19 @@ export default function Page() {
     const { catalogosDeClases } = useCatalogoDeClase(escuela?._id);
     const { ciclosEscolares } = useCicloEscolar(escuela?._id);
     const { eventosEscolares } = useEventoEscolar(escuela?._id);
+    const { personal } = usePersonal(escuela?._id);
 
-
+    const personalAdaptado = personal?.map(p => ({
+        ...p,
+        _id: p._id as Id<'personal'>, // 👈 fuerza el tipo correcto
+        telefono: p.telefono ?? null,
+        email: p.email ?? null,
+        escuelaId: p.escuelaId as Id<'escuelas'>,
+        departamentoId: p.departamentoId as Id<'departamento'>,
+        fechaIngreso: typeof p.fechaIngreso === 'string'
+            ? new Date(p.fechaIngreso).getTime()
+            : p.fechaIngreso,
+    }));
 
     const {
         isOpen,
@@ -70,10 +83,11 @@ export default function Page() {
                     fecha: new Date(values.fecha as string).getTime(),
                     descripcion: values.descripcion as string,
                     activo: values.activo as boolean,
+                    createdBy: values.createdBy as Id<"personal">,
                 });
             } else if (operation === 'edit' && data?._id) {
                 await actualizarEventoPorClase({
-                    _id: values.id as Id<"eventoPorClases">,
+                    _id: values?._id as Id<"eventoPorClases">,
                     escuelaId: escuela?._id as Id<"escuelas">,
                     catalogoClaseId: values.catalogoClases as Id<"catalogosDeClases">,
                     calendarioId: values.calendario as Id<"calendario">,
@@ -82,6 +96,8 @@ export default function Page() {
                     fecha: new Date(values.fecha as string).getTime(),
                     descripcion: values.descripcion as string,
                     activo: values.activo as boolean,
+                    createdBy: values.createdBy as Id<"personal">,
+                    updatedBy: values.updatedBy as Id<"personal">,
                 })
             } else {
                 console.error('Operación no válida o datos faltantes:', { operation, data });
@@ -156,10 +172,32 @@ export default function Page() {
                                         <TableCell>{evento.eventoEscolar}</TableCell>
                                         <TableCell>{evento.activo ? 'Activo' : 'Inactivo'}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
-                                            <Button variant='outline' size='sm' onClick={() => openView({ ...evento, _id: evento._id })}>
+                                            <Button variant='outline' size='sm' onClick={() => openView({
+                                                _id: evento._id, // usado internamente
+                                                catalogoClases: evento.catalogoClaseId,
+                                                cicloEscolar: evento.cicloEscolarId,
+                                                calendario: evento.calendarioId,
+                                                eventosEscolares: evento.eventoEscolarId,
+                                                fecha: new Date(evento.fecha).toISOString().split("T")[0], // valor en formato YYYY-MM-DD para <input type="date" />
+                                                descripcion: evento.descripcion,
+                                                activo: evento.activo,
+                                                createdBy: evento.createdBy,
+                                                updatedBy: evento.updatedBy, // si existe
+                                            })}>
                                                 <Eye className="h-4 w-4" />
                                             </Button>
-                                            <Button variant='outline' size='sm' onClick={() => openEdit({ ...evento, _id: evento._id })}>
+                                            <Button variant='outline' size='sm' onClick={() => openEdit({
+                                                _id: evento._id, // usado internamente
+                                                catalogoClases: evento.catalogoClaseId,
+                                                cicloEscolar: evento.cicloEscolarId,
+                                                calendario: evento.calendarioId,
+                                                eventosEscolares: evento.eventoEscolarId,
+                                                fecha: new Date(evento.fecha).toISOString().split("T")[0], // valor en formato YYYY-MM-DD para <input type="date" />
+                                                descripcion: evento.descripcion,
+                                                activo: evento.activo,
+                                                createdBy: evento.createdBy,
+                                                updatedBy: evento.updatedBy, // si existe
+                                            })}>
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
                                             <Button variant='destructive' size='sm' onClick={() => openDelete({ ...evento, _id: evento._id })}>
@@ -213,6 +251,7 @@ export default function Page() {
                         catalogosDeClases={catalogosDeClases}
                         eventosEscolares={eventosEscolares}
                         ciclosEscolares={ciclosEscolares}
+                        personal={personalAdaptado}
                     />
                 )}
             </CrudDialog>

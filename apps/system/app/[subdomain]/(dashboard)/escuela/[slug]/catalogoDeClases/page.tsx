@@ -130,8 +130,6 @@ export default function Page() {
         }
     }
 
-    console.log(catalogoConNombre);
-
     return (
         <main className="container mx-auto py-10">
             <h1 className="text-3xl font-bold mb-6">Catalogo de Clases</h1>
@@ -160,6 +158,7 @@ export default function Page() {
                             <TableHead>Maestro</TableHead>
                             <TableHead>Grupo</TableHead>
                             <TableHead>Activo</TableHead>
+                            <TableHead>Creado Por</TableHead>
                             <TableHead className="text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -167,7 +166,7 @@ export default function Page() {
                         {catalogoConNombre?.length === 0
                             ? (
                                 <TableRow>
-                                    <TableCell colSpan={8} className="text-center text-muted-foreground">
+                                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                                         No hay salones registrados para esta escuela.
                                     </TableCell>
                                 </TableRow>
@@ -181,7 +180,12 @@ export default function Page() {
                                         <TableCell>{clase.salon}</TableCell>
                                         <TableCell>{clase.maestro}</TableCell>
                                         <TableCell>{clase.grupo}</TableCell>
-                                        <TableCell>{clase.activa ? 'Activa' : 'Inactiva'}</TableCell>
+                                        <TableCell>
+                                            <span className={`${clase.activa ? 'bg-green-600' : 'bg-red-600'} text-white rounded-2xl p-2`}>
+                                                {clase.activa ? 'Activa' : 'Inactiva'}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>{clase.createdBy}</TableCell>
                                         <TableCell className="flex justify-end gap-2">
                                             <Button variant='outline' size='sm' onClick={() => openView({ ...clase, _id: clase._id })}>
                                                 <Eye className="h-4 w-4" />
@@ -205,16 +209,16 @@ export default function Page() {
             <CrudDialog
                 operation={operation}
                 title={operation === 'create'
-                    ? 'Crear Nuevo Evento'
+                    ? 'Crear Nuevo Catálogo de Clase'
                     : operation === 'edit'
-                        ? 'Editar Evento'
-                        : 'Ver Evento'
+                        ? 'Editar Catálogo de Clase'
+                        : 'Ver Catálogo de Clase'
                 }
                 description={operation === 'create'
-                    ? 'Completa la información del Evento'
+                    ? 'Completa la información del Catálogo de Clase'
                     : operation === 'edit'
-                        ? 'Modifica la información del Evento'
-                        : 'Información del Evento'
+                        ? 'Modifica la información del Catálogo de Clase'
+                        : 'Información del Catálogo de Clase'
                 }
                 schema={catalogoDeClaseSchema}
                 defaultValues={{
