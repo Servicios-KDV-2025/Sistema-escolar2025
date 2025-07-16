@@ -101,6 +101,7 @@ export const grupoSchema = z.object({
   _id: z.custom<Id<'grupos'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   cicloEscolarId: z.custom<Id<'ciclosEscolares'>>(),
+  cicloEscolar: z.string(),
   nombre: z.string(),
   grado: z.string(),
   activo: z.boolean(),
