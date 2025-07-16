@@ -20,9 +20,9 @@ export default async function EscuelaLayout({
       <SidebarProvider className="flex flex-col">
         <SiteHeader />
         <div className="flex flex-1">
-          <AppSidebar />
-          <SidebarInset>
-            <div className="flex flex-1 flex-col gap-4 p-4">
+          <AppSidebar className="w-64 shrink-0" />
+          <SidebarInset className="flex-1 overflow-hidden">
+            <div className="flex flex-1 flex-col gap-4 p-4 overflow-x-auto">
               <EscuelaWrapper slug={awaitedParams?.slug ?? ""}>{children}</EscuelaWrapper>
             </div>
           </SidebarInset>

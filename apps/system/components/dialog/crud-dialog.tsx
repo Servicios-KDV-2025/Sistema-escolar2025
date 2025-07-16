@@ -134,7 +134,6 @@ export function CrudDialog({
     try {
       setIsInternalSubmitting(true)
       await onSubmit(values)
-      if (operation === 'edit') { toast.success('Actualizado correctamente') }
       setDialogOpen?.(false)
       form.reset()
       onSuccess?.()
@@ -154,7 +153,6 @@ export function CrudDialog({
     try {
       setIsInternalDeleting(true)
       await onDelete(data._id)
-      toast.success('Eliminado correctamente')
       setDialogOpen?.(false)
       onSuccess?.()
     } catch (error) {

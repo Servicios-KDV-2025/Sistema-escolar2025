@@ -2,7 +2,7 @@
 
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Id } from "@/convex/_generated/dataModel";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { grupoSchema } from "@/app/shemas/grupo";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -51,7 +51,7 @@ export default function Page() {
         )
 
         if (operation === 'create' && grupoExiste) {
-            toast.warning('Grupo dublicado', {
+            toast.warning('Grupo duplicado', {
                 description: `Ya existe un grupo con el nombre "${values.nombre}" y grado "${values.grado}".`
             })
             return
@@ -66,7 +66,7 @@ export default function Page() {
                     nombre: values.nombre as string,
                     activo: values.activo as boolean
                 })
-                toast.success('creado correctamente')
+                toast.success('Creado correctamente')
             } else if (operation === 'edit' && data?._id) {
                 await actualizarGrupo({
                     _id: data._id as Id<"grupos">,
@@ -77,6 +77,7 @@ export default function Page() {
                     nombre: values.nombre as string,
                     activo: values.activo as boolean
                 })
+                toast.success('Actualizado correctamente')
             } else {
                 console.error('Operación no válida o datos faltantes:', { operation, data })
                 throw new Error('Operación no válida o datos faltantes')
@@ -92,9 +93,9 @@ export default function Page() {
             toast.error('Error', { description: 'No se pudo identificar la escuela' })
             return
         }
-
         try {
             await eliminarGrupo(id, escuela?._id)
+            toast.success('Eliminado correctamente')
         } catch (error) {
             console.error('Error al eliminar grupo:', error)
             throw error

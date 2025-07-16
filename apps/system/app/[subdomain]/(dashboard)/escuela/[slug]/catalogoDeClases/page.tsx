@@ -4,7 +4,7 @@ import { useEscuela } from "@/app/store/useEscuela";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { CrudDialog, useCrudDialog } from "@/components/ui/crud-dialog";
+import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { catalogoDeClaseSchema } from "@/app/shemas/catalogoDeClases";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -94,6 +94,7 @@ export default function Page() {
                     activa: values?.activa as boolean,
                     createdBy: values?.createdBy as Id<'personal'>
                 })
+                toast.success('Creado correctamente')
             } else if (operation === 'edit' && data?._id) {
                 await actualizarCatalogoDeClase({
                     _id: values.id as Id<"catalogosDeClases">,
@@ -107,6 +108,7 @@ export default function Page() {
                     activa: values?.activa as boolean,
                     createdBy: values?.createdBy as Id<'personal'>
                 })
+                toast.success('Actualizado correctamente')
             } else {
                 console.error('Operación no válida o datos faltantes:', { operation, data });
                 throw new Error('Operación no válida o datos faltantes:');
@@ -124,6 +126,7 @@ export default function Page() {
         }
         try {
             await eliminarCatalogoDeClase(id, escuela._id)
+            toast.success('Eliminado correctamente')
         } catch (error) {
             console.error('Error al eliminar evento:', error);
             throw error;
