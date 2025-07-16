@@ -6,7 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Grupo } from "@/types/convex-zod-types";
 
 // Tipos para crear y actualizar grupo
-export type CrearGrupoData = Pick<Grupo, "escuelaId" | "nombre" | "grado" | "activo">
+export type CrearGrupoData = Pick<Grupo, "escuelaId" | "nombre" | "grado" | "activo" | "cicloEscolarId">
 
 export type ActualizarGrupoData = Grupo;
 
@@ -170,6 +170,7 @@ export const useGrupo = (escuelaId?: string) => {
         (gruposQuery as Grupo[]).map((g) => ({
           _id: g._id,
           escuelaId: g.escuelaId,
+          cicloEscolarId: g.cicloEscolarId,
           nombre: g.nombre,
           grado: g.grado,
           activo: g.activo,

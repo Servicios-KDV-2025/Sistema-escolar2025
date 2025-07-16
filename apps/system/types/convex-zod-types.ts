@@ -66,8 +66,8 @@ export const personalSchema = z.object({
   departamentoId: z.custom<Id<'departamento'>>(),
   nombre: z.string(),
   apellidos: z.string(),
-  email: z.custom<string | null>(),
-  telefono: z.custom<string | null>(),
+  email: z.string().nullable().optional(),
+  telefono: z.string().nullable().optional(),
   maestro: z.boolean(),
   fechaIngreso: z.number(),
   activo: z.boolean(),
@@ -100,6 +100,7 @@ export type Salon = z.infer<typeof saloneSchema>;
 export const grupoSchema = z.object({
   _id: z.custom<Id<'grupos'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
+  cicloEscolarId: z.custom<Id<'ciclosEscolares'>>(),
   nombre: z.string(),
   grado: z.string(),
   activo: z.boolean(),
@@ -128,6 +129,8 @@ export const catalogosDeClasesSchema = z.object({
   grupoId: z.optional(z.custom<Id<'grupos'>>()),
   nombre: z.string(),
   activa: z.boolean(),
+
+  createdBy: z.custom<Id<'personal'>>(),
 });
 
 export type Catalogosdeclases = z.infer<typeof catalogosDeClasesSchema>;
@@ -242,6 +245,9 @@ export const eventoPorClasesSchema = z.object({
   fecha: z.number(),
   descripcion: z.optional(z.string()),
   activo: z.boolean(),
+
+  createdBy: z.custom<Id<"personal">>(),
+  updatedBy: z.custom<Id<"personal">>(),
 });
 
 export type Eventoporclases = z.infer<typeof eventoPorClasesSchema>;

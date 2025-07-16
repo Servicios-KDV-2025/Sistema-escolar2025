@@ -1,7 +1,7 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
- 
+
 const applicationTables = {
   // Tabla de subdominios
   subdominios: defineTable({
@@ -9,7 +9,7 @@ const applicationTables = {
     createdAt: v.number(),
     activo: v.boolean(),
   }).index("by_subdomain", ["subdomain"]),
- 
+
   // Tabla principal de escuelas
   escuelas: defineTable({
     nombre: v.string(),
@@ -22,7 +22,7 @@ const applicationTables = {
     director: v.optional(v.string()),
     activa: v.boolean(),
   }),
- 
+
   //prospectos
   prospectos: defineTable({
     nombre: v.string(),
@@ -33,8 +33,9 @@ const applicationTables = {
     telefono: v.optional(v.string()),
     email: v.string(),
     director: v.optional(v.string()),
+    activo: v.optional(v.boolean())
   }),
- 
+
   // Ciclos escolares
   ciclosEscolares: defineTable({
     escuelaId: v.id("escuelas"),
@@ -43,15 +44,17 @@ const applicationTables = {
     fechaFin: v.number(), // timestamp
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId", "activo"]),
- 
+
   // Departamentos
-  departamento: defineTable({
+departamento: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   }).index("by_escuela", ["escuelaId"]),
- 
+
   // Personal (maestros, administrativos, etc.)
   personal: defineTable({
     escuelaId: v.id("escuelas"),
@@ -67,7 +70,7 @@ const applicationTables = {
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_departamento", ["departamentoId"]),
- 
+
   // Materias
   materias: defineTable({
     escuelaId: v.id("escuelas"),
@@ -76,7 +79,7 @@ const applicationTables = {
     creditos: v.optional(v.number()),
     activa: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
+
   // Salones
   salones: defineTable({
     escuelaId: v.id("escuelas"),
@@ -85,16 +88,17 @@ const applicationTables = {
     ubicacion: v.optional(v.string()),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
+
   // Grupos
   grupos: defineTable({
     escuelaId: v.id("escuelas"),
+    cicloEscolarId: v.id("ciclosEscolares"),
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
-  //* Periodos (horarios)
+
+  // Periodos (horarios)
   periodos: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1ra hora", "2da hora"
@@ -102,7 +106,7 @@ const applicationTables = {
     horaFin: v.string(), // formato "HH:MM"
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
+
   // Catálogo de clases (programación de materias)
   catalogosDeClases: defineTable({
     escuelaId: v.id("escuelas"),
@@ -113,13 +117,15 @@ const applicationTables = {
     grupoId: v.optional(v.id("grupos")),
     nombre: v.string(), // ej: "Matemáticas 1°A"
     activa: v.boolean(),
+
+    createdBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_ciclo", ["cicloEscolarId"])
     .index("by_materia", ["materiaId"])
     .index("by_salon", ["salonId"])
     .index("by_maestro", ["maestroId"]),
- 
+
   // Relación periodo por clase (horarios de clases)
   periodoPorClase: defineTable({
     escuelaId: v.id("escuelas"),
@@ -131,7 +137,7 @@ const applicationTables = {
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
     .index("by_periodo", ["periodoId"]),
- 
+
   // Padres de familia
   padres: defineTable({
     escuelaId: v.id("escuelas"),
@@ -142,7 +148,7 @@ const applicationTables = {
     direccion: v.optional(v.string()),
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
+
   // Alumnos
   alumnos: defineTable({
     escuelaId: v.id("escuelas"),
@@ -162,7 +168,7 @@ const applicationTables = {
     .index("by_padre", ["padreId"])
     .index("by_grupo", ["grupoId"])
     .index("by_matricula", ["matricula"]),
- 
+
   // Clases por alumno (inscripciones)
   clasesPorAlumno: defineTable({
     escuelaId: v.id("escuelas"),
@@ -174,7 +180,7 @@ const applicationTables = {
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
     .index("by_alumno", ["alumnoId"]),
- 
+
   // Calificaciones
   calificaciones: defineTable({
     escuelaId: v.id("escuelas"),
@@ -186,15 +192,15 @@ const applicationTables = {
     comentarios: v.optional(v.string()),
     registradoPorId: v.id("personal"),
     fechaRegistro: v.number(), // timestamp
- 
+
     createdBy: v.id("personal"),
     updatedBy: v.optional(v.id("personal")),
     updatedAt: v.optional(v.number()),
- 
+
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"]),
- 
+
   // Asistencia
   asistencia: defineTable({
     escuelaId: v.id("escuelas"),
@@ -205,16 +211,16 @@ const applicationTables = {
     justificada: v.optional(v.boolean()),
     comentarios: v.optional(v.string()),
     fechaRegistro: v.number(),
- 
+
     createdBy: v.id("personal"),
     updatedBy: v.optional(v.id("personal")),
     updatedAt: v.optional(v.number()),
- 
+
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_clase_alumno", ["clasePorAlumnoId"])
     .index("by_fecha", ["fecha"]),
- 
+
   // Eventos escolares
   eventosEscolares: defineTable({
     escuelaId: v.id("escuelas"),
@@ -223,7 +229,7 @@ const applicationTables = {
     tipo: v.string(), // "examen", "evento", "suspension", etc.
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
- 
+
   // Calendario escolar
   calendario: defineTable({
     cicloEscolarId: v.id("ciclosEscolares"),
@@ -236,7 +242,7 @@ const applicationTables = {
     .index("by_escuela", ["escuelaId", "activo"])
     .index("by_ciclo", ["cicloEscolarId"])
     .index("by_fecha", ["fecha"]),
- 
+
   // Eventos por clases
   eventoPorClases: defineTable({
     escuelaId: v.id("escuelas"),
@@ -247,6 +253,9 @@ const applicationTables = {
     fecha: v.number(),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
+
+    createdBy: v.optional(v.id("personal")),
+    updatedBy: v.optional(v.id("personal")),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
@@ -266,7 +275,7 @@ const applicationTables = {
   }).index("by_escuela", ["escuelaId"]),
 
 };
- 
+
 export default defineSchema({
   ...authTables,
   ...applicationTables,
