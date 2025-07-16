@@ -15,6 +15,7 @@ export type CatalogoDeClase = {
   grupoId?: string;
   nombre: string;
   activa: boolean;
+  createdBy: string;
 };
 
 // Tipos para crear y actualizar catálogo de clase
@@ -27,6 +28,7 @@ export type CrearCatalogoDeClaseData = {
   grupoId?: string;
   nombre: string;
   activa: boolean;
+  createdBy: string;
 };
 
 export type ActualizarCatalogoDeClaseData = {
@@ -39,6 +41,7 @@ export type ActualizarCatalogoDeClaseData = {
   grupoId?: string;
   nombre: string;
   activa: boolean;
+  createdBy: string;
 };
 
 // Store de CatalogoDeClase con CRUD completo
@@ -111,6 +114,7 @@ type CatalogoDeClaseQueryResult = {
   grupoId?: string;
   nombre: string;
   activa: boolean;
+  createdBy: string;
 };
 
 export const useCatalogoDeClase = (escuelaId?: string) => {
@@ -160,6 +164,7 @@ export const useCatalogoDeClase = (escuelaId?: string) => {
         salonId: data.salonId as Id<"salones">,
         maestroId: data.maestroId as Id<"personal">,
         grupoId: data.grupoId as Id<"grupos"> | undefined,
+        createdBy: data.createdBy as Id<"personal">,
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error al crear catálogo de clase';
@@ -227,6 +232,7 @@ export const useCatalogoDeClase = (escuelaId?: string) => {
           grupoId: c.grupoId,
           nombre: c.nombre,
           activa: c.activa,
+          createdBy: c.createdBy,
         }))
       );
     }
