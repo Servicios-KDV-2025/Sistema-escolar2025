@@ -3,17 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rootDomain } from './lib/utils';
 
 const isPublicRoute = createRouteMatcher([
-  '/',
   '/api',
-  '/_next',
-  '/favicon.ico',
-  '/error',
-  '/_vercel',
-  '/static',
-  '/sign-in',
-  '/inicio',
- 
-
 ])
 
 
@@ -62,8 +52,11 @@ export default clerkMiddleware(async (auth, req) => {
   const { pathname } = request.nextUrl;
   const subdomain = extractSubdomain(request);
 
+  const isSubdomainRoot = subdomain && pathname === '/';
+  const isRootDomain = pathname === '/';
+
   // Primero manejar la autenticación de Clerk
-  if (!isPublicRoute(req)) {
+  if (!isPublicRoute(req) && !isSubdomainRoot && !isRootDomain) {
     await auth.protect();
   }
 
@@ -96,7 +89,11 @@ export default clerkMiddleware(async (auth, req) => {
 
   // On the root domain, allow normal access
   return NextResponse.next();
-})
+},
+// {
+//   debug: process.env.NODE_ENV === 'development',
+// }
+)
 
 
 export const config = {

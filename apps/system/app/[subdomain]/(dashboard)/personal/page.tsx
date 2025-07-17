@@ -15,7 +15,7 @@ import {
 } from "@repo/ui/components/shadcn/table"
 import { Edit, Eye, Plus, Trash2 } from "lucide-react"
 import { useEffect } from "react"
-import { CrudDialog, useCrudDialog } from "../../../../../../components/dialog/crud-dialog"
+import { CrudDialog, useCrudDialog } from "../../../../components/dialog/crud-dialog"
 import { PersonalFormValues, personalSchema } from "@/app/shemas/personal"
 import { toast } from "sonner"
 import { useQuery } from "convex/react"
