@@ -96,7 +96,9 @@ departamento: defineTable({
     nombre: v.string(), // ej: "1°A", "2°B"
     grado: v.string(),
     activo: v.boolean(),
-  }).index("by_escuela", ["escuelaId"]),
+  })
+    .index("by_escuela", ["escuelaId"])
+    .index("by_ciclo", ["cicloEscolarId"]),
 
   // Periodos (horarios)
   periodos: defineTable({
@@ -153,7 +155,7 @@ departamento: defineTable({
   alumnos: defineTable({
     escuelaId: v.id("escuelas"),
     padreId: v.id("padres"),
-    grupoId: v.id("grupos"),
+    grupoId: v.optional(v.id("grupos")),
     matricula: v.string(),
     nombre: v.string(),
     apellidos: v.string(),
@@ -174,12 +176,14 @@ departamento: defineTable({
     escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
     alumnoId: v.id("alumnos"),
+    cicloEscolarId: v.id("ciclosEscolares"),
     fechaInscripcion: v.number(),
-    activa: v.boolean(),
+    activo: v.boolean(),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
-    .index("by_alumno", ["alumnoId"]),
+    .index("by_alumno", ["alumnoId"])
+    .index("by_ciclo", ["cicloEscolarId"]),
 
   // Calificaciones
   calificaciones: defineTable({
@@ -238,6 +242,8 @@ departamento: defineTable({
     tipoEventoId: v.id("tiposDeEventos"),
     descripcion: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_escuela", ["escuelaId", "activo"])
     .index("by_ciclo", ["cicloEscolarId"])
@@ -272,6 +278,8 @@ departamento: defineTable({
     color: v.optional(v.string()),
     icono: v.optional(v.string()),
     activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
   }).index("by_escuela", ["escuelaId"]),
 
 };
