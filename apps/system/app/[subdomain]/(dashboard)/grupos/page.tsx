@@ -32,7 +32,7 @@ import {
   TableRow,
 } from "@repo/ui/components/shadcn/table";
 import { GruposAlumnosModal } from "@/components/dialog/gruposAlumnosModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch } from "@repo/ui/components/shadcn/switch";
 import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import SortableHeader from "@/components/SortableHeader"; //componente para ordenar columnas
@@ -46,13 +46,27 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui/components/shadcn/dropdown-menu";
 import { exportToExcel } from "@/app/utils/exportToExcel";
+import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 
 export default function Page() {
   const { escuela } = useEscuela();
 
+  const setItems = useBreadcrumbStore((state) => state.setItems);
+  useEffect(() => {
+      if (escuela) {
+        setItems([
+          {
+            label: `${(escuela?.nombre).toUpperCase()}`,
+            href: `/escuela/${escuela.nombre}`,
+          },
+          { label: "Grupos", isCurrentPage: true },
+        ]);
+      }
+    }, [escuela, setItems, escuela?.nombre]);
+
   const { crearGrupo, actualizarGrupo, eliminarGrupo, grupos } = useGrupo(
     escuela?._id
-  );
+  ); 
 
   const { ciclosEscolares } = useCicloEscolar(escuela?._id);
 
