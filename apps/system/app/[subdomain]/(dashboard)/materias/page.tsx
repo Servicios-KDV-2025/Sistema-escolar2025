@@ -10,13 +10,17 @@ import {
   TableRow,
 } from "@repo/ui/components/shadcn/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Edit, Eye, Download } from "lucide-react";
+import { Plus, Trash2, Edit, Eye, Download, } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useBreadcrumbStore } from "@/app/store/breadcrumbStore";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { useMateria } from "@/app/store/useMateriaStore";
 import { materiaSchema } from "@/app/shemas/materia";
-import { Card, CardContent } from "@repo/ui/components/shadcn/card";
+import {
+  Card,
+  CardContent,
+
+} from "@repo/ui/components/shadcn/card";
 import {
   FormControl,
   FormField,
@@ -39,6 +43,7 @@ import {
   DropdownMenuTrigger,
 } from "@repo/ui/components/shadcn/dropdown-menu";
 import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
+import SortableHeader from "@/components/SortableHeader";
 
 export default function Page() {
   const { escuela } = useEscuela();
@@ -93,6 +98,8 @@ export default function Page() {
     if (aStr > bStr) return ordenAscendente ? 1 : -1;
     return 0;
   });
+  const materiasActivas = materias.filter((m) => m.activa);
+  const materiasInactivas = materias.filter((m) => !m.activa);
 
   const materiasParaExcel = materiasOrdenadas.map((materia) => ({
     Nombre: materia.nombre,
@@ -200,7 +207,7 @@ export default function Page() {
   return (
     <div className="w-[90%] mx-auto">
       <h1 className="text-3xl font-bold mb-6">Materias</h1>
-      <p className="text-muted-foreground mb-6 w-[80%]">
+      <p className="text-muted-foreground mb-6 w-[98%]">
         Esta tabla muestra el listado de materias académicas registradas en{" "}
         {escuela.nombre.charAt(0).toUpperCase() +
           escuela.nombre.slice(1).toLowerCase()}
@@ -209,72 +216,79 @@ export default function Page() {
         visualizar, editar o eliminar materias existentes, así como agregar
         nuevas según sea necesario para el plan de estudios.
       </p>
+      <div className="flex justify-end items-center mb-6 w-[98%]">
+        <Button
+          onClick={openCreate}
+          disabled={isCreatingMateria}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Nueva Materia
+        </Button>
+      </div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Lista de Materias</h2>
-        <div className="flex gap-2 items-center">
-          <Button
-            variant={filtroActiva === "todas" ? "default" : "outline"}
-            onClick={() => setFiltroActiva("todas")}
-          >
-            Todas
-          </Button>
-          <Button
-            variant={filtroActiva === "activas" ? "default" : "outline"}
-            onClick={() => setFiltroActiva("activas")}
-          >
-            Activas
-          </Button>
-          <Button
-            variant={filtroActiva === "inactivas" ? "default" : "outline"}
-            onClick={() => setFiltroActiva("inactivas")}
-          >
-            Inactivas
-          </Button>
+         <div className="flex gap-2">
+
+        <p className="text-xl text-muted-foreground">Activas</p>
+        <h3 className="text-xl font-bold text-green-600">
+          {materiasActivas.length}
+        </h3>
+
+        <p className="text-xl text-muted-foreground">Inactivas</p>
+        <h3 className="text-xl font-bold text-red-600">
+          {materiasInactivas.length}
+        </h3>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Exportar
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              className="justify-center "
-              onClick={() =>
-                exportToExcel(
-                  materiasParaExcel,
-                  `Materias_${filtroActiva}`,
-                  `${filtroActiva}`
-                )
-              }
-            >
-              Generar Excel
-            </DropdownMenuItem>
-            <DropdownMenuItem className="justify-center">
-              <PDFGenerator
-                tableTitle={`Lista de Materias ${filtroActiva}`}
-                buttonVariant="ghost"
-                buttonText="Generar PDF"
-                tableColumns={columnHeaders}
-                tableData={materiasOrdenadas}
-                columnDataMap={columnDataMap}
-                fileName={`materias_${filtroActiva.toLowerCase()}_${escuela?.nombre || "escuela"}.pdf`}
-              />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
         <div className="flex gap-2">
-          <Button
-            onClick={openCreate}
-            disabled={isCreatingMateria}
-            className="flex items-center gap-2"
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                className="justify-center "
+                onClick={() =>
+                  exportToExcel(
+                    materiasParaExcel,
+                    `Materias_${filtroActiva}`,
+                    `${filtroActiva}`
+                  )
+                }
+              >
+                Generar Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem className="justify-center">
+                <PDFGenerator
+                  tableTitle={`Lista de Materias ${filtroActiva}`}
+                  buttonVariant="ghost"
+                  buttonText="Generar PDF"
+                  tableColumns={columnHeaders}
+                  tableData={materiasOrdenadas}
+                  columnDataMap={columnDataMap}
+                  fileName={`materias_${filtroActiva.toLowerCase()}_${escuela?.nombre || "escuela"}.pdf`}
+                />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <select
+            id="filtroMateria"
+            value={filtroActiva}
+            onChange={(event) => {
+              setFiltroActiva(
+                event.target.value as "todas" | "activas" | "inactivas"
+              );
+            }}
+            className="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
-            <Plus className="h-4 w-4" />
-            Nueva Materia
-          </Button>
+            <option value="todas">Todas</option>
+            <option value="activas">Activas</option>
+            <option value="inactivas">Inactivas</option>
+          </select>
         </div>
       </div>
 
@@ -301,85 +315,48 @@ export default function Page() {
         </div>
       )}
 
-      <Card>
+      <Card className="mb-8">
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead
-                  onClick={() => {
-                    if (ordenColumna === "Nombre") {
-                      setOrdenAscendente(!ordenAscendente);
-                    } else {
-                      setOrdenColumna("Nombre");
-                      setOrdenAscendente(true);
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  Nombre{" "}
-                  {ordenColumna === "Nombre"
-                    ? ordenAscendente
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </TableHead>
-                <TableHead
-                  onClick={() => {
-                    if (ordenColumna === "Descripción") {
-                      setOrdenAscendente(!ordenAscendente);
-                    } else {
-                      setOrdenColumna("Descripción");
-                      setOrdenAscendente(true);
-                    }
-                  }}
-                  
-                >
-                  Descripción{" "}
-                  {ordenColumna === "Descripción"
-                    ? ordenAscendente
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </TableHead>
-                <TableHead
-                  onClick={() => {
-                    if (ordenColumna === "Créditos") {
-                      setOrdenAscendente(!ordenAscendente);
-                    } else {
-                      setOrdenColumna("Créditos");
-                      setOrdenAscendente(true);
-                    }
-                  }}
-                  className="cursor-pointer"
-                >
-                  Créditos{" "}
-                  {ordenColumna === "Créditos"
-                    ? ordenAscendente
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </TableHead>
+                <SortableHeader
+                  columna="Nombre"
+                  label="Nombre"
+                  ordenColumna={ordenColumna}
+                  ordenAscendente={ordenAscendente}
+                  setOrdenColumna={setOrdenColumna}
+                  setOrdenAscendente={setOrdenAscendente}
+                />
 
-                <TableHead
-                  onClick={() => {
-                    if (ordenColumna === "Activa") {
-                      setOrdenAscendente(!ordenAscendente);
-                    } else {
-                      setOrdenColumna("Activa");
-                      setOrdenAscendente(true);
-                    }
-                  }}
-                  className="text-center cursor-pointer"
-                >
-                  Estado{" "}
-                  {ordenColumna === "Activa"
-                    ? ordenAscendente
-                      ? "↑"
-                      : "↓"
-                    : ""}
-                </TableHead>
+                <SortableHeader
+                  columna="Descripción"
+                  label="Descripción"
+                  ordenColumna={ordenColumna}
+                  ordenAscendente={ordenAscendente}
+                  setOrdenColumna={setOrdenColumna}
+                  setOrdenAscendente={setOrdenAscendente}
+                />
 
+                <SortableHeader
+                  columna="Créditos"
+                  label="Créditos"
+                  ordenColumna={ordenColumna}
+                  ordenAscendente={ordenAscendente}
+                  setOrdenColumna={setOrdenColumna}
+                  setOrdenAscendente={setOrdenAscendente}
+                  className="text-center"
+                />
+
+                <SortableHeader
+                  columna="Activa"
+                  label="Estado"
+                  ordenColumna={ordenColumna}
+                  ordenAscendente={ordenAscendente}
+                  setOrdenColumna={setOrdenColumna}
+                  setOrdenAscendente={setOrdenAscendente}
+                  className="text-center"
+                />
                 <TableHead className="text-center sticky right-0 bg-white">
                   Acciones
                 </TableHead>
@@ -467,6 +444,34 @@ export default function Page() {
           </Table>
         </CardContent>
       </Card>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-9">
+        <Card className="border shadow-md">
+          <CardContent className="p-4 justify-center">
+            <p className="text-2xl text-center text-muted-foreground">Materias activas</p>
+            <h3 className="text-4xl font-bold text-center text-black-600">
+              {materiasActivas.length}
+            </h3>
+          </CardContent>
+        </Card>
+
+        <Card className="border shadow-md">
+          <CardContent className="p-4">
+            <p className="text-2xl text-center text-muted-foreground">Materias inactivas</p>
+            <h3 className="text-4xl font-bold text-center text-black-600">
+              {materiasInactivas.length}
+            </h3>
+          </CardContent>
+        </Card>
+        <Card className="border justify-center shadow-md">
+          <CardContent className="p-4">
+            <p className="text-2xl text-center text-muted-foreground">Total</p>
+            <h3 className="text-4xl font-bold text-center text-black-600">
+              {materias.length}
+            </h3>
+          </CardContent>
+        </Card>
+      </div>
 
       <CrudDialog
         operation={operation}
