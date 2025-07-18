@@ -155,7 +155,7 @@ departamento: defineTable({
   alumnos: defineTable({
     escuelaId: v.id("escuelas"),
     padreId: v.id("padres"),
-    grupoId: v.id("grupos"),
+    grupoId: v.optional(v.id("grupos")),
     matricula: v.string(),
     nombre: v.string(),
     apellidos: v.string(),

@@ -53,6 +53,11 @@ export default function Page() {
   const params = useParams()
   const slug = typeof params.slug === 'string' ? params.slug : ''
 
+  const fechaMaxima = new Date()
+  fechaMaxima.setFullYear(fechaMaxima.getFullYear())
+  const maxDate = fechaMaxima.toDateString().split('T')[0] // Formato YYYY-MM-DD
+  console.log("Fecha máxima permitida:", maxDate) // Para depuración, puedes eliminarlo más tarde
+
   useEffect(() => {
     if (escuela){
       setItems([
@@ -320,7 +325,7 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Nombre</FormLabel>
                     <FormControl>
-                      <Input type="text" {...field} placeholder="Nombre" value={field.value as string} disabled={operation === 'view'} />
+                      <Input type="text" {...field} maxLength={20} placeholder="Nombre" value={field.value as string} disabled={operation === 'view'} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -332,7 +337,7 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Apellidos</FormLabel>
                     <FormControl>
-                      <Input type="text" {...field} placeholder="Apellidos" value={field.value as string} disabled={operation === 'view'}/>
+                      <Input type="text" {...field} maxLength={20} placeholder="Apellidos" value={field.value as string} disabled={operation === 'view'}/>
                     </FormControl>
                   </FormItem>
                 )}
@@ -344,7 +349,7 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Correo electrónico</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} placeholder="Correo electrónico" value={field.value as string} disabled={operation === 'view'}/>
+                      <Input type="email" {...field} maxLength={50} placeholder="Correo electrónico" value={field.value as string} disabled={operation === 'view'}/>
                     </FormControl>
                   </FormItem>
                 )}
@@ -360,6 +365,7 @@ export default function Page() {
                         type='text' 
                         {...field} 
                         placeholder="Telefono" 
+                        maxLength={10}
                         value={field.value as string} 
                         disabled={operation === 'view'}
                         onChange={(e) => {
@@ -403,8 +409,19 @@ export default function Page() {
                   <FormItem>
                     <FormLabel>Fecha de ingreso</FormLabel>
                     <FormControl>
-                      <Input type='date' {...field} value={field.value as string} disabled={operation === 'view'}/>
+                      <Input 
+                        type='date' 
+                        {...field} 
+                        max={maxDate}
+                        value={field.value as string} 
+                        disabled={operation === 'view'}
+                      />
                     </FormControl>
+                    {form.formState.errors.fechaIngreso && (
+                      <p className="text-sm text-red-500 mt-1">
+                        {form.formState.errors.fechaIngreso.message}
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
