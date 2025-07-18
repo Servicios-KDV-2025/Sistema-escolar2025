@@ -88,12 +88,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: `/materias`,
       icon: SquareTerminal,
       isActive: true,
-      items: [
-        {
-          title: "Materias",
-          url: `/materias`,
-        },
-      ],
     },
     {
       title: "Departamentos",

@@ -18,6 +18,7 @@ import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
 import { Input } from "@repo/ui/components/shadcn/input"
 import { Switch } from "@repo/ui/components/shadcn/switch"
+import { Badge } from "@repo/ui/components/shadcn/badge"
 
 export default function Page() {
   const { escuela } = useEscuela()
@@ -55,6 +56,10 @@ export default function Page() {
   const params = useParams()
   const slug = typeof params?.slug === "string" ? params.slug : ""
 
+  const fechaMaxima = new Date()
+  fechaMaxima.setFullYear(fechaMaxima.getFullYear() - 5)
+  const maxDate = fechaMaxima.toDateString().split('T')[0] // Formato YYYY-MM-DD
+
   useEffect(() => {
     if (escuela){
       setItems([
@@ -76,7 +81,7 @@ export default function Page() {
         await crearAlumno({
           escuelaId: escuela?._id as Id<"escuelas">,
           padreId: validatedValues.padreId as Id<"padres">,
-          grupoId: validatedValues.grupoId as Id<"grupos">,
+          grupoId: validatedValues.grupoId ? validatedValues.grupoId as Id<"grupos"> : undefined,
           matricula: validatedValues.matricula,
           nombre: validatedValues.nombre,
           apellidos: validatedValues.apellidos,
@@ -207,7 +212,18 @@ export default function Page() {
                 <TableCell>{alumno.fechaNacimiento}</TableCell>
                 <TableCell>{alumno.telefono}</TableCell>
                 <TableCell>{alumno.direccion}</TableCell>
-                <TableCell>{alumno.activo ? 'Activo' : 'Inactivo'}</TableCell>
+                <TableCell>
+                  <Badge
+                    variant="secondary"
+                    className={
+                      alumno.activo
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }
+                  >
+                    {alumno.activo ? 'Activo' : 'Inactivo'}
+                  </Badge>
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button
@@ -327,7 +343,7 @@ export default function Page() {
                       onValueChange={field.onChange}
                     >
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder='Seleccionar un Grupo'/>
+                        <SelectValue placeholder='Seleccionar un Grupo (opcional)'/>
                       </SelectTrigger>
                       <SelectContent>
                         {grupos?.map((grupo) => (
@@ -348,7 +364,7 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Matricula</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} placeholder="Matricula" value={field.value as string} disabled={operation === 'view'}
+                    <Input type="text" {...field} maxLength={10} placeholder="Matricula" value={field.value as string} disabled={operation === 'view'}
                     />
                   </FormControl>
                 </FormItem>
@@ -361,7 +377,7 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} placeholder="Nombre"
+                    <Input type="text" {...field} placeholder="Nombre" maxLength={20}
                     value={field.value as string} disabled={operation === 'view'}/>
                   </FormControl>
                 </FormItem>
@@ -374,7 +390,7 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Apellidos</FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} placeholder="Apellidos"
+                    <Input type="text" {...field} placeholder="Apellidos" maxLength={20}
                     value={field.value as string} disabled={operation === 'view'}/>
                   </FormControl>
                 </FormItem>
@@ -387,9 +403,19 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Fecha de Nacimiento</FormLabel>
                   <FormControl>
-                    <Input type='date' {...field} placeholder="DD/MM/AAAA"
-                    value={field.value as string} disabled={operation === 'view'}/>
+                    <Input 
+                      type='date' 
+                      {...field}
+                      max={maxDate}
+                      value={field.value as string} 
+                      disabled={operation === 'view'}
+                    />
                   </FormControl>
+                  {form.formState.errors.fechaNacimiento && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {form.formState.errors.fechaNacimiento.message?.toString()}
+                    </p>
+                  )}
                 </FormItem>
               )}
             /> 
@@ -400,7 +426,7 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Correo electrónico</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} placeholder="Correo electrónico"
+                    <Input type="email" {...field} placeholder="Correo electrónico" maxLength={50}
                     value={field.value as string} disabled={operation === 'view'}/>
                   </FormControl>
                 </FormItem>
@@ -413,7 +439,7 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Numero de telefono</FormLabel>
                   <FormControl>
-                    <Input type='text' {...field} placeholder="Telefono"
+                    <Input type='text' {...field} placeholder="Telefono" maxLength={10}
                     value={field.value as string} disabled={operation === 'view'}
                     onChange={(e) => {
                       const onlyNumbers = e.target.value.replace(/[^0-9]/g, '')
@@ -431,7 +457,7 @@ export default function Page() {
                 <FormItem>
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
-                    <Input type='text' {...field} placeholder="direccion"
+                    <Input type='text' {...field} placeholder="direccion" maxLength={50}
                     value={field.value as string} disabled={operation === 'view'}/>
                   </FormControl>
                 </FormItem>

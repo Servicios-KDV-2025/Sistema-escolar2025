@@ -1,6 +1,6 @@
 'use client'
 
-import { useEscuela } from '@/app/store/useEscuela'
+import { useEscuela } from '@/app/store/useEscuelaStore'
 import { salonSchema, SalonFormValues } from '@/app/shemas/salon'
 import { CrudDialog, useCrudDialog } from '@/components/dialog/crud-dialog'
 import { useSalon } from '@/app/store/useSalonStore'
@@ -14,7 +14,7 @@ import { toast } from 'sonner'
 import { Id } from '@/convex/_generated/dataModel'
 
 export default function Page() {
-  const escuela = useEscuela((s) => s.escuela)
+  const {escuela} = useEscuela()
 
   const {
     salones,

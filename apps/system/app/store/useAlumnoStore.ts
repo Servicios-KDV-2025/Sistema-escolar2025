@@ -9,7 +9,7 @@ export type Alumno = {
   _id: string;
   escuelaId: string;
   padreId: string;
-  grupoId: string;
+  grupoId?: string;
   matricula: string;
   nombre: string;
   apellidos: string;
@@ -25,7 +25,7 @@ export type Alumno = {
 export type CrearAlumnoData = {
   escuelaId: string;
   padreId: string;
-  grupoId: string;
+  grupoId?: string;
   matricula: string;
   nombre: string;
   apellidos: string;
@@ -40,7 +40,7 @@ export type CrearAlumnoData = {
 export type ActualizarAlumnoData = {
   id: string;
   escuelaId: string;
-  grupoId: string;
+  grupoId?: string;
   matricula: string;
   nombre: string;
   apellidos: string;
@@ -222,7 +222,7 @@ export const useAlumno = (escuelaId?: string) => {
           _id: string;
           escuelaId: string;
           padreId: string;
-          grupoId: string;
+          grupoId?: string;
           matricula: string;
           nombre: string;
           apellidos: string;
