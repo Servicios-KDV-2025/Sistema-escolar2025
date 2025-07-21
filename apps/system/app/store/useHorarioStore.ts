@@ -5,45 +5,37 @@ import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 
 // Tipo de Periodo basado en tu schema de Convex
-export type Periodo = {
+export type Horario = {
   _id: string;
   escuelaId: string;
-  cicloEscolarId: string;
   nombre: string;
-  clave: string;
-  fechaInicio: number;
-  fechaFin: number;
+  horaInicio: string;
+  horaFin: string;
   activo: boolean;
-  createdAt: number;
-  updatedAt?: number;
 };
 
 // Tipos para crear y actualizar periodo
-export type CrearPeriodoData = {
+export type CrearHorarioData = {
   escuelaId: string;
-  cicloEscolarId: string;
   nombre: string;
-  clave: string;
-  fechaInicio: number;
-  fechaFin: number;
+  horaInicio: string;
+  horaFin: string;
   activo: boolean;
 };
 
-export type ActualizarPeriodoData = {
+export type ActualizarHorarioData = {
   id: string;
   escuelaId: string;
-  cicloEscolarId: string;
   nombre?: string;
-  clave?: string;
-  fechaInicio?: number;
-  fechaFin?: number;
+  horaInicio?: string;
+  horaFin?: string;
   activo?: boolean;
 };
 
 // Store de Periodo con CRUD completo
-export type PeriodoStore = {
-  periodos: Periodo[];
-  periodoSeleccionado: Periodo | null;
+export type HorarioStore = {
+  horarios: Horario[];
+  horarioSeleccionado: Horario | null;
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
@@ -52,8 +44,8 @@ export type PeriodoStore = {
   createError: string | null;
   updateError: string | null;
   deleteError: string | null;
-  setPeriodos: (periodos: Periodo[]) => void;
-  setPeriodoSeleccionado: (periodo: Periodo | null) => void;
+  setHorarios: (horarios: Horario[]) => void;
+  setHorarioSeleccionado: (horario: Horario | null) => void;
   setLoading: (loading: boolean) => void;
   setCreating: (creating: boolean) => void;
   setUpdating: (updating: boolean) => void;
@@ -67,8 +59,8 @@ export type PeriodoStore = {
 };
 
 const initialState = {
-  periodos: [],
-  periodoSeleccionado: null,
+  horarios: [],
+  horarioSeleccionado: null,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -79,10 +71,10 @@ const initialState = {
   deleteError: null,
 };
 
-export const usePeriodoStore = create<PeriodoStore>((set) => ({
+export const useHorarioStore = create<HorarioStore>((set) => ({
   ...initialState,
-  setPeriodos: (periodos) => set({ periodos }),
-  setPeriodoSeleccionado: (periodoSeleccionado) => set({ periodoSeleccionado }),
+  setHorarios: (horarios) => set({ horarios }),
+  setHorarioSeleccionado: (horarioSeleccionado) => set({ horarioSeleccionado }),
   setLoading: (isLoading) => set({ isLoading }),
   setCreating: (isCreating) => set({ isCreating }),
   setUpdating: (isUpdating) => set({ isUpdating }),
@@ -100,23 +92,19 @@ export const usePeriodoStore = create<PeriodoStore>((set) => ({
   reset: () => set(initialState),
 }));
 
-type PeriodoQueryData = {
+type HorarioQueryData = {
   _id: string;
   escuelaId: string;
-  cicloEscolarId: string;
   nombre: string;
-  clave: string;
-  fechaInicio: number;
-  fechaFin: number;
+  horaInicio: string;
+  horaFin: string;
   activo: boolean;
-  createdAt: number;
-  updatedAt?: number;
 };
 
-export const usePeriodo = (escuelaId?: string) => {
+export const useHorario = (escuelaId?: string) => {
   const {
-    periodos,
-    periodoSeleccionado,
+    horarios,
+    horarioSeleccionado,
     isLoading,
     isCreating,
     isUpdating,
@@ -125,8 +113,8 @@ export const usePeriodo = (escuelaId?: string) => {
     createError,
     updateError,
     deleteError,
-    setPeriodos,
-    setPeriodoSeleccionado,
+    setHorarios,
+    setHorarioSeleccionado,
     setCreating,
     setUpdating,
     setDeleting,
@@ -134,104 +122,96 @@ export const usePeriodo = (escuelaId?: string) => {
     setUpdateError,
     setDeleteError,
     clearErrors,
-  } = usePeriodoStore();
+    } = useHorarioStore();
 
-  // Query para obtener los periodos de la escuela
-  const periodosQuery = useQuery(
-    api.periodos.obtenerPeriodosPorEscuela,
+  // Query para obtener los horarios de la escuela
+  const horariosQuery = useQuery(
+    api.horarios.obtenerHorariosPorEscuela,
     escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
   );
 
   // Mutations
-  const crearPeriodoMutation = useMutation(api.periodos.crearPeriodo);
-  const actualizarPeriodoMutation = useMutation(api.periodos.actualizarPeriodo);
-  const eliminarPeriodoMutation = useMutation(api.periodos.eliminarPeriodo);
+  const crearHorarioMutation = useMutation(api.horarios.crearHorario);
+  const actualizarHorarioMutation = useMutation(api.horarios.actualizarHorario);
+  const eliminarHorarioMutation = useMutation(api.horarios.eliminarHorario);
 
   // CREATE
-  const crearPeriodo = useCallback(async (data: CrearPeriodoData) => {
+  const crearHorario = useCallback(async (data: CrearHorarioData) => {
     setCreating(true);
     setCreateError(null);
     try {
-      await crearPeriodoMutation({
+      await crearHorarioMutation({
         ...data,
         escuelaId: data.escuelaId as Id<"escuelas">,
-        cicloEscolarId: data.cicloEscolarId as Id<"ciclosEscolares">,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al crear periodo';
+      const errorMessage = error instanceof Error ? error.message : 'Error al crear horario';
       setCreateError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setCreating(false);
     }
-  }, [crearPeriodoMutation, setCreating, setCreateError]);
+  }, [crearHorarioMutation, setCreating, setCreateError]);
 
   // UPDATE
-  const actualizarPeriodo = useCallback(async (data: ActualizarPeriodoData) => {
+  const actualizarHorario = useCallback(async (data: ActualizarHorarioData) => {
     setUpdating(true);
     setUpdateError(null);
     try {
-      await actualizarPeriodoMutation({
-        id: data.id as Id<"periodos">,
+      await actualizarHorarioMutation({
+        id: data.id as Id<"horarios">,
         escuelaId: data.escuelaId as Id<"escuelas">,
-        cicloEscolarId: data.cicloEscolarId as Id<"ciclosEscolares">,
         nombre: data.nombre,
-        clave: data.clave,
-        fechaInicio: data.fechaInicio,
-        fechaFin: data.fechaFin,
+        horaInicio: data.horaInicio,
+        horaFin: data.horaFin,
         activo: data.activo,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar periodo';
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar horario';
       setUpdateError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setUpdating(false);
     }
-  }, [actualizarPeriodoMutation, setUpdating, setUpdateError]);
+  }, [actualizarHorarioMutation, setUpdating, setUpdateError]);
 
   // DELETE
-  const eliminarPeriodo = useCallback(async (id: string, escuelaId: string, cicloEscolarId: string) => {
+  const eliminarHorario = useCallback(async (id: string, escuelaId: string) => {
     setDeleting(true);
     setDeleteError(null);
     try {
-      await eliminarPeriodoMutation({
-        id: id as Id<"periodos">,
+      await eliminarHorarioMutation({
+        id: id as Id<"horarios">,
         escuelaId: escuelaId as Id<"escuelas">,
-        cicloEscolarId: cicloEscolarId as Id<"ciclosEscolares">,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar periodo';
+        const errorMessage = error instanceof Error ? error.message : 'Error al eliminar horario';
       setDeleteError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setDeleting(false);
     }
-  }, [eliminarPeriodoMutation, setDeleting, setDeleteError]);
+  }, [eliminarHorarioMutation, setDeleting, setDeleteError]);
 
-  // Refrescar periodos cuando cambie la query
+  // Refrescar horarios cuando cambie la query
   useEffect(() => {
-    if (periodosQuery) {
-      setPeriodos(
-        (periodosQuery as PeriodoQueryData[]).map((p) => ({
+    if (horariosQuery) {
+      setHorarios(
+        (horariosQuery as HorarioQueryData[]).map((p) => ({
           _id: p._id,
           escuelaId: p.escuelaId,
-          cicloEscolarId: p.cicloEscolarId,
           nombre: p.nombre,
-          clave: p.clave,
-          fechaInicio: p.fechaInicio,
-          fechaFin: p.fechaFin,
+          horaInicio: p.horaInicio,
+          horaFin: p.horaFin,
           activo: p.activo,
-          createdAt: p.createdAt,
-          updatedAt: p.updatedAt,
         }))
       );
     }
-  }, [periodosQuery, setPeriodos]);
+  }, [horariosQuery, setHorarios]);
 
   return {
-    periodos,
-    periodoSeleccionado,
+    horarios,
+    horarioSeleccionado,
     isLoading,
     isCreating,
     isUpdating,
@@ -240,10 +220,10 @@ export const usePeriodo = (escuelaId?: string) => {
     createError,
     updateError,
     deleteError,
-    crearPeriodo,
-    actualizarPeriodo,
-    eliminarPeriodo,
-    setPeriodoSeleccionado,
+    crearHorario,
+    actualizarHorario,
+    eliminarHorario,
+    setHorarioSeleccionado,
     clearErrors,
   };
 }; 

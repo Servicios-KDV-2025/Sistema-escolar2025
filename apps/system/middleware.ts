@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rootDomain } from './lib/utils';
 
 const isPublicRoute = createRouteMatcher([
-  '/api',
+  '/api/(.*)',
 ])
 
 

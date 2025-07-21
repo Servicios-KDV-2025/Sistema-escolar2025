@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// 1. Obtener periodos POR una escuela específica
+// 1. Obtener periodos por escuela
 export const obtenerPeriodosPorEscuela = query({
   args: {
     escuelaId: v.id("escuelas"),
@@ -18,7 +18,24 @@ export const obtenerPeriodosPorEscuela = query({
   },
 });
 
-// 2. Obtener un solo periodo por su ID
+// 2. Obtener periodos por ciclo escolar
+export const obtenerPeriodosPorCiclo = query({
+  args: {
+    cicloEscolarId: v.id("ciclosEscolares"),
+  },
+  handler: async (ctx, args) => {
+    const ciclo = await ctx.db.get(args.cicloEscolarId);
+    if (!ciclo) {
+      throw new Error("El ciclo escolar especificado no existe.");
+    }
+    return await ctx.db
+      .query("periodos")
+      .withIndex("by_ciclo", (q) => q.eq("cicloEscolarId", args.cicloEscolarId))
+      .collect();
+  },
+});
+
+// 3. Obtener un periodo por su ID
 export const obtenerPeriodoPorId = query({
   args: {
     id: v.id("periodos"),
@@ -34,55 +51,69 @@ export const obtenerPeriodoPorId = query({
 
 // --- MUTATIONS ---
 
-// 3. Crear un nuevo periodo DENTRO de una escuela específica
+// 4. Crear un nuevo periodo
 export const crearPeriodo = mutation({
   args: {
     escuelaId: v.id("escuelas"),
+    cicloEscolarId: v.id("ciclosEscolares"),
     nombre: v.string(),
-    horaInicio: v.string(),
-    horaFin: v.string(),
+    clave: v.string(),
+    fechaInicio: v.number(),
+    fechaFin: v.number(),
     activo: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const escuelaExiste = await ctx.db.get(args.escuelaId);
-    if (!escuelaExiste) {
+    const escuela = await ctx.db.get(args.escuelaId);
+    const ciclo = await ctx.db.get(args.cicloEscolarId);
+    if (!escuela) {
       throw new Error("No se puede crear el periodo: La escuela especificada no existe.");
     }
-    return await ctx.db.insert("periodos", args);
+    if (!ciclo) {
+      throw new Error("No se puede crear el periodo: El ciclo escolar especificado no existe.");
+    }
+    const now = Date.now();
+    return await ctx.db.insert("periodos", {
+      ...args,
+      createdAt: now,
+      updatedAt: now,
+    });
   },
 });
 
-// 4. Actualizar un periodo existente, asegurándose de que pertenezca a la escuela
+// 5. Actualizar un periodo existente
 export const actualizarPeriodo = mutation({
   args: {
     id: v.id("periodos"),
     escuelaId: v.id("escuelas"),
+    cicloEscolarId: v.id("ciclosEscolares"),
     nombre: v.optional(v.string()),
-    horaInicio: v.optional(v.string()),
-    horaFin: v.optional(v.string()),
+    clave: v.optional(v.string()),
+    fechaInicio: v.optional(v.number()),
+    fechaFin: v.optional(v.number()),
     activo: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { id, escuelaId, ...data } = args;
-    const periodoExistente = await ctx.db.get(id);
-    if (!periodoExistente || periodoExistente.escuelaId !== escuelaId) {
-      throw new Error("No se puede actualizar: Periodo no encontrado o no pertenece a la escuela especificada.");
+    const { id, escuelaId, cicloEscolarId, ...data } = args;
+    const periodo = await ctx.db.get(id);
+    if (!periodo || periodo.escuelaId !== escuelaId || periodo.cicloEscolarId !== cicloEscolarId) {
+      throw new Error("No se puede actualizar: Periodo no encontrado o no pertenece a la escuela/ciclo especificado.");
     }
-    await ctx.db.patch(id, data);
+    await ctx.db.patch(id, { ...data, updatedAt: Date.now() });
     return await ctx.db.get(id);
   },
 });
 
-// 5. Eliminar un periodo, asegurándose de que pertenezca a la escuela
+// 6. Eliminar un periodo
 export const eliminarPeriodo = mutation({
   args: {
     id: v.id("periodos"),
     escuelaId: v.id("escuelas"),
+    cicloEscolarId: v.id("ciclosEscolares"),
   },
   handler: async (ctx, args) => {
-    const periodoExistente = await ctx.db.get(args.id);
-    if (!periodoExistente || periodoExistente.escuelaId !== args.escuelaId) {
-      throw new Error("No se puede eliminar: Periodo no encontrado o no pertenece a la escuela especificada.");
+    const periodo = await ctx.db.get(args.id);
+    if (!periodo || periodo.escuelaId !== args.escuelaId || periodo.cicloEscolarId !== args.cicloEscolarId) {
+      throw new Error("No se puede eliminar: Periodo no encontrado o no pertenece a la escuela/ciclo especificado.");
     }
     await ctx.db.delete(args.id);
     return true;
