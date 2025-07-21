@@ -109,8 +109,8 @@ export const grupoSchema = z.object({
 
 export type Grupo = z.infer<typeof grupoSchema>;
 
-export const periodoSchema = z.object({
-  _id: z.custom<Id<'periodos'>>(),
+export const horarioSchema = z.object({
+  _id: z.custom<Id<'horarios'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   nombre: z.string(),
   horaInicio: z.string(),
@@ -118,7 +118,7 @@ export const periodoSchema = z.object({
   activo: z.boolean(),
 });
 
-export type Periodo = z.infer<typeof periodoSchema>;
+export type Horario = z.infer<typeof horarioSchema>;
 
 export const catalogosDeClasesSchema = z.object({
   _id: z.custom<Id<'catalogosDeClases'>>(),
@@ -136,16 +136,16 @@ export const catalogosDeClasesSchema = z.object({
 
 export type Catalogosdeclases = z.infer<typeof catalogosDeClasesSchema>;
 
-export const periodoPorClaseSchema = z.object({
-  _id: z.custom<Id<'periodoPorClase'>>(),
+export const horarioPorClaseSchema = z.object({
+  _id: z.custom<Id<'horarioPorClase'>>(),
   escuelaId: z.custom<Id<'escuelas'>>(),
   catalogoClaseId: z.custom<Id<'catalogosDeClases'>>(),
-  periodoId: z.custom<Id<'periodos'>>(),
+  horarioId: z.custom<Id<'horarios'>>(),
   diaSemana: z.number(),
   activo: z.boolean(),
 });
 
-export type Periodoporclase = z.infer<typeof periodoPorClaseSchema>;
+export type Horarioporclase = z.infer<typeof horarioPorClaseSchema>;
 
 export const padresSchema = z.object({
   _id: z.custom<Id<'padres'>>(),
