@@ -346,54 +346,60 @@ export default function CalendarioEscolar() {
                   )}
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent>             
                 {datosCalendario.eventosDelDia.length > 0 ? (
                   <div className="space-y-3 max-h-84 overflow-y-auto">
-                    {datosCalendario.eventosDelDia.map((evento, index) => {
-                      const tipoEvento = getTipoEventoById(evento.tipoEventoId);
-                      const config = tipoEvento
-                        ? tipoEventoMap[tipoEvento.clave]
-                        : null;
-                      const IconComponent = config?.icon || CalendarIcon;
-                      return (
-                        <div
-                          key={index}
-                          className={cn(
-                            "p-4 rounded-xl border-l-4 mx-2",
-                            config?.bgLight || "bg-gray-50",
-                            config?.borderColor || "border-l-gray-300"
-                          )}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div
-                              className={cn(
-                                "p-2 rounded-lg shadow-sm",
-                                config?.color || "bg-gray-500 text-white"
-                              )}
-                            >
-                              <IconComponent className="w-4 h-4" />
+                    {datosCalendario.eventosDelDia
+                      .sort(
+                        (a, b) =>
+                          new Date(a.fecha).getTime() -
+                          new Date(b.fecha).getTime()
+                      )
+                      .map((evento, index) => {
+                        const tipoEvento = getTipoEventoById(evento.tipoEventoId);
+                        const config = tipoEvento
+                          ? tipoEventoMap[tipoEvento.clave]
+                          : null;
+                        const IconComponent = config?.icon || CalendarIcon;
+                        return (
+                          <div
+                            key={index}
+                            className={cn(
+                              "p-4 rounded-xl border-l-4 mx-2",
+                              config?.bgLight || "bg-gray-50",
+                              config?.borderColor || "border-l-gray-300"
+                            )}
+                            role="button"
+                            tabIndex={0}
+                          >
+                            <div className="flex items-center gap-3 mb-2">
+                              <div
+                                className={cn(
+                                  "p-2 rounded-lg shadow-sm",
+                                  config?.color || "bg-gray-500 text-white"
+                                )}
+                              >
+                                <IconComponent className="w-4 h-4" />
+                              </div>
+                              <div className="flex-1">
+                                <span className="font-semibold text-slate-800 capitalize">
+                                  {config?.nombre || evento.tipoEventoId}
+                                </span>
+                                <div className="text-xs items-center text-slate-500">
+                                  <p>
+                                    {format(new Date(evento.fecha), "hh:mm a", {locale: es,})}
+                                  </p>
+                                </div>                     
+                              </div>
                             </div>
-                            <div className="flex-1">
-                              <span className="font-semibold text-slate-800 capitalize">
-                                {config?.nombre || evento.tipoEventoId}
-                              </span>
-                              <div className="text-xs items-center text-slate-500">
-                                <p>
-                                  {format(new Date(evento.fecha), "hh:mm a", {locale: es,})}
-                                </p>
-                              </div>                     
-                            </div>
+                            {evento.descripcion && (
+                              <p className="text-sm text-slate-700 ml-11 leading-relaxed">
+                                {evento.descripcion}
+                              </p>
+                            )}
                           </div>
-                          {evento.descripcion && (
-                            <p className="text-sm text-slate-700 ml-11 leading-relaxed">
-                              {evento.descripcion}
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
