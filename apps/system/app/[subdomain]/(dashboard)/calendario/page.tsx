@@ -7,11 +7,31 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { Id } from "@/convex/_generated/dataModel";
-import { BookOpen, AlertTriangle, Bell, TrendingUp, School, CalendarDays, Calendar as CalendarIcon } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
+import {
+  BookOpen,
+  AlertTriangle,
+  Bell,
+  TrendingUp,
+  School,
+  CalendarDays,
+  Calendar as CalendarIcon,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@repo/ui/components/shadcn/card";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { Button } from "@repo/ui/components/shadcn/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/shadcn/select";
 import { Separator } from "@repo/ui/components/shadcn/separator";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -25,42 +45,49 @@ import { TiposDeEventos } from "@/app/types/tipoDeEventos";
 import { GenericId } from "convex/values";
 
 interface TipoEventoConfig {
-  id: GenericId<"tiposDeEventos">
-  nombre: string
-  clave: string
-  icono: string
-  color: string
-  colorB: string
-  activo: boolean
-  bgLight: string
-  borderColor: string
-  icon: React.ElementType
-  description: string
-  colorBase: string
-  dotColor: string
+  id: GenericId<"tiposDeEventos">;
+  nombre: string;
+  clave: string;
+  icono: string;
+  color: string;
+  colorB: string;
+  activo: boolean;
+  bgLight: string;
+  borderColor: string;
+  icon: React.ElementType;
+  description: string;
+  colorBase: string;
+  dotColor: string;
 }
 export default function CalendarioEscolar() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
-  const [currentMonth, setCurrentMonth] = useState(new Date())
-  const {escuela } = useEscuela()
-  const setItems = useBreadcrumbStore(state => state.setItems)
-  const params = useParams()
-  const slug = typeof params?.slug === "string" ? params.slug : ""
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(
+    new Date()
+  );
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const { escuela } = useEscuela();
+  const setItems = useBreadcrumbStore((state) => state.setItems);
+  const params = useParams();
+  const slug = typeof params?.slug === "string" ? params.slug : "";
 
   const ciclosEscolares = useQuery(
     api.ciclosEscolares.obtenerCiclosEscolares,
     escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
-  )
+  );
   const tiposDeEventos = useQuery(
     api.tiposDeEventos.obtenerTiposDeEventos,
     escuela ? { escuelaId: escuela._id as Id<"escuelas"> } : "skip"
-  )
+  );
 
-  const getTipoEventoById = useCallback((tipoEventoId: string) => {
-    return tiposDeEventos?.find(tipo => tipo._id === tipoEventoId || tipo.clave === tipoEventoId);
-  }, [tiposDeEventos]);
+  const getTipoEventoById = useCallback(
+    (tipoEventoId: string) => {
+      return tiposDeEventos?.find(
+        (tipo) => tipo._id === tipoEventoId || tipo.clave === tipoEventoId
+      );
+    },
+    [tiposDeEventos]
+  );
 
-  const [filtroCicloEscolarId, setFiltroCicloEscolarId] = useState<string>("")
+  const [filtroCicloEscolarId, setFiltroCicloEscolarId] = useState<string>("");
 
   // Calendarios
   const [modalAbierto, setModalAbierto] = useState(false);
@@ -70,92 +97,108 @@ export default function CalendarioEscolar() {
 
   // Tipos de eventos
   const [modalAbiertoT, setModalAbiertoT] = useState(false);
-  const [tipoDeEventoEditar, setTipoDeEventoEditar] = useState<TiposDeEventos | null>(null);
+  const [tipoDeEventoEditar, setTipoDeEventoEditar] =
+    useState<TiposDeEventos | null>(null);
   type ModoTipoDeEvento = "editar" | "ver" | "eliminar" | null;
   const [modoDialogoT, setModoDialogoT] = useState<ModoTipoDeEvento>();
 
   useEffect(() => {
-    if (ciclosEscolares && ciclosEscolares.length > 0 && !filtroCicloEscolarId) {
-      setFiltroCicloEscolarId(ciclosEscolares[ciclosEscolares.length - 1]._id)
+    if (
+      ciclosEscolares &&
+      ciclosEscolares.length > 0 &&
+      !filtroCicloEscolarId
+    ) {
+      setFiltroCicloEscolarId(ciclosEscolares[ciclosEscolares.length - 1]._id);
     }
 
     if (escuela) {
       setItems([
         { label: `${escuela.nombre}`, href: `/escuela/${slug}` },
-        { label: 'Calendario Escolar', isCurrentPage: true },
-      ])
+        { label: "Calendario Escolar", isCurrentPage: true },
+      ]);
     }
-  }, [ciclosEscolares, escuela, setItems, slug, filtroCicloEscolarId])
+  }, [ciclosEscolares, escuela, setItems, slug, filtroCicloEscolarId]);
 
   const eventos = useQuery(
     api.calendario.obtenerCalendarioCicloEscolar,
     escuela?._id && filtroCicloEscolarId
       ? {
-        escuelaId: escuela._id as Id<"escuelas">,
-        cicloEscolarId: filtroCicloEscolarId as Id<"ciclosEscolares">
-      }
+          escuelaId: escuela._id as Id<"escuelas">,
+          cicloEscolarId: filtroCicloEscolarId as Id<"ciclosEscolares">,
+        }
       : "skip"
-  )
+  );
 
   const convertirColorAClases = useCallback((color: string | undefined) => {
-    if (!color) return {
-      color: "bg-gray-500 text-white",
-      bgLight: "bg-gray-50",
-      borderColor: "border-l-gray-300",
-      dotColor: "before:bg-gray-500"
-    }
+    if (!color)
+      return {
+        color: "bg-gray-500 text-white",
+        bgLight: "bg-gray-50",
+        borderColor: "border-l-gray-300",
+        dotColor: "before:bg-gray-500",
+      };
 
-    return colorMap[color] || {
-      color: "bg-gray-500 text-white",
-      bgLight: "bg-gray-50",
-      borderColor: "border-l-gray-300",
-      dotColor: "before:bg-gray-500"
-    };
-  }, [])
+    return (
+      colorMap[color] || {
+        color: "bg-gray-500 text-white",
+        bgLight: "bg-gray-50",
+        borderColor: "border-l-gray-300",
+        dotColor: "before:bg-gray-500",
+      }
+    );
+  }, []);
 
   const tipoEventoMap = useMemo(() => {
     if (!tiposDeEventos) return {};
 
-    return tiposDeEventos.reduce((acc, tipo) => {
-      const clases = convertirColorAClases(tipo.color);
-      const extractColorBase = (bgClass: string) => {
-        const match = bgClass.match(/bg-([a-z]+)-\d+/);
-        return match ? match[1] : "gray";
-      };
+    const sortedTiposDeEventos = [...tiposDeEventos].sort((a, b) => {
+      const nameA = a.nombre.toLowerCase();
+      const nameB = b.nombre.toLowerCase();
+      return nameA.localeCompare(nameB); // More robust string comparison
+    });
 
-      acc[tipo.clave] = {
-        id: tipo._id,
-        nombre: tipo.nombre,
-        clave: tipo.clave,
-        icono: tipo.icono || "",
-        activo: tipo.activo,
-        color: clases.color,
-        colorB: tipo.color || "",
-        bgLight: clases.bgLight,
-        borderColor: clases.borderColor,
-        icon: iconMap[tipo.icono || "BookOpen"] || BookOpen,
-        description: tipo.descripcion || "Sin descripción",
-        colorBase: extractColorBase(clases.color),
-        dotColor: clases.dotColor,
-      };
+    return sortedTiposDeEventos.reduce(
+      (acc, tipo) => {
+        const clases = convertirColorAClases(tipo.color);
+        const extractColorBase = (bgClass: string) => {
+          const match = bgClass.match(/bg-([a-z]+)-\d+/);
+          return match ? match[1] : "gray";
+        };
 
-      return acc;
-    }, {} as Record<string, TipoEventoConfig>);
+        acc[tipo.clave] = {
+          id: tipo._id,
+          nombre: tipo.nombre,
+          clave: tipo.clave,
+          icono: tipo.icono || "",
+          activo: tipo.activo,
+          color: clases.color,
+          colorB: tipo.color || "",
+          bgLight: clases.bgLight,
+          borderColor: clases.borderColor,
+          icon: iconMap[tipo.icono || "BookOpen"] || BookOpen,
+          description: tipo.descripcion || "Sin descripción",
+          colorBase: extractColorBase(clases.color),
+          dotColor: clases.dotColor,
+        };
+
+        return acc;
+      },
+      {} as Record<string, TipoEventoConfig>
+    );
   }, [tiposDeEventos, convertirColorAClases]);
 
-
   const datosCalendario = useMemo(() => {
-    if (!eventos) return {
-      fechasConEventos: new Map<string, string>(),
-      contadorEventos: {} as Record<string, number>,
-      eventosDelDia: [],
-      eventosFiltrados: []
-    };
+    if (!eventos)
+      return {
+        fechasConEventos: new Map<string, string>(),
+        contadorEventos: {} as Record<string, number>,
+        eventosDelDia: [],
+        eventosFiltrados: [],
+      };
 
     const fechasConEventos = new Map<string, string>();
     const contadorEventos: Record<string, number> = {};
     const eventosDelDia: typeof eventos = [];
-
 
     eventos.forEach((evento) => {
       const fecha = format(new Date(evento.fecha), "yyyy-MM-dd");
@@ -178,11 +221,14 @@ export default function CalendarioEscolar() {
     return format(f, "yyyy-MM-dd");
   };
 
-  const getTipoEvento = useCallback((date: Date) => {
-    const fechaStr = normalizarFecha(date);
-    const tipo = datosCalendario.fechasConEventos.get(fechaStr);
-    return tipo;
-  }, [datosCalendario.fechasConEventos]);
+  const getTipoEvento = useCallback(
+    (date: Date) => {
+      const fechaStr = normalizarFecha(date);
+      const tipo = datosCalendario.fechasConEventos.get(fechaStr);
+      return tipo;
+    },
+    [datosCalendario.fechasConEventos]
+  );
 
   const generateModifiers = useCallback(() => {
     const modifiers: Record<string, (date: Date) => boolean> = {};
@@ -200,14 +246,14 @@ export default function CalendarioEscolar() {
   const generateModifiersClassNames = useCallback(() => {
     const classNames: Record<string, string> = {};
     const dotColorMap: Record<string, string> = {
-      blue: 'after:bg-blue-500 after:border-blue-600 hover:ring-blue-300/50',
-      pink: 'after:bg-pink-500 after:border-pink-600 hover:ring-pink-300/50',
-      yellow: 'after:bg-yellow-500 after:border-yellow-600 hover:ring-yellow-300/50',
-      gray: 'after:bg-gray-500 after:border-gray-600 hover:ring-gray-300/50',
-      green: 'after:bg-green-500 after:border-green-600 hover:ring-green-300/50',
-      purple: 'after:bg-purple-500 after:border-purple-600 hover:ring-purple-300/50',
-      cyan: 'after:bg-cyan-500 after:border-cyan-600 hover:ring-cyan-300/50',
-      orange: 'after:bg-orange-500 after:border-orange-600 hover:ring-orange-300/50',
+      blue: "after:bg-blue-500 after:border-blue-600 hover:ring-blue-300/50",
+      pink: "after:bg-pink-500 after:border-pink-600 hover:ring-pink-300/50",
+      yellow:"after:bg-yellow-500 after:border-yellow-600 hover:ring-yellow-300/50",
+      gray: "after:bg-gray-500 after:border-gray-600 hover:ring-gray-300/50",
+      green:"after:bg-green-500 after:border-green-600 hover:ring-green-300/50",
+      purple:"after:bg-purple-500 after:border-purple-600 hover:ring-purple-300/50",
+      cyan: "after:bg-cyan-500 after:border-cyan-600 hover:ring-cyan-300/50",
+      orange:"after:bg-orange-500 after:border-orange-600 hover:ring-orange-300/50",
     };
 
     for (const tipoClave in tipoEventoMap) {
@@ -241,7 +287,10 @@ export default function CalendarioEscolar() {
       <div className="container mx-auto px-6 py-6">
         <div className="text-center space-y-4">
           <div className="flex mt-2 justify-end">
-            <Select value={filtroCicloEscolarId} onValueChange={setFiltroCicloEscolarId}>
+            <Select
+              value={filtroCicloEscolarId}
+              onValueChange={setFiltroCicloEscolarId}
+            >
               <SelectTrigger className="bg-slate-50 border-slate-200 focus:bg-white">
                 <School className="h-4 w-4 mr-2" />
                 <SelectValue placeholder="Filtrar por ciclo escolar" />
@@ -259,10 +308,13 @@ export default function CalendarioEscolar() {
             <div className="p-3 rounded-full backdrop-blur-sm">
               <School className="h-8 w-8" />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">Sistema Escolar</h1>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Sistema Escolar
+            </h1>
           </div>
           <p className="text-xl max-w-2xl mx-auto">
-            Gestiona eventos, exámenes y actividades escolares de manera eficiente y organizada
+            Gestiona eventos, exámenes y actividades escolares de manera
+            eficiente y organizada
           </p>
         </div>
       </div>
@@ -285,7 +337,10 @@ export default function CalendarioEscolar() {
                     </div>
                   </div>
                   {datosCalendario.eventosDelDia.length > 0 && (
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                    <Badge
+                      variant="secondary"
+                      className="bg-blue-100 text-blue-700"
+                    >
                       {datosCalendario.eventosDelDia.length}
                     </Badge>
                   )}
@@ -296,7 +351,9 @@ export default function CalendarioEscolar() {
                   <div className="space-y-3 max-h-84 overflow-y-auto">
                     {datosCalendario.eventosDelDia.map((evento, index) => {
                       const tipoEvento = getTipoEventoById(evento.tipoEventoId);
-                      const config = tipoEvento ? tipoEventoMap[tipoEvento.clave] : null;
+                      const config = tipoEvento
+                        ? tipoEventoMap[tipoEvento.clave]
+                        : null;
                       const IconComponent = config?.icon || CalendarIcon;
                       return (
                         <div
@@ -310,19 +367,23 @@ export default function CalendarioEscolar() {
                           tabIndex={0}
                         >
                           <div className="flex items-center gap-3 mb-2">
-                            <div className={cn(
-                              "p-2 rounded-lg shadow-sm",
-                              config?.color || "bg-gray-500 text-white"
-                            )}>
+                            <div
+                              className={cn(
+                                "p-2 rounded-lg shadow-sm",
+                                config?.color || "bg-gray-500 text-white"
+                              )}
+                            >
                               <IconComponent className="w-4 h-4" />
                             </div>
                             <div className="flex-1">
                               <span className="font-semibold text-slate-800 capitalize">
                                 {config?.nombre || evento.tipoEventoId}
                               </span>
-                              <div className="text-xs text-slate-500">
-                                {format(new Date(evento.fecha), "d 'de' MMMM", { locale: es })}
-                              </div>
+                              <div className="text-xs items-center text-slate-500">
+                                <p>
+                                  {format(new Date(evento.fecha), "hh:mm a", {locale: es,})}
+                                </p>
+                              </div>                     
                             </div>
                           </div>
                           {evento.descripcion && (
@@ -340,9 +401,7 @@ export default function CalendarioEscolar() {
                     <p className="text-slate-500 font-medium">
                       No hay eventos programados
                     </p>
-                    <p className="text-slate-400 text-sm mt-1">
-                      para este día
-                    </p>
+                    <p className="text-slate-400 text-sm mt-1">para este día</p>
                   </div>
                 )}
               </CardContent>
@@ -362,24 +421,31 @@ export default function CalendarioEscolar() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {datosCalendario.eventos && datosCalendario.eventos?.length > 0 ? (
+              {datosCalendario.eventos &&
+              datosCalendario.eventos?.length > 0 ? (
                 <div className="space-y-3 max-h-84 overflow-y-auto">
                   {datosCalendario.eventos
-                    ?.filter(evento => new Date(evento.fecha) >= new Date())
-                    .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime())
+                    ?.filter((evento) => new Date(evento.fecha) >= new Date())
+                    .sort(
+                      (a, b) =>
+                        new Date(a.fecha).getTime() -
+                        new Date(b.fecha).getTime()
+                    )
                     .slice(0, 5)
                     .map((evento, index) => {
                       const tipoEvento = getTipoEventoById(evento.tipoEventoId);
-                      const config = tipoEvento ? tipoEventoMap[tipoEvento.clave] : null;
+                      const config = tipoEvento
+                        ? tipoEventoMap[tipoEvento.clave]
+                        : null;
                       const IconComponent = config?.icon || CalendarIcon;
 
                       return (
                         <div
                           key={index}
                           onClick={() => {
-                            setEventoEditar(evento as Calendario)
+                            setEventoEditar(evento as Calendario);
                             setModoDialogo("editar");
-                            setModalAbierto(true)
+                            setModalAbierto(true);
                           }}
                           className={cn(
                             "p-4 rounded-xl border-l-4 transition-all duration-200 hover:shadow-md cursor-pointer",
@@ -390,18 +456,25 @@ export default function CalendarioEscolar() {
                           tabIndex={0}
                         >
                           <div className="flex items-center gap-3 mb-2">
-                            <div className={cn(
-                              "p-2 rounded-lg shadow-sm",
-                              config?.color || "bg-gray-500 text-white"
-                            )}>
+                            <div
+                              className={cn(
+                                "p-2 rounded-lg shadow-sm",
+                                config?.color || "bg-gray-500 text-white"
+                              )}
+                            >
                               <IconComponent className="w-4 h-4" />
                             </div>
                             <div className="flex-1">
                               <span className="font-semibold text-slate-800 capitalize">
                                 {config?.nombre || evento.tipoEventoId}
                               </span>
-                              <div className="text-xs text-slate-500">
-                                {format(new Date(evento.fecha), "d 'de' MMMM", { locale: es })}
+                              <div className="text-xs items-center text-slate-500">
+                                  {format(new Date(evento.fecha), "d 'de' MMMM", {
+                                    locale: es,
+                                  })}
+                                <p>
+                                  {format(new Date(evento.fecha), "hh:mm a", {locale: es,})}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -413,7 +486,9 @@ export default function CalendarioEscolar() {
                         </div>
                       );
                     })}
-                  {datosCalendario.eventos?.filter(evento => new Date(evento.fecha) >= new Date()).length === 0 && (
+                  {datosCalendario.eventos?.filter(
+                    (evento) => new Date(evento.fecha) >= new Date()
+                  ).length === 0 && (
                     <div className="text-center py-8">
                       <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                       <p className="text-slate-500 font-medium">
@@ -489,14 +564,14 @@ export default function CalendarioEscolar() {
                     "focus:bg-blue-50 focus:text-blue-700 focus:ring-2 focus:ring-blue-300"
                   ),
                   day_button:
-                    'data-[selected-single=true]:bg-transparent data-[selected-single=true]:text-black',
-                  selected: 'bg-transparent border-1 sm:border-2 p-0 border-blue-300 text-black font-semibold',
-                  today: 'bg-slate-100',
-                  day_selected: "ring-2 ring-slate-400 bg-slate-100 text-slate-900 font-bold",
-                  day_today: "ring-2 ring-slate-400 bg-slate-100 text-slate-900 font-bold",
+                    "data-[selected-single=true]:bg-transparent data-[selected-single=true]:text-black",
+                  selected:"bg-transparent border-1 sm:border-2 p-0 border-blue-300 text-black font-semibold",
+                  today: "bg-slate-100",
+                  day_selected:"ring-2 ring-slate-400 bg-slate-100 text-slate-900 font-bold",
+                  day_today:"ring-2 ring-slate-400 bg-slate-100 text-slate-900 font-bold",
                   day_outside: "text-slate-300 opacity-40",
                   day_disabled: "text-slate-300 opacity-30 cursor-not-allowed",
-                  day_range_middle: "aria-selected:bg-blue-50 aria-selected:text-blue-700",
+                  day_range_middle:"aria-selected:bg-blue-50 aria-selected:text-blue-700",
                   day_hidden: "invisible",
                 }}
                 modifiers={generateModifiers()}
@@ -505,9 +580,9 @@ export default function CalendarioEscolar() {
               <div className="flex justify-center mt-6 pl-4">
                 <Button
                   onClick={() => {
-                    setEventoEditar(null)
+                    setEventoEditar(null);
                     setModoDialogo(null);
-                    setModalAbierto(true)
+                    setModalAbierto(true);
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-150 hover:scale-105"
                 >
@@ -522,7 +597,6 @@ export default function CalendarioEscolar() {
           <Card className="lg:col-span-1 shadow-xl bg-white/90 backdrop-blur-md">
             <CardContent className="px-4">
               <CardHeader className="flex flex-row justify-between pb-4">
-
                 <div className="flex items-center gap-3">
                   <div className="p-3 bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl shadow-md">
                     <AlertTriangle className="w-6 h-6 text-white" />
@@ -549,36 +623,38 @@ export default function CalendarioEscolar() {
                     descripcion: config.description,
                     color: config.colorB,
                     icono: config.icono,
-                    activo: config.activo
-
-                  }
+                    activo: config.activo,
+                  };
                   return (
                     <div
                       key={tipo}
                       onClick={() => {
-                        setTipoDeEventoEditar(tipoDeEvento as TiposDeEventos)
+                        setTipoDeEventoEditar(tipoDeEvento as TiposDeEventos);
                         setModoDialogoT("editar");
-                        setModalAbiertoT(true)
-
+                        setModalAbiertoT(true);
                       }}
                       className={cn(
                         "p-4 rounded-xl border-2 transition-all duration-200 hover:shadow-md cursor-pointer",
                         config.bgLight,
-                        config.borderColor.replace('border-l-', 'border-')
+                        config.borderColor.replace("border-l-", "border-")
                       )}
                       role="button"
                       tabIndex={0}
                     >
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={cn(
-                          "p-2 rounded-lg shadow-sm transition-all duration-200",
-                          config.color,
-                          "group-hover:shadow-md"
-                        )}>
+                        <div
+                          className={cn(
+                            "p-2 rounded-lg shadow-sm transition-all duration-200",
+                            config.color,
+                            "group-hover:shadow-md"
+                          )}
+                        >
                           <IconComponent className="w-4 h-4" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-slate-800">{config.nombre}</h3>
+                          <h3 className="font-bold text-slate-800">
+                            {config.nombre}
+                          </h3>
                         </div>
                         <TrendingUp className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
                       </div>
@@ -592,21 +668,20 @@ export default function CalendarioEscolar() {
               <div className="flex mt-6 pl-1">
                 <Button
                   onClick={() => {
-                    setTipoDeEventoEditar(null)
+                    setTipoDeEventoEditar(null);
                     setModoDialogoT(null);
-                    setModalAbiertoT(true)
+                    setModalAbiertoT(true);
                   }}
                   className="bg-amber-600 hover:bg-amber-700 shadow-lg rounded-lg px-4 py-2 flex items-center justify-center transition-transform duration-150 hover:scale-105 "
                   aria-label="Agregar tipo de evento"
-                  title="Agregar tipo de evento">
+                  title="Agregar tipo de evento"
+                >
                   Crear nuevo tipo de evento
                 </Button>
               </div>
             </CardContent>
           </Card>
         </div>
-
-
       </div>
       <TipoDeEventoDialog
         isOpen={modalAbiertoT}
@@ -633,6 +708,5 @@ export default function CalendarioEscolar() {
         eventoEditar={eventoEditar ?? undefined}
       />
     </div>
-
   );
 }

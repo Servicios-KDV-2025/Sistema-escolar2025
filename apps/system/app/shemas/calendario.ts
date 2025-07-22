@@ -5,6 +5,7 @@ export const calendarioSchema = z.object({
         required_error: "La fecha es requerida",
         invalid_type_error: "Fecha inválida",
     }),
+    hora: z.string().optional(),
     tipoEventoId: z.string({
         required_error: "El tipo de evento es requerido",
     }).min(1, "Debe seleccionar un tipo de evento"),
