@@ -5,81 +5,42 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useEscuela } from "@/app/store/useEscuelaStore";
 import { usePeriodo } from "@/app/store/usePeriodoStore";
+import { useCicloEscolar } from "@/app/store/useCicloEscolarStore";
 import { Badge } from "@repo/ui/components/shadcn/badge";
 import { CrudDialog, useCrudDialog } from "@/components/dialog/crud-dialog";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@repo/ui/components/shadcn/form";
 import { Input } from "@repo/ui/components/shadcn/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@repo/ui/components/shadcn/select";
 import { Switch } from "@repo/ui/components/shadcn/switch";
 import { Plus, Pencil, Trash2, Eye } from "lucide-react";
 import { z } from "zod";
 import { UseFormReturn } from "react-hook-form";
+import { useEffect } from "react";
 
-// Schema de validación para periodos
+// Nuevo schema de validación para periodos
 const periodoSchema = z.object({
   nombre: z.string().min(1, "Nombre requerido"),
-  horaInicio: z.string().regex(/^\d{2}:\d{2}$/, "Formato HH:MM"),
-  horaFin: z.string().regex(/^\d{2}:\d{2}$/, "Formato HH:MM"),
+  clave: z.string().min(1, "Clave requerida"),
+  cicloEscolarId: z.string().min(1, "Ciclo escolar requerido"),
+  fechaInicio: z.string().min(1, "Fecha de inicio requerida"), // como string para input type="date"
+  fechaFin: z.string().min(1, "Fecha de fin requerida"),
   activo: z.boolean(),
 });
 
-// Opciones para AM/PM
-const ampmOptions = ["AM", "PM"];
-
-// Helper para convertir a 24h
-function to24h(hora: string, ampm: string) {
-  if (!/^\d{1,2}:\d{2}$/.test(hora)) {
-    return hora;
-  }
-
-  const [h, m] = hora.split(":").map(Number);
-
-  if (h < 1 || h > 12 || m < 0 || m > 59) {
-    return hora;
-  }
-
-  let h24 = h;
-  if (ampm === "PM" && h !== 12) h24 += 12;
-  if (ampm === "AM" && h === 12) h24 = 0;
-  return `${h24.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+// Utilidad para convertir timestamp a string 'YYYY-MM-DD' para input type="date"
+function toDateInputString(timestamp?: number | string) {
+  if (!timestamp) return "";
+  const date = typeof timestamp === "string" ? new Date(Number(timestamp)) : new Date(timestamp);
+  // Ajuste local, no UTC
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
-// Helper para convertir de 24h a 12h
-function from24h(hora24: string) {
-  if (!hora24) return { hora: "7:00", ampm: "AM" };
-  const [h, m] = hora24.split(":").map(Number);
-  const ampm = h >= 12 ? "PM" : "AM";
-  let hora = h % 12;
-  if (hora === 0) hora = 12;
-  return { hora: `${hora}:${m.toString().padStart(2, "0")}`, ampm };
-}
-
-// Formato 12 horas para mostrar
-function formatoHora12(hora24: string) {
-  if (!hora24) return "";
-  const [h, m] = hora24.split(":").map(Number);
-  const ampm = h >= 12 ? "PM" : "AM";
-  const hora12 = ((h + 11) % 12 + 1);
-  return `${hora12}:${m.toString().padStart(2, "0")} ${ampm}`;
-}
-
-// Función para validar formato de hora 12h
-function validarHora12(hora: string) {
-  if (!/^\d{1,2}:\d{2}$/.test(hora)) {
-    return "Formato inválido. Use H:MM o HH:MM";
-  }
-
-  const [h, m] = hora.split(":").map(Number);
-
-  if (h < 1 || h > 12) {
-    return "La hora debe estar entre 1 y 12";
-  }
-
-  if (m < 0 || m > 59) {
-    return "Los minutos deben estar entre 00 y 59";
-  }
-
-  return null;
+// Utilidad para convertir 'YYYY-MM-DD' a timestamp local
+function dateStringToLocalTimestamp(dateString: string) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  return new Date(year, month - 1, day).getTime();
 }
 
 export default function PeriodosPage() {
@@ -105,6 +66,12 @@ export default function PeriodosPage() {
     clearErrors: clearStoreErrors,
   } = usePeriodo(escuela?._id);
 
+  const { ciclosEscolares } = useCicloEscolar(escuela?._id);
+
+  // TODO: Obtener lista de ciclos escolares de la escuela
+  // const ciclosEscolares: Array<{ _id: string; nombre: string }> = ...
+  // const ciclosEscolares: Array<{ _id: string; nombre: string }> = [];
+
   // Hook del CrudDialog
   const {
     isOpen,
@@ -117,8 +84,10 @@ export default function PeriodosPage() {
     close
   } = useCrudDialog(periodoSchema, {
     nombre: "",
-    horaInicio: "07:00",
-    horaFin: "08:00",
+    clave: "",
+    cicloEscolarId: "",
+    fechaInicio: "",
+    fechaFin: "",
     activo: true
   });
 
@@ -127,14 +96,20 @@ export default function PeriodosPage() {
       toast.error('Error: Escuela no seleccionada');
       return;
     }
-
+    // Validar cicloEscolarId
+    if (!values.cicloEscolarId) {
+      toast.error('Selecciona un ciclo escolar');
+      return;
+    }
     try {
       if (operation === 'create') {
         await crearPeriodo({
           escuelaId: escuela._id,
+          cicloEscolarId: values.cicloEscolarId as string,
           nombre: values.nombre as string,
-          horaInicio: values.horaInicio as string,
-          horaFin: values.horaFin as string,
+          clave: values.clave as string,
+          fechaInicio: dateStringToLocalTimestamp(values.fechaInicio as string),
+          fechaFin: dateStringToLocalTimestamp(values.fechaFin as string),
           activo: values.activo as boolean
         });
         toast.success('Creado correctamente')
@@ -142,9 +117,11 @@ export default function PeriodosPage() {
         await actualizarPeriodo({
           id: data._id,
           escuelaId: escuela._id,
+          cicloEscolarId: values.cicloEscolarId as string,
           nombre: values.nombre as string,
-          horaInicio: values.horaInicio as string,
-          horaFin: values.horaFin as string,
+          clave: values.clave as string,
+          fechaInicio: dateStringToLocalTimestamp(values.fechaInicio as string),
+          fechaFin: dateStringToLocalTimestamp(values.fechaFin as string),
           activo: values.activo as boolean
         });
         toast.success('Actualizado correctamente')
@@ -155,14 +132,17 @@ export default function PeriodosPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string, cicloEscolarId: string) => {
     if (!escuela?._id) {
       toast.error('Error: Escuela no seleccionada');
       return;
     }
-
+    if (!cicloEscolarId) {
+      toast.error('Error: Ciclo escolar no seleccionado');
+      return;
+    }
     try {
-      await eliminarPeriodo(id, escuela._id);
+      await eliminarPeriodo(id, escuela._id, cicloEscolarId);
       toast.success('Eliminado correctamente')
     } catch (error) {
       console.error('Error al eliminar periodo:', error);
@@ -243,7 +223,14 @@ export default function PeriodosPage() {
             <div>
               <div className="font-semibold text-lg">{periodo.nombre}</div>
               <div className="text-base text-muted-foreground">
-                {formatoHora12(periodo.horaInicio)} - {formatoHora12(periodo.horaFin)}
+                Clave: {periodo.clave}
+              </div>
+              <div className="text-base text-muted-foreground">
+                Ciclo Escolar: {ciclosEscolares.find(c => c._id === periodo.cicloEscolarId)?.nombre || periodo.cicloEscolarId}
+              </div>
+              <div className="text-base text-muted-foreground">
+                Inicio: {new Date(periodo.fechaInicio).toLocaleDateString()}<br/>
+                Fin: {new Date(periodo.fechaFin).toLocaleDateString()}
               </div>
               <div className="mt-2">
                 <Badge
@@ -283,62 +270,45 @@ export default function PeriodosPage() {
         schema={periodoSchema}
         defaultValues={{
           nombre: "",
-          horaInicio: "07:00",
-          horaFin: "08:00",
+          clave: "",
+          cicloEscolarId: "",
+          fechaInicio: "",
+          fechaFin: "",
           activo: true
         }}
-        data={data}
+        data={
+          data
+            ? {
+                ...data,
+                fechaInicio: toDateInputString(data.fechaInicio as number | string | undefined),
+                fechaFin: toDateInputString(data.fechaFin as number | string | undefined),
+              }
+            : undefined
+        }
         isOpen={isOpen}
         onOpenChange={close}
         onSubmit={handleSubmit}
-        onDelete={handleDelete}
+        onDelete={(id) => handleDelete(id as string, (data?.cicloEscolarId as string) || "")}
         deleteConfirmationTitle="¿Eliminar periodo?"
         deleteConfirmationDescription="Esta acción no se puede deshacer. El periodo será eliminado permanentemente."
       >
-        {(form, operation) => <PeriodoForm form={form} operation={operation} />}
+        {(form, operation) => <PeriodoForm form={form} operation={operation} ciclosEscolares={ciclosEscolares} data={data} />}
       </CrudDialog>
     </div>
   );
 }
 
 // Componente separado para el formulario
-function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, unknown>>; operation: string }) {
-  const [inicio, setInicio] = React.useState({ hora: "7:00", ampm: "AM" });
-  const [fin, setFin] = React.useState({ hora: "8:00", ampm: "AM" });
-  const [errorInicio, setErrorInicio] = React.useState<string | null>(null);
-  const [errorFin, setErrorFin] = React.useState<string | null>(null);
-
-  // Inicializar valores del formulario
-  React.useEffect(() => {
-    const horaInicio = form.watch('horaInicio') as string;
-    const horaFin = form.watch('horaFin') as string;
-
-    if (horaInicio) {
-      const inicioData = from24h(horaInicio);
-      setInicio(inicioData);
+function PeriodoForm({ form, operation, ciclosEscolares, data }: { form: UseFormReturn<Record<string, unknown>>; operation: string, ciclosEscolares: Array<{ _id: string; nombre: string }>, data?: Record<string, unknown> }) {
+  useEffect(() => {
+    if (data && operation === "edit") {
+      form.reset({
+        ...data,
+        fechaInicio: toDateInputString(data.fechaInicio as number | string | undefined),
+        fechaFin: toDateInputString(data.fechaFin as number | string | undefined),
+      });
     }
-    if (horaFin) {
-      const finData = from24h(horaFin);
-      setFin(finData);
-    }
-  }, [form]);
-
-  // Sincronizar selectores con formulario
-  React.useEffect(() => {
-    const errorIni = validarHora12(inicio.hora);
-    const errorFinVal = validarHora12(fin.hora);
-
-    setErrorInicio(errorIni);
-    setErrorFin(errorFinVal);
-
-    if (!errorIni && !errorFinVal) {
-      const horaInicio = to24h(inicio.hora, inicio.ampm);
-      const horaFin = to24h(fin.hora, fin.ampm);
-      form.setValue("horaInicio", horaInicio);
-      form.setValue("horaFin", horaFin);
-    }
-  }, [inicio, fin, form]);
-
+  }, [data, operation, form]);
   return (
     <div className="grid grid-cols-1 gap-4">
       <FormField
@@ -359,67 +329,86 @@ function PeriodoForm({ form, operation }: { form: UseFormReturn<Record<string, u
           </FormItem>
         )}
       />
-
+      <FormField
+        control={form.control}
+        name="clave"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Clave</FormLabel>
+            <FormControl>
+              <Input
+                {...field}
+                value={field.value as string}
+                placeholder="Clave del periodo"
+                disabled={operation === 'view'}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {/* Select de ciclo escolar (debes poblar ciclosEscolares) */}
+      <FormField
+        control={form.control}
+        name="cicloEscolarId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Ciclo Escolar</FormLabel>
+            <FormControl>
+              <select
+                {...field}
+                disabled={operation === 'view'}
+                className="w-full border rounded px-2 py-1"
+                value={String(field.value)}
+              >
+                <option value="">Selecciona un ciclo escolar</option>
+                {ciclosEscolares.map((ciclo) => (
+                  <option key={ciclo._id} value={ciclo._id}>{ciclo.nombre}</option>
+                ))}
+              </select>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <FormLabel>Hora inicio</FormLabel>
-          <div className="flex gap-2 items-center mt-1">
-            <Input
-              type="text"
-              placeholder="H:MM"
-              value={inicio.hora}
-              onChange={e => setInicio(i => ({ ...i, hora: e.target.value }))}
-              className={`w-20 ${errorInicio ? 'border-red-500' : ''}`}
-              disabled={operation === 'view'}
-            />
-            <Select
-              value={inicio.ampm}
-              onValueChange={ampm => setInicio(i => ({ ...i, ampm }))}
-              disabled={operation === 'view'}
-            >
-              <SelectTrigger className="w-16">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ampmOptions.map(a => (
-                  <SelectItem key={a} value={a}>{a}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {errorInicio && <p className="text-red-500 text-xs mt-1">{errorInicio}</p>}
-        </div>
-
-        <div>
-          <FormLabel>Hora fin</FormLabel>
-          <div className="flex gap-2 items-center mt-1">
-            <Input
-              type="text"
-              placeholder="H:MM"
-              value={fin.hora}
-              onChange={e => setFin(f => ({ ...f, hora: e.target.value }))}
-              className={`w-20 ${errorFin ? 'border-red-500' : ''}`}
-              disabled={operation === 'view'}
-            />
-            <Select
-              value={fin.ampm}
-              onValueChange={ampm => setFin(f => ({ ...f, ampm }))}
-              disabled={operation === 'view'}
-            >
-              <SelectTrigger className="w-16">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ampmOptions.map(a => (
-                  <SelectItem key={a} value={a}>{a}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {errorFin && <p className="text-red-500 text-xs mt-1">{errorFin}</p>}
-        </div>
+        <FormField
+          control={form.control}
+          name="fechaInicio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha de inicio</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="date"
+                  value={field.value as string}
+                  disabled={operation === 'view'}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="fechaFin"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Fecha de fin</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  type="date"
+                  value={field.value as string}
+                  disabled={operation === 'view'}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-
       <FormField
         control={form.control}
         name="activo"

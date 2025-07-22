@@ -2,9 +2,9 @@
 import React from "react";
 // import MostrarEscuelas from "@/components/mostrar-escuelas";
 import ListaSubdominios from "@/components/lista-subdominios";
-import CustomSignIn from "@/components/CustomSignIn";
+// import CustomSignIn from "@/components/CustomSignIn";
 import Navbar from "@/components/Navbar";
-import { useSession } from "@clerk/nextjs";
+import { SignIn, useSession } from "@clerk/nextjs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@repo/ui/components/shadcn/card";
 
 export default function Home() {
@@ -69,10 +69,10 @@ export default function Home() {
           </main>
         </>
       ) : (
-        <CustomSignIn />
-        // <div className="flex items-center justify-center min-h-screen">
-        //   <SignIn />
-        // </div>
+        // <CustomSignIn />
+        <div className="flex items-center justify-center min-h-screen">
+          <SignIn />
+        </div>
       )}
     </div>
   );

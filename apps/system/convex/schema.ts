@@ -100,14 +100,30 @@ departamento: defineTable({
     .index("by_escuela", ["escuelaId"])
     .index("by_ciclo", ["cicloEscolarId"]),
 
-  // Periodos (horarios)
-  periodos: defineTable({
+  // Horarios
+  horarios: defineTable({
     escuelaId: v.id("escuelas"),
     nombre: v.string(), // ej: "1ra hora", "2da hora"
     horaInicio: v.string(), // formato "HH:MM"
     horaFin: v.string(), // formato "HH:MM"
     activo: v.boolean(),
   }).index("by_escuela", ["escuelaId"]),
+
+  // Periodos
+  periodos: defineTable({
+    escuelaId: v.id("escuelas"),
+    cicloEscolarId: v.id("ciclosEscolares"), 
+    nombre: v.string(),  // Ej: "1er Parcial", "Final"
+    clave: v.string(),    // Ej: "P1", "F1"
+    fechaInicio: v.number(),  // Timestamp
+    fechaFin: v.number(),     // Timestamp
+    activo: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  })
+  .index("by_escuela", ["escuelaId"])
+  .index("by_ciclo", ["cicloEscolarId"])
+  .index("by_nombre", ["nombre"]),
 
   // Catálogo de clases (programación de materias)
   catalogosDeClases: defineTable({
@@ -129,16 +145,16 @@ departamento: defineTable({
     .index("by_maestro", ["maestroId"]),
 
   // Relación periodo por clase (horarios de clases)
-  periodoPorClase: defineTable({
+  horarioPorClase: defineTable({
     escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
-    periodoId: v.id("periodos"),
+    horarioId: v.id("horarios"),
     diaSemana: v.number(), // 1=Lunes, 2=Martes, etc.
     activo: v.boolean(),
   })
     .index("by_escuela", ["escuelaId"])
     .index("by_catalogo_clase", ["catalogoClaseId"])
-    .index("by_periodo", ["periodoId"]),
+    .index("by_horario", ["horarioId"]),
 
   // Padres de familia
   padres: defineTable({
