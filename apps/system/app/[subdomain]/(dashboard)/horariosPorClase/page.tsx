@@ -5,8 +5,8 @@ import { useQuery } from "convex/react";
 import { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { useEscuela } from "@/app/store/useEscuelaStore";
-import { usePeriodoPorClase } from "@/app/store/usePeriodoPorClaseStore";
-import { usePeriodo } from "@/app/store/usePeriodoStore";
+import { useHorarioPorClase } from "@/app/store/useHorarioPorClaseStore";
+import { useHorario } from "@/app/store/useHorarioStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Badge } from "@repo/ui/components/shadcn/badge";
@@ -29,20 +29,21 @@ const DIAS_SEMANA = [
 ] as const;
 
 // Types
+
 type CatalogoClase = { _id: string; nombre: string; materiaId: string };
-type Periodo = { _id: string; nombre: string; horaInicio?: string; horaFin?: string };
-type PeriodoPorClaseItem = {
+type Horario = { _id: string; nombre: string; horaInicio?: string; horaFin?: string };
+type HorarioPorClaseItem = {
   _id: string;
   catalogoClaseId: string;
-  periodoId: string;
+  horarioId: string;
   diaSemana: number;
   activo: boolean;
 };
 
 // Schema para el CrudDialog
-const periodoClaseSchema = z.object({
+  const horarioPorClaseSchema = z.object({
   catalogoClaseId: z.string().min(1, "Clase requerida"),
-  periodoIds: z.array(z.string()).min(1, "Selecciona al menos un periodo"),
+  horarioIds: z.array(z.string()).min(1, "Selecciona al menos un horario"),
   diasSemana: z.array(z.number()).min(1, "Selecciona al menos un día"),
   activo: z.boolean(),
 });
@@ -125,25 +126,25 @@ const ClassFilter = ({
   </div>
 );
 
-const PeriodosTable = ({ 
+const HorariosTable = ({ 
   items, 
   title, 
   onView,
   onEdit, 
   onDelete, 
   getClaseNombre, 
-  getPeriodoNombreYHorario, 
+  getHorarioNombreYHorario, 
   getDiaNombre,
   isUpdating,
   isDeleting
 }: {
-  items: PeriodoPorClaseItem[] | undefined;
+  items: HorarioPorClaseItem[] | undefined;
   title: string;
-  onView: (item: PeriodoPorClaseItem) => void;
-  onEdit: (item: PeriodoPorClaseItem) => void;
-  onDelete: (item: PeriodoPorClaseItem) => void;
+  onView: (item: HorarioPorClaseItem) => void;
+  onEdit: (item: HorarioPorClaseItem) => void;
+  onDelete: (item: HorarioPorClaseItem) => void;
   getClaseNombre: (id: string) => string;
-  getPeriodoNombreYHorario: (id: string) => string;
+  getHorarioNombreYHorario: (id: string) => string;
   getDiaNombre: (num: number) => string;
   isUpdating?: boolean;
   isDeleting?: boolean;
@@ -171,7 +172,7 @@ const PeriodosTable = ({
                 {getClaseNombre(item.catalogoClaseId)}
               </TableCell>
               <TableCell>
-                {getPeriodoNombreYHorario(item.periodoId)}
+                {getHorarioNombreYHorario(item.horarioId)}
               </TableCell>
               <TableCell>
                 {getDiaNombre(item.diaSemana)}
@@ -217,25 +218,25 @@ export default function PeriodosClasePage() {
   const { catalogosClases, materias, maestros } = useDataQueries(escuelaId);
   
   // Obtener periodos globales desde el store de periodos (solo para mostrar en selects)
-  const { periodos } = usePeriodo(escuelaId);
+  const { horarios } = useHorario(escuelaId);
   
   const [catalogoClaseId, setCatalogoClaseId] = useState("");
   
   // Store de periodos por clase
   const {
-    periodosPorClase,
+    horariosPorClase,
     isCreating,
     isUpdating,
     isDeleting,
     createError,
     updateError,
     deleteError,
-    crearPeriodoPorClase,
-    actualizarPeriodoPorClase,
-    eliminarPeriodoPorClase,
+    crearHorarioPorClase,
+    actualizarHorarioPorClase,
+    eliminarHorarioPorClase,
     clearErrors: clearStoreErrors,
-    periodosPorClasePorCatalogo,
-  } = usePeriodoPorClase(escuelaId);
+    horariosPorClasePorCatalogo,
+  } = useHorarioPorClase(escuelaId);
   
   const {
     isOpen,
@@ -246,9 +247,9 @@ export default function PeriodosClasePage() {
     openView,
     openDelete,
     close
-  } = useCrudDialog(periodoClaseSchema, {
+  } = useCrudDialog(horarioPorClaseSchema, {
     catalogoClaseId: "",
-    periodoIds: [],
+    horarioIds: [],
     diasSemana: [],
     activo: true
   });
@@ -259,11 +260,11 @@ export default function PeriodosClasePage() {
     [catalogosClases]
   );
 
-  const getPeriodoNombreYHorario = useCallback((id: string) => {
-    const periodo = periodos?.find((p: Periodo) => p._id === id);
-    if (!periodo) return id;
-    return `${periodo.nombre} (${formatoHora12(periodo.horaInicio || "")} - ${formatoHora12(periodo.horaFin || "")})`;
-  }, [periodos]);
+  const getHorarioNombreYHorario = useCallback((id: string) => {
+    const horario = horarios?.find((p: Horario) => p._id === id);
+    if (!horario) return id;
+    return `${horario.nombre} (${formatoHora12(horario.horaInicio || "")} - ${formatoHora12(horario.horaFin || "")})`;
+  }, [horarios]);
 
   const getDiaNombre = useCallback((num: number) =>
     DIAS_SEMANA.find((d) => d.value === num)?.label || num.toString(),
@@ -280,31 +281,31 @@ export default function PeriodosClasePage() {
     try {
       if (operation === 'create') {
         // Para crear, generamos todas las combinaciones
-        const periodoIds = values.periodoIds as string[];
+        const horarioIds = values.horarioIds as string[];
         const diasSemana = values.diasSemana as number[];
         
         const combinaciones = diasSemana.flatMap(dia =>
-          periodoIds.map(periodoId => ({
+          horarioIds.map(horarioId => ({
             escuelaId: escuelaId as Id<"escuelas">,
             catalogoClaseId: values.catalogoClaseId as Id<"catalogosDeClases">,
-            periodoId: periodoId as Id<"periodos">,
+            horarioId: horarioId as Id<"horarios">,
             diaSemana: dia,
             activo: values.activo as boolean,
           }))
         );
 
         await Promise.all(
-          combinaciones.map(combo => crearPeriodoPorClase(combo))
+          combinaciones.map(combo => crearHorarioPorClase(combo))
         );
         
         toast.success(`${combinaciones.length} horarios creados exitosamente`);
       } else if (operation === 'edit' && data?._id) {
         // Para editar, solo actualizamos el registro actual
-        await actualizarPeriodoPorClase({
-          id: data._id as Id<"periodoPorClase">,
+        await actualizarHorarioPorClase({
+          id: data._id as Id<"horarioPorClase">,
           escuelaId: escuelaId as Id<"escuelas">,
           catalogoClaseId: values.catalogoClaseId as Id<"catalogosDeClases">,
-          periodoId: (values.periodoIds as string[])[0] as Id<"periodos">,
+          horarioId: (values.horarioIds as string[])[0] as Id<"horarios">,
           diaSemana: (values.diasSemana as number[])[0],
           activo: values.activo as boolean,
         });
@@ -314,7 +315,7 @@ export default function PeriodosClasePage() {
       console.error('Error en operación CRUD:', error);
       throw error;
     }
-  }, [operation, data, escuelaId, crearPeriodoPorClase, actualizarPeriodoPorClase]);
+  }, [operation, data, escuelaId, crearHorarioPorClase, actualizarHorarioPorClase]);
 
   const handleDelete = useCallback(async (id: string) => {
     if (!escuelaId) {
@@ -323,36 +324,36 @@ export default function PeriodosClasePage() {
     }
     
     try {
-      await eliminarPeriodoPorClase(id, escuelaId);
+        await eliminarHorarioPorClase(id, escuelaId);
       toast.success('Eliminado correctamente')
     } catch (error) {
       console.error('Error al eliminar:', error);
       throw error;
     }
-  }, [escuelaId, eliminarPeriodoPorClase]);
+  }, [escuelaId, eliminarHorarioPorClase]);
 
   // Event handlers para los botones
-  const handleView = useCallback((item: PeriodoPorClaseItem) => {
+  const handleView = useCallback((item: HorarioPorClaseItem) => {
     const adaptedData = {
       ...item,
-      periodoIds: [item.periodoId],
+      horarioIds: [item.horarioId],
       diasSemana: [item.diaSemana],
       _id: item._id
     };
     openView(adaptedData);
   }, [openView]);
 
-  const handleEdit = useCallback((item: PeriodoPorClaseItem) => {
+  const handleEdit = useCallback((item: HorarioPorClaseItem) => {
     const adaptedData = {
       ...item,
-      periodoIds: [item.periodoId],
+      horarioIds: [item.horarioId],
       diasSemana: [item.diaSemana],
       _id: item._id
     };
     openEdit(adaptedData);
   }, [openEdit]);
 
-  const handleDeleteClick = useCallback((item: PeriodoPorClaseItem) => {
+  const handleDeleteClick = useCallback((item: HorarioPorClaseItem) => {
     openDelete({ ...item, _id: item._id });
   }, [openDelete]);
 
@@ -369,7 +370,7 @@ export default function PeriodosClasePage() {
   return (
     <div className="w-full px-4 py-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Horarios </h1>
+        <h1 className="text-2xl font-bold">Horarios por Clase</h1>
   
       </div>
 
@@ -410,27 +411,27 @@ export default function PeriodosClasePage() {
       )}
 
       {catalogoClaseId ? (
-        <PeriodosTable
-          items={periodosPorClasePorCatalogo(catalogoClaseId)}
+        <HorariosTable
+          items={horariosPorClasePorCatalogo(catalogoClaseId)}
           title="Horarios de la clase seleccionada"
           onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           getClaseNombre={getClaseNombre}
-          getPeriodoNombreYHorario={getPeriodoNombreYHorario}
+          getHorarioNombreYHorario={getHorarioNombreYHorario}
           getDiaNombre={getDiaNombre}
           isUpdating={isUpdating}
           isDeleting={isDeleting}
         />
       ) : (
-        <PeriodosTable
-          items={periodosPorClase}
+        <HorariosTable
+          items={horariosPorClase}
           title="Todos los horarios"
           onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDeleteClick}
           getClaseNombre={getClaseNombre}
-          getPeriodoNombreYHorario={getPeriodoNombreYHorario}
+          getHorarioNombreYHorario={getHorarioNombreYHorario}
           getDiaNombre={getDiaNombre}
           isUpdating={isUpdating}
           isDeleting={isDeleting}
@@ -444,10 +445,10 @@ export default function PeriodosClasePage() {
               operation === 'edit' ? 'Editar Horario' : 'Detalle del Horario'}
         description={operation === 'create' ? 'Completa la información del nuevo horario' :
                     operation === 'edit' ? 'Modifica la información del horario' : 'Información completa del horario'}
-        schema={periodoClaseSchema}
+        schema={horarioPorClaseSchema}
         defaultValues={{
           catalogoClaseId: "",
-          periodoIds: [],
+          horarioIds: [],
           diasSemana: [],
           activo: true
         }}
@@ -459,12 +460,12 @@ export default function PeriodosClasePage() {
       >
         {(form, currentOperation) => {
           const watchedValues = form.watch();
-          const totalCombinaciones = (watchedValues.periodoIds as string[])?.length * (watchedValues.diasSemana as number[])?.length || 0;
+          const totalCombinaciones = (watchedValues.horarioIds as string[])?.length * (watchedValues.diasSemana as number[])?.length || 0;
           
           // Si es modo "view", mostrar información detallada
           if (currentOperation === 'view' && data) {
             const clase = catalogosClases?.find((c: CatalogoClase) => c._id === data.catalogoClaseId);
-            const periodo = periodos?.find((p: Periodo) => p._id === data.periodoId);
+              const horario = horarios?.find((p: Horario) => p._id === data.horarioId);
             const materia = materias?.find((m: { _id: Id<"materias">; nombre: string }) => m._id === clase?.materiaId);
             const maestro = maestros?.find((m: { id: string }) => m.id === clase?.maestroId);
             
@@ -488,12 +489,12 @@ export default function PeriodosClasePage() {
                     </div>
                     <div>
                       <span className="text-blue-600 text-sm font-medium">Periodo</span>
-                      <div className="font-medium">{periodo?.nombre || "-"}</div>
+                      <div className="font-medium">{horario?.nombre || "-"}</div>
                     </div>
                     <div>
                       <span className="text-blue-600 text-sm font-medium">Horario</span>
                       <div className="font-medium">
-                        {periodo ? `${formatoHora12(periodo.horaInicio || "")} - ${formatoHora12(periodo.horaFin || "")}` : "-"}
+                        {horario ? `${formatoHora12(horario.horaInicio || "")} - ${formatoHora12(horario.horaFin || "")}` : "-"}
                       </div>
                     </div>
                     <div>
@@ -530,7 +531,7 @@ export default function PeriodosClasePage() {
                       setTimeout(() => {
                         const adaptedData = {
                           ...data,
-                          periodoIds: [data.periodoId],
+                          horarioIds: [data.horarioId],
                           diasSemana: [data.diaSemana],
                           _id: data._id
                         };
@@ -588,31 +589,31 @@ export default function PeriodosClasePage() {
                 )}
               />
 
-              {/* Periodos Selection */}
+              {/* Horarios Selection */}
               <FormField
                 control={form.control}
-                name="periodoIds"
+                name="horarioIds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Periodos</FormLabel>
+                    <FormLabel>Horarios</FormLabel>
                     <FormControl>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded p-2">
-                        {periodos?.map((periodo) => (
-                          <div key={periodo._id} className="flex items-center space-x-2">
+                        {horarios?.map((horario) => (
+                          <div key={horario._id} className="flex items-center space-x-2">
                             <Checkbox
-                              checked={(field.value as string[])?.includes(periodo._id) || false}
+                              checked={(field.value as string[])?.includes(horario._id) || false}
                               onCheckedChange={(checked) => {
                                 const currentValue = field.value as string[] || [];
                                 if (checked) {
-                                  field.onChange([...currentValue, periodo._id]);
+                                  field.onChange([...currentValue, horario._id]);
                                 } else {
-                                  field.onChange(currentValue.filter(id => id !== periodo._id));
+                                  field.onChange(currentValue.filter(id => id !== horario._id));
                                 }
                               }}
                               disabled={currentOperation === 'view'}
                             />
                             <label className="text-sm">
-                              {periodo.nombre} ({formatoHora12(periodo.horaInicio || "")} - {formatoHora12(periodo.horaFin || "")})
+                              {horario.nombre} ({formatoHora12(horario.horaInicio || "")} - {formatoHora12(horario.horaFin || "")})
                             </label>
                           </div>
                         ))}
@@ -685,7 +686,7 @@ export default function PeriodosClasePage() {
                     Se crearán {totalCombinaciones} horarios:
                   </p>
                   <p className="text-xs text-blue-600 mt-1">
-                    {(watchedValues.periodoIds as string[])?.length || 0} periodo(s) × {(watchedValues.diasSemana as number[])?.length || 0} día(s)
+                      {(watchedValues.horarioIds as string[])?.length || 0} horario(s) × {(watchedValues.diasSemana as number[])?.length || 0} día(s)
                   </p>
                 </div>
               )}

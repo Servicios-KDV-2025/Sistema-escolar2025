@@ -2,11 +2,11 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 // Crear
-export const crearPeriodoPorClase = mutation({
+export const crearHorarioPorClase = mutation({
   args: {
     escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
-    periodoId: v.id("periodos"),
+    horarioId: v.id("horarios"),
     diaSemana: v.number(), // 1=Lunes, 2=Martes, etc.
     activo: v.boolean(),
   },
@@ -14,39 +14,39 @@ export const crearPeriodoPorClase = mutation({
     // Validar existencia de la escuela y clase
     const escuela = await ctx.db.get(args.escuelaId);
     const clase = await ctx.db.get(args.catalogoClaseId);
-    const periodo = await ctx.db.get(args.periodoId);
+    const horario = await ctx.db.get(args.horarioId);
     if (!escuela) throw new Error("Escuela no encontrada.");
     if (!clase) throw new Error("Catálogo de clase no encontrado.");
-    if (!periodo) throw new Error("Periodo no encontrado.");
-    return await ctx.db.insert("periodoPorClase", args);
+    if (!horario) throw new Error("Horario no encontrado.");
+    return await ctx.db.insert("horarioPorClase", args);
   },
 });
 
 // Leer todos por escuela
-export const obtenerPeriodosPorClasePorEscuela = query({
+export const obtenerHorariosPorClasePorEscuela = query({
   args: { escuelaId: v.id("escuelas") },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query("periodoPorClase")
+      .query("horarioPorClase")
       .withIndex("by_escuela", (q) => q.eq("escuelaId", args.escuelaId))
       .collect();
-  },
-});
+  },  
+});   
 
 // Leer todos por catálogo de clase
-export const obtenerPeriodosPorClasePorCatalogo = query({
+export const obtenerHorariosPorClasePorCatalogo = query({
   args: { catalogoClaseId: v.id("catalogosDeClases") },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query("periodoPorClase")
+      .query("horarioPorClase")
       .withIndex("by_catalogo_clase", (q) => q.eq("catalogoClaseId", args.catalogoClaseId))
       .collect();
   },
 });
 
 // Leer uno por ID
-export const obtenerPeriodoPorClasePorId = query({
-  args: { id: v.id("periodoPorClase") },
+export const obtenerHorarioPorClasePorId = query({
+  args: { id: v.id("horarioPorClase") },
   handler: async (ctx, args) => {
     const registro = await ctx.db.get(args.id);
     if (!registro) throw new Error("Registro no encontrado.");
@@ -54,13 +54,13 @@ export const obtenerPeriodoPorClasePorId = query({
   },
 });
 
-// Actualizar
-export const actualizarPeriodoPorClase = mutation({
+// Actualizar 
+export const actualizarHorarioPorClase = mutation({
   args: {
-    id: v.id("periodoPorClase"),
+    id: v.id("horarioPorClase"),
     escuelaId: v.id("escuelas"),
     catalogoClaseId: v.id("catalogosDeClases"),
-    periodoId: v.id("periodos"),
+    horarioId: v.id("horarios"),
     diaSemana: v.optional(v.number()),
     activo: v.optional(v.boolean()),
   },
@@ -76,9 +76,9 @@ export const actualizarPeriodoPorClase = mutation({
 });
 
 // Eliminar
-export const eliminarPeriodoPorClase = mutation({
+  export const eliminarHorarioPorClase = mutation({
   args: {
-    id: v.id("periodoPorClase"),
+    id: v.id("horarioPorClase"),
     escuelaId: v.id("escuelas"),
   },
   handler: async (ctx, args) => {

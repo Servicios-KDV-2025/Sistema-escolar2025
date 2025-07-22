@@ -4,38 +4,38 @@ import { useQuery, useMutation } from "convex/react";
 import { useCallback, useEffect } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 
-// Tipo de Periodo por Clase basado en tu schema de Convex
-export type PeriodoPorClase = {
+// Tipo de Horario por Clase basado en tu schema de Convex
+export type HorarioPorClase = {
   _id: string;
   escuelaId: string;
   catalogoClaseId: string;
-  periodoId: string;
+  horarioId: string;
   diaSemana: number; // 1=Lunes, 2=Martes, etc.
   activo: boolean;
 };
 
-// Tipos para crear y actualizar periodo por clase
-export type CrearPeriodoPorClaseData = {
+// Tipos para crear y actualizar horario por clase
+export type CrearHorarioPorClaseData = {
   escuelaId: string;
   catalogoClaseId: string;
-  periodoId: string;
+  horarioId: string;
   diaSemana: number;
   activo: boolean;
 };
 
-export type ActualizarPeriodoPorClaseData = {
+export type ActualizarHorarioPorClaseData = {
   id: string;
   escuelaId: string;
   catalogoClaseId: string;
-  periodoId: string;
+  horarioId: string;
   diaSemana?: number;
   activo?: boolean;
 };
 
-// Store de Periodo por Clase con CRUD completo
-export type PeriodoPorClaseStore = {
-  periodosPorClase: PeriodoPorClase[];
-  periodoPorClaseSeleccionado: PeriodoPorClase | null;
+// Store de Horario por Clase con CRUD completo
+export type HorarioPorClaseStore = {
+  horariosPorClase: HorarioPorClase[];
+  horarioPorClaseSeleccionado: HorarioPorClase | null;
   isLoading: boolean;
   isCreating: boolean;
   isUpdating: boolean;
@@ -44,8 +44,8 @@ export type PeriodoPorClaseStore = {
   createError: string | null;
   updateError: string | null;
   deleteError: string | null;
-  setPeriodosPorClase: (periodosPorClase: PeriodoPorClase[]) => void;
-  setPeriodoPorClaseSeleccionado: (periodoPorClase: PeriodoPorClase | null) => void;
+  setHorariosPorClase: (horariosPorClase: HorarioPorClase[]) => void;
+  setHorarioPorClaseSeleccionado: (horarioPorClase: HorarioPorClase | null) => void;
   setLoading: (loading: boolean) => void;
   setCreating: (creating: boolean) => void;
   setUpdating: (updating: boolean) => void;
@@ -59,8 +59,8 @@ export type PeriodoPorClaseStore = {
 };
 
 const initialState = {
-  periodosPorClase: [],
-  periodoPorClaseSeleccionado: null,
+  horariosPorClase: [],
+  horarioPorClaseSeleccionado: null,
   isLoading: false,
   isCreating: false,
   isUpdating: false,
@@ -71,10 +71,10 @@ const initialState = {
   deleteError: null,
 };
 
-export const usePeriodoPorClaseStore = create<PeriodoPorClaseStore>((set) => ({
+export const useHorarioPorClaseStore = create<HorarioPorClaseStore>((set) => ({
   ...initialState,
-  setPeriodosPorClase: (periodosPorClase) => set({ periodosPorClase }),
-  setPeriodoPorClaseSeleccionado: (periodoPorClaseSeleccionado) => set({ periodoPorClaseSeleccionado }),
+  setHorariosPorClase: (horariosPorClase) => set({ horariosPorClase }),
+  setHorarioPorClaseSeleccionado: (horarioPorClaseSeleccionado) => set({ horarioPorClaseSeleccionado }),
   setLoading: (isLoading) => set({ isLoading }),
   setCreating: (isCreating) => set({ isCreating }),
   setUpdating: (isUpdating) => set({ isUpdating }),
@@ -94,10 +94,10 @@ export const usePeriodoPorClaseStore = create<PeriodoPorClaseStore>((set) => ({
 
 
 
-export const usePeriodoPorClase = (escuelaId?: string) => {
+export const useHorarioPorClase = (escuelaId?: string) => {
   const {
-    periodosPorClase,
-    periodoPorClaseSeleccionado,
+    horariosPorClase,
+    horarioPorClaseSeleccionado,
     isLoading,
     isCreating,
     isUpdating,
@@ -106,8 +106,8 @@ export const usePeriodoPorClase = (escuelaId?: string) => {
     createError,
     updateError,
     deleteError,
-    setPeriodosPorClase,
-    setPeriodoPorClaseSeleccionado,
+    setHorariosPorClase,
+    setHorarioPorClaseSeleccionado,
     setCreating,
     setUpdating,
     setDeleting,
@@ -115,118 +115,114 @@ export const usePeriodoPorClase = (escuelaId?: string) => {
     setUpdateError,
     setDeleteError,
     clearErrors,
-  } = usePeriodoPorClaseStore();
+  } = useHorarioPorClaseStore();
 
   // Query para obtener todos los periodos por clase de la escuela
-  const periodosPorClaseQuery = useQuery(
-    api.periodoporClase.obtenerPeriodosPorClasePorEscuela,
+  const horariosPorClaseQuery = useQuery(
+      api.horarioPorClase.obtenerHorariosPorClasePorEscuela,
     escuelaId ? { escuelaId: escuelaId as Id<"escuelas"> } : "skip"
   );
 
 
 
   // Mutations
-  const crearPeriodoPorClaseMutation = useMutation(api.periodoporClase.crearPeriodoPorClase);
-  const actualizarPeriodoPorClaseMutation = useMutation(api.periodoporClase.actualizarPeriodoPorClase);
-  const eliminarPeriodoPorClaseMutation = useMutation(api.periodoporClase.eliminarPeriodoPorClase);
+  const crearHorarioPorClaseMutation = useMutation(api.horarioPorClase.crearHorarioPorClase);
+  const actualizarHorarioPorClaseMutation = useMutation(api.horarioPorClase.actualizarHorarioPorClase);
+  const eliminarHorarioPorClaseMutation = useMutation(api.horarioPorClase.eliminarHorarioPorClase);
 
   // CREATE
-  const crearPeriodoPorClase = useCallback(async (data: CrearPeriodoPorClaseData) => {
+  const crearHorarioPorClase = useCallback(async (data: CrearHorarioPorClaseData) => {
     setCreating(true);
     setCreateError(null);
     try {
-      await crearPeriodoPorClaseMutation({
+      await crearHorarioPorClaseMutation({
         ...data,
         escuelaId: data.escuelaId as Id<"escuelas">,
         catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
-        periodoId: data.periodoId as Id<"periodos">,
+        horarioId: data.horarioId as Id<"horarios">,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al crear periodo por clase';
+      const errorMessage = error instanceof Error ? error.message : 'Error al crear horario por clase';
       setCreateError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setCreating(false);
     }
-  }, [crearPeriodoPorClaseMutation, setCreating, setCreateError]);
+  }, [crearHorarioPorClaseMutation, setCreating, setCreateError]);
 
   // UPDATE
-  const actualizarPeriodoPorClase = useCallback(async (data: ActualizarPeriodoPorClaseData) => {
+  const actualizarHorarioPorClase = useCallback(async (data: ActualizarHorarioPorClaseData) => {
     setUpdating(true);
     setUpdateError(null);
     try {
-      await actualizarPeriodoPorClaseMutation({
-        id: data.id as Id<"periodoPorClase">,
+      await actualizarHorarioPorClaseMutation({
+        id: data.id as Id<"horarioPorClase">,
         escuelaId: data.escuelaId as Id<"escuelas">,
         catalogoClaseId: data.catalogoClaseId as Id<"catalogosDeClases">,
-        periodoId: data.periodoId as Id<"periodos">,
+        horarioId: data.horarioId as Id<"horarios">,
         diaSemana: data.diaSemana,
         activo: data.activo,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar periodo por clase';
+      const errorMessage = error instanceof Error ? error.message : 'Error al actualizar horario por clase';
       setUpdateError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setUpdating(false);
     }
-  }, [actualizarPeriodoPorClaseMutation, setUpdating, setUpdateError]);
+  }, [actualizarHorarioPorClaseMutation, setUpdating, setUpdateError]);
 
   // DELETE
-  const eliminarPeriodoPorClase = useCallback(async (id: string, escuelaId: string) => {
+  const eliminarHorarioPorClase = useCallback(async (id: string, escuelaId: string) => {
     setDeleting(true);
     setDeleteError(null);
     try {
-      await eliminarPeriodoPorClaseMutation({
-        id: id as Id<"periodoPorClase">,
+        await eliminarHorarioPorClaseMutation({
+        id: id as Id<"horarioPorClase">,
         escuelaId: escuelaId as Id<"escuelas">,
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar periodo por clase';
+      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar horario por clase';
       setDeleteError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setDeleting(false);
     }
-  }, [eliminarPeriodoPorClaseMutation, setDeleting, setDeleteError]);
+  }, [eliminarHorarioPorClaseMutation, setDeleting, setDeleteError]);
 
-  // Refrescar periodos por clase cuando cambie la query
+  // Refrescar horarios por clase cuando cambie la query
   useEffect(() => {
-    if (periodosPorClaseQuery) {
-      setPeriodosPorClase(
-        (periodosPorClaseQuery as unknown as Array<{
+    if (horariosPorClaseQuery) {
+      setHorariosPorClase(
+        (horariosPorClaseQuery as unknown as Array<{
           _id: string;
           escuelaId: string;
           catalogoClaseId: string;
-          periodoId: string;
+          horarioId: string;
           diaSemana: number;
           activo: boolean;
         }>).map((p) => ({
           _id: p._id,
           escuelaId: p.escuelaId,
           catalogoClaseId: p.catalogoClaseId,
-          periodoId: p.periodoId,
+          horarioId: p.horarioId,
           diaSemana: p.diaSemana,
           activo: p.activo,
         }))
       );
     }
-  }, [periodosPorClaseQuery, setPeriodosPorClase]);
+  }, [horariosPorClaseQuery, setHorariosPorClase]);
 
   // Funciones helper
-  const periodosPorClasePorCatalogo = (catalogoClaseId: string) => {
-    return periodosPorClase.filter(p => p.catalogoClaseId === catalogoClaseId);
+  const horariosPorClasePorCatalogo = (catalogoClaseId: string) => {
+    return horariosPorClase.filter(p => p.catalogoClaseId === catalogoClaseId);
   };
 
-  const periodosPorClasePorPeriodo = (periodoId: string) => {
-    return periodosPorClase.filter(p => p.periodoId === periodoId);
+  const horariosPorClasePorDia = (diaSemana: number) => {
+      return horariosPorClase.filter(p => p.diaSemana === diaSemana);
   };
 
-  const periodosPorClasePorDia = (diaSemana: number) => {
-    return periodosPorClase.filter(p => p.diaSemana === diaSemana);
-  };
-
-  const periodosPorClaseActivos = periodosPorClase.filter(p => p.activo);
+  const horariosPorClaseActivos = horariosPorClase.filter(p => p.activo);
 
   const obtenerNombreDia = (diaSemana: number) => {
     const dias = [
@@ -241,20 +237,20 @@ export const usePeriodoPorClase = (escuelaId?: string) => {
     return dias[diaSemana] || 'Inv';
   };
 
-  const ordenarPorDiaYPeriodo = (periodos: PeriodoPorClase[]) => {
-    return periodos.sort((a, b) => {
+  const ordenarPorDiaYPeriodo = (horarios: HorarioPorClase[]) => {
+    return horarios.sort((a, b) => {
       if (a.diaSemana !== b.diaSemana) {
         return a.diaSemana - b.diaSemana;
       }
       // Si es el mismo día, ordenar por periodo (asumiendo que periodoId tiene orden)
-      return a.periodoId.localeCompare(b.periodoId);
+      return a.horarioId.localeCompare(b.horarioId);
     });
   };
 
   return {
-    periodosPorClase,
-    periodosPorClaseActivos,
-    periodoPorClaseSeleccionado,
+    horariosPorClase,
+    horariosPorClaseActivos,
+    horarioPorClaseSeleccionado,
     isLoading,
     isCreating,
     isUpdating,
@@ -263,13 +259,12 @@ export const usePeriodoPorClase = (escuelaId?: string) => {
     createError,
     updateError,
     deleteError,
-    crearPeriodoPorClase,
-    actualizarPeriodoPorClase,
-    eliminarPeriodoPorClase,
-    setPeriodoPorClaseSeleccionado,
-    periodosPorClasePorCatalogo,
-    periodosPorClasePorPeriodo,
-    periodosPorClasePorDia,
+    crearHorarioPorClase,
+    actualizarHorarioPorClase,
+    eliminarHorarioPorClase,
+    setHorarioPorClaseSeleccionado,
+    horariosPorClasePorCatalogo,
+    horariosPorClasePorDia,
     obtenerNombreDia,
     obtenerDiaCorto,
     ordenarPorDiaYPeriodo,
