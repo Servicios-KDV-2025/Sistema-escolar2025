@@ -44,25 +44,25 @@ export default function Header() {
           <div>
             <nav className="hidden md:flex gap-6">
               <Link
-                href={`/escuela/${escuela.nombre}/public/`}
+                href={`/public/`}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
                 INICIO
               </Link>
               <Link
-                href={`/escuela/${escuela.nombre}/public/nosotros`}
+                href={`/public/nosotros`}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
                 NOSOTROS
               </Link>
               <Link
-              href={`/escuela/${escuela.nombre}/public/oferta-educativa`}
+              href={`/public/oferta-educativa`}
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
                 OFERTA EDUCATIVA
               </Link>
               <Link
-              href={`/escuela/${escuela.nombre}/public/contacto`}
+              href={`/public/contacto`}
                 
                 className="text-sm font-medium hover:text-primary transition-colors"
               >
